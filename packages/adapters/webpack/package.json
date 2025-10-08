@@ -1,0 +1,42 @@
+{
+  "name": "@expozr/webpack-adapter",
+  "version": "0.1.0",
+  "description": "Webpack adapter for the Expozr ecosystem",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "expozr",
+    "webpack",
+    "module-federation",
+    "adapter"
+  ],
+  "author": "Bruno Silva",
+  "license": "MIT",
+  "dependencies": {
+    "@expozr/core": "^0.1.0"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.0",
+    "@rollup/plugin-node-resolve": "^15.0.0",
+    "@rollup/plugin-typescript": "^11.0.0",
+    "@types/webpack": "^5.0.0",
+    "@types/node": "^20.0.0",
+    "rollup": "^4.0.0",
+    "tslib": "^2.0.0"
+  },
+  "peerDependencies": {
+    "webpack": "^5.0.0",
+    "typescript": "^5.0.0"
+  }
+}

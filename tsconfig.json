@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "lib": ["ES2020", "DOM"],
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "types": ["node"],
+    "baseUrl": ".",
+    "paths": {
+      "@expozr/core": ["packages/core/src"],
+      "@expozr/navigator": ["packages/navigator/src"],
+      "@expozr/webpack-adapter": ["packages/adapters/webpack/src"],
+      "@expozr/vite-adapter": ["packages/adapters/vite/src"],
+      "@expozr/rollup-adapter": ["packages/adapters/rollup/src"],
+      "@expozr/rspack-adapter": ["packages/adapters/rspack/src"],
+      "@expozr/cli": ["packages/cli/src"]
+    }
+  },
+  "include": ["packages/*/src/**/*", "examples/*/src/**/*"],
+  "exclude": ["node_modules", "**/dist", "**/build", "**/*.test.*"]
+}
