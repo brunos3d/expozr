@@ -47,7 +47,6 @@ Universal runtime system that handles dynamic loading, dependency resolution, an
 - 🔄 **Version Management**: Semantic versioning support with automatic resolution
 - 🏗️ **Dependency Resolution**: Smart dependency handling and conflict resolution
 - 💾 **Intelligent Caching**: Multiple caching strategies (memory, localStorage, IndexedDB)
-- 🛡️ **Type Safety**: Full TypeScript support with type-safe module loading
 - 📱 **Cross-Platform**: Works in both Browser and Node.js environments
 - 🔧 **Great DX**: Simple APIs, CLI tools, and comprehensive documentation
 
@@ -295,7 +294,6 @@ npm install && npm run dev
 
 - ✅ **Automatic Config Discovery**: Zero configuration needed
 - ✅ **Runtime Module Loading**: Modules loaded dynamically from remote
-- ✅ **Type Safety**: Full TypeScript support
 - ✅ **Hot Reloading**: Changes update instantly in development
 - ✅ **Error Handling**: Clear error messages and troubleshooting
 
