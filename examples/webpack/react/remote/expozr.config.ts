@@ -21,6 +21,10 @@ export default defineWarehouseConfig({
       exports: ["useCounter", "useToggle"],
     },
   },
+  dependencies: {
+    react: "^18.0.0",
+    "react-dom": "^18.0.0",
+  },
   build: {
     outDir: "dist",
     publicPath: "http://localhost:3001/",
