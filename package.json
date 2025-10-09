@@ -39,7 +39,6 @@
     "url": "https://github.com/brunos3d/expozr.git"
   },
   "keywords": [
-    "module-federation",
     "bundler",
     "webpack",
     "vite",

@@ -40,3 +40,6 @@ export const Card: React.FC<CardProps> = ({
     </div>
   );
 };
+
+// Export both named and default for UMD compatibility
+export default Card;

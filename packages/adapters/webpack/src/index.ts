@@ -3,13 +3,17 @@
  */
 
 // Main adapter
-export { WebpackAdapter, webpackAdapter } from './adapter';
+export { WebpackAdapter, webpackAdapter } from "./adapter";
 
 // Plugins
-export { ExpozrWarehousePlugin, ExpozrHostPlugin } from './adapter';
+export { ExpozrWarehousePlugin, ExpozrHostPlugin } from "./adapter";
 
 // Convenience functions
-export { createWarehousePlugin, createHostPlugin } from './adapter';
+export { createWarehousePlugin, createHostPlugin } from "./adapter";
 
-// Version
-export const VERSION = '0.1.0';
+// Utilities for cleaner webpack configs
+export {
+  suppressExpozrWarnings,
+  createHostConfig,
+  createWarehouseConfig,
+} from "./utils";

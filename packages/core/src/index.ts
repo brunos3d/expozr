@@ -3,19 +3,16 @@
  */
 
 // Types
-export * from './types';
+export * from "./types";
 
 // Errors
-export * from './errors';
+export * from "./errors";
 
 // Interfaces
-export * from './interfaces';
+export * from "./interfaces";
 
 // Utilities
-export * from './utils';
+export * from "./utils";
 
 // Configuration helpers
-export * from './config';
-
-// Version
-export const VERSION = '0.1.0';
+export * from "./config";

@@ -1,21 +1,23 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const { createWarehousePlugin } = require("@expozr/webpack-adapter");
+const {
+  createHostConfig,
+  createWarehousePlugin,
+} = require("@expozr/webpack-adapter");
 
 module.exports = (env, argv) => {
   const isProduction = argv.mode === "production";
 
   return {
-    entry: "./src/index.ts",
+    // Apply Expozr host optimizations
+    ...createHostConfig(),
+    entry: "./src/index.tsx",
     mode: argv.mode || "development",
     devtool: isProduction ? "source-map" : "inline-source-map",
-    resolve: {
-      extensions: [".ts", ".js"],
-    },
     module: {
       rules: [
         {
-          test: /\.ts$/,
+          test: /\.tsx?$/,
           use: "ts-loader",
           exclude: /node_modules/,
         },
@@ -25,6 +27,11 @@ module.exports = (env, argv) => {
       path: path.resolve(__dirname, "dist"),
       filename: "app.js",
       clean: true,
+      library: {
+        name: "ReactHost",
+        type: "umd",
+      },
+      globalObject: "this",
     },
     plugins: [
       // Automatically discovers expozr.config.ts
@@ -42,6 +49,9 @@ module.exports = (env, argv) => {
       open: true,
       hot: true,
       liveReload: true,
+      devMiddleware: {
+        writeToDisk: true, // Ensure files are written to disk in development
+      },
     },
   };
 };

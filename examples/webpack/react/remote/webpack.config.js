@@ -1,16 +1,21 @@
 const path = require("path");
-const { createWarehousePlugin } = require("@expozr/webpack-adapter");
+const {
+  createWarehousePlugin,
+  createWarehouseConfig,
+} = require("@expozr/webpack-adapter");
 
 module.exports = (env, argv) => {
   const isProduction = argv.mode === "production";
 
   return {
-    entry: {}, // Adapter will populate this from expozr.config.ts
+    ...createWarehouseConfig(), // Apply Expozr warehouse optimizations
+    entry: {
+      Button: "./src/components/Button.tsx",
+      Card: "./src/components/Card.tsx",
+      hooks: "./src/hooks/index.ts",
+    }, // Adapter will populate this from expozr.config.ts
     mode: argv.mode || "development",
     devtool: isProduction ? "source-map" : "inline-source-map",
-    resolve: {
-      extensions: [".ts", ".tsx", ".js", ".jsx"],
-    },
     module: {
       rules: [
         {
@@ -34,21 +39,21 @@ module.exports = (env, argv) => {
       // Automatically discovers expozr.config.ts
       createWarehousePlugin(),
     ],
-    externals: {
-      react: "react",
-      "react-dom": "react-dom",
-    },
+    // externals are now handled by createWarehouseConfig()
     devServer: {
       static: {
         directory: path.join(__dirname, "dist"),
       },
-      port: 3002,
+      port: 3001,
       headers: {
         "Access-Control-Allow-Origin": "*",
       },
       open: false,
       hot: true,
       liveReload: true,
+      devMiddleware: {
+        writeToDisk: true, // Ensure files are written to disk in development
+      },
     },
   };
 };

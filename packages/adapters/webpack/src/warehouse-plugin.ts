@@ -167,8 +167,11 @@ export class ExpozrWarehousePlugin {
       ...compiler.options.output,
       path: path.resolve(compiler.context, outputPath),
       filename: "[name].js",
-      library: "[name]",
-      libraryTarget: "umd",
+      library: {
+        name: "[name]",
+        type: "umd",
+        export: "default",
+      },
       umdNamedDefine: true,
       globalObject: "typeof self !== 'undefined' ? self : this",
       publicPath: publicPath,
@@ -245,6 +248,30 @@ export class ExpozrWarehousePlugin {
         ...compiler.options.devServer.headers,
       };
     }
+
+    // Suppress Navigator dynamic import warnings for better DX
+    // This applies to both warehouse projects and host projects using Navigator
+    if (!compiler.options.ignoreWarnings) {
+      compiler.options.ignoreWarnings = [];
+    }
+
+    // Add warning suppressions for common Expozr ecosystem patterns
+    const expozrWarningSuppressions = [
+      {
+        // Navigator package dynamic imports
+        module: /navigator\/dist\/index\.esm\.js/,
+        message:
+          /Critical dependency: the request of a dependency is an expression/,
+      },
+      {
+        // Any @expozr package dynamic imports
+        module: /@expozr\/.*\/dist\/.*\.js/,
+        message:
+          /Critical dependency: the request of a dependency is an expression/,
+      },
+    ];
+
+    compiler.options.ignoreWarnings.push(...expozrWarningSuppressions);
 
     console.log("✅ Webpack configured for UMD output");
   }

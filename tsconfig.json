@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "ES2020",
     "module": "ESNext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "lib": ["ES2020", "DOM"],
     "declaration": true,
     "declarationMap": true,
@@ -16,10 +16,12 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "types": ["node"],
+    "ignoreDeprecations": "6.0",
     "baseUrl": ".",
     "paths": {
       "@expozr/core": ["packages/core/src"],
       "@expozr/navigator": ["packages/navigator/src"],
+      "@expozr/react": ["packages/react/src"],
       "@expozr/webpack-adapter": ["packages/adapters/webpack/src"],
       "@expozr/vite-adapter": ["packages/adapters/vite/src"],
       "@expozr/rollup-adapter": ["packages/adapters/rollup/src"],

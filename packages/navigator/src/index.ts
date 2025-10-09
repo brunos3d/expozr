@@ -21,8 +21,14 @@ export {
   UniversalModuleLoader,
 } from "./loader";
 
+// UMD module loader utilities
+export {
+  loadUMDModule,
+  loadWarehouseInventory,
+  loadCargo as loadCargoUMD,
+  type UMDLoadOptions,
+  type UMDModuleInfo,
+} from "./umd-loader";
+
 // Convenience function for loading modules
 export { loadCargo } from "./load-cargo";
-
-// Version
-export const VERSION = "0.1.0";
