@@ -24,6 +24,9 @@
   ],
   "author": "Bruno Silva",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "@expozr/core": "^1.1.0",
     "@expozr/navigator": "^1.1.0",
@@ -43,5 +46,5 @@
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
-  "gitHead": "8d30343bcc5c5751d4922392cb245f4701ab6e74"
+  "gitHead": "a6eb1b94303a6556644ec7e3f48d7e235f799596"
 }
