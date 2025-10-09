@@ -12,8 +12,4 @@ export { ExpozrWarehousePlugin, ExpozrHostPlugin } from "./adapter";
 export { createWarehousePlugin, createHostPlugin } from "./adapter";
 
 // Utilities for cleaner webpack configs
-export {
-  suppressExpozrWarnings,
-  createHostConfig,
-  createWarehouseConfig,
-} from "./utils";
+export { suppressExpozrWarnings } from "./utils";

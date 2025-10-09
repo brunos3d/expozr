@@ -1,17 +1,12 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
-const {
-  createHostConfig,
-  createWarehousePlugin,
-} = require("@expozr/webpack-adapter");
+const { createWarehousePlugin } = require("@expozr/webpack-adapter");
 
 module.exports = (env, argv) => {
   const isProduction = argv.mode === "production";
 
   return {
-    // Apply Expozr host optimizations
-    ...createHostConfig(),
     mode: argv.mode || "development",
     entry: "./src/bootstrap.tsx", // Use bootstrap.tsx as entry point
     devtool: isProduction ? "source-map" : "inline-source-map",

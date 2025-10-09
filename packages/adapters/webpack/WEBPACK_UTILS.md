@@ -7,63 +7,45 @@ Clean, simple webpack configurations for the Expozr ecosystem.
 ### For Host Applications (consuming remote modules):
 
 ```javascript
-const { createHostConfig } = require("@expozr/webpack-adapter");
+const {
+  createWarehousePlugin,
+  suppressExpozrWarnings,
+} = require("@expozr/webpack-adapter");
 
 module.exports = {
-  ...createHostConfig(), // 🎯 Automatic Expozr optimizations
-  entry: "./src/index.tsx",
-  // ... your custom config
+  ignoreWarnings: suppressExpozrWarnings(), // 🎯 Suppress Expozr warnings
+  plugins: [
+    // 🚀 Auto-discovers expozr.config.ts (includes warning suppression)
+    createWarehousePlugin(), // optional, you can use just in case you want to expose some module/crate
+  ],
 };
 ```
 
 ### For Warehouse Applications (providing remote modules):
 
 ```javascript
-const {
-  createWarehousePlugin,
-  createWarehouseConfig,
-} = require("@expozr/webpack-adapter");
+const { createWarehousePlugin } = require("@expozr/webpack-adapter");
 
 module.exports = {
-  ...createWarehouseConfig(), // 🎯 Automatic Expozr optimizations
   plugins: [
-    createWarehousePlugin(), // 🚀 Auto-discovers expozr.config.ts
+    createWarehousePlugin(), // 🚀 Auto-discovers expozr.config.ts (includes warning suppression)
   ],
   // ... your custom config
 };
 ```
 
-### Manual Warning Suppression (if needed):
-
-```javascript
-const { suppressExpozrWarnings } = require("@expozr/webpack-adapter");
-
-module.exports = {
-  // ... your config
-  ignoreWarnings: suppressExpozrWarnings(),
-};
-```
-
 ## What's Included
-
-### `createHostConfig()`
-
-- ✅ Suppresses Navigator dynamic import warnings
-- ✅ Optimized resolve extensions for TypeScript/JSX
-- ✅ Clean development experience
-
-### `createWarehouseConfig()`
-
-- ✅ Suppresses Navigator dynamic import warnings
-- ✅ Optimized resolve extensions for TypeScript/JSX
-- ✅ Proper React externals configuration for UMD
-- ✅ Clean development experience
 
 ### `suppressExpozrWarnings()`
 
 - ✅ Suppresses all common Expozr dynamic import warnings
 - ✅ Covers Navigator, Core, and all @expozr packages
-- ✅ Can be used standalone if you prefer custom configs
+- ✅ Automatically included in `createWarehousePlugin()` and `createHostPlugin()`
+
+### Webpack Plugins
+
+- ✅ `createWarehousePlugin()` - Auto-discovers expozr.config.ts + warning suppression
+- ✅ `createHostPlugin()` - Configures host applications + warning suppression
 
 ## Benefits
 
@@ -72,29 +54,15 @@ module.exports = {
 📦 **Optimized** - Best practices baked in  
 🔧 **Flexible** - Use what you need, customize the rest
 
-## Migration
-
-### Before:
-
 ```javascript
-// ❌ Manual, error-prone configuration
-module.exports = {
-  resolve: { extensions: [".ts", ".tsx", ".js", ".jsx"] },
-  externals: { react: "React", "react-dom": "ReactDOM" },
-  ignoreWarnings: [
-    /* complex regex patterns */
-  ],
-  // ... lots of boilerplate
-};
-```
+const { createWarehousePlugin } = require("@expozr/webpack-adapter");
 
-### After:
-
-```javascript
-// ✅ Clean, simple, optimized
 module.exports = {
-  ...createWarehouseConfig(),
   entry: "./src/index.tsx",
+  resolve: {
+    extensions: [".ts", ".tsx", ".js", ".jsx"],
+  },
+  plugins: [createWarehousePlugin()],
 };
 ```
 

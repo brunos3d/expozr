@@ -7,7 +7,9 @@ import type {
   HostConfig,
   CargoConfig,
   WarehouseMetadata,
+  ModuleSystemConfig,
 } from "./types";
+import { createDefaultModuleSystemConfig } from "./module-system";
 
 /**
  * Helper to define warehouse configuration with type safety
@@ -15,6 +17,11 @@ import type {
 export function defineWarehouseConfig(
   config: WarehouseConfig
 ): WarehouseConfig {
+  // Ensure module system configuration is present
+  if (config.build && !config.build.moduleSystem) {
+    config.build.moduleSystem = createDefaultModuleSystemConfig();
+  }
+
   return config;
 }
 
@@ -42,11 +49,22 @@ export const defaultWarehouseConfig: Partial<WarehouseConfig> = {
     sourcemap: true,
     minify: true,
     target: "universal",
+    format: ["esm", "umd"], // Default to hybrid mode
+    moduleSystem: createDefaultModuleSystemConfig(),
   },
   metadata: {
     license: "MIT",
   },
 };
+
+/**
+ * Helper to create module system configuration
+ */
+export function defineModuleSystemConfig(
+  config: Partial<ModuleSystemConfig>
+): ModuleSystemConfig {
+  return createDefaultModuleSystemConfig(config);
+}
 
 /**
  * Default host configuration

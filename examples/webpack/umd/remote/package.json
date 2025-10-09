@@ -1,0 +1,27 @@
+{
+  "name": "@expozr/umd-remote-example",
+  "version": "1.0.0",
+  "private": true,
+  "description": "UMD Remote example exposing math functions",
+  "scripts": {
+    "build": "webpack --mode production",
+    "dev": "webpack serve --mode development --port 3001",
+    "start": "webpack serve --mode production --port 3001"
+  },
+  "keywords": [
+    "expozr",
+    "umd",
+    "remote",
+    "example"
+  ],
+  "author": "Expozr Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@expozr/webpack-adapter": "^1.1.0",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.0.0",
+    "webpack": "^5.90.0",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^4.15.1"
+  }
+}

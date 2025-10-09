@@ -9,7 +9,7 @@ import type {
   Cargo,
   LoadOptions,
   LoadedCargo,
-} from './types';
+} from "./types";
 
 /**
  * Abstract base class for bundler adapters
@@ -39,31 +39,6 @@ export abstract class ExpozrAdapter {
    * Get the version of the bundler this adapter supports
    */
   abstract get supportedVersions(): string[];
-}
-
-/**
- * Interface for runtime module loaders
- */
-export interface ModuleLoader {
-  /**
-   * Load a module from a URL
-   */
-  loadModule<T = any>(url: string, options?: LoadOptions): Promise<T>;
-
-  /**
-   * Check if a module is already loaded
-   */
-  isModuleLoaded(url: string): boolean;
-
-  /**
-   * Preload a module without executing it
-   */
-  preloadModule(url: string): Promise<void>;
-
-  /**
-   * Clear the module cache
-   */
-  clearCache(): void;
 }
 
 /**
@@ -209,20 +184,26 @@ export interface ConfigManager {
  * Event types for the Expozr ecosystem
  */
 export interface ExpozrEvents {
-  'warehouse:loaded': { warehouse: string; inventory: Inventory };
-  'cargo:loading': { warehouse: string; cargo: string };
-  'cargo:loaded': { warehouse: string; cargo: string; module: any };
-  'cargo:error': { warehouse: string; cargo: string; error: Error };
-  'cache:hit': { key: string };
-  'cache:miss': { key: string };
-  'navigator:reset': {};
+  "warehouse:loaded": { warehouse: string; inventory: Inventory };
+  "cargo:loading": { warehouse: string; cargo: string };
+  "cargo:loaded": { warehouse: string; cargo: string; module: any };
+  "cargo:error": { warehouse: string; cargo: string; error: Error };
+  "cache:hit": { key: string };
+  "cache:miss": { key: string };
+  "navigator:reset": {};
 }
 
 /**
  * Interface for event emitter
  */
 export interface EventEmitter {
-  on<K extends keyof ExpozrEvents>(event: K, listener: (data: ExpozrEvents[K]) => void): void;
-  off<K extends keyof ExpozrEvents>(event: K, listener: (data: ExpozrEvents[K]) => void): void;
+  on<K extends keyof ExpozrEvents>(
+    event: K,
+    listener: (data: ExpozrEvents[K]) => void
+  ): void;
+  off<K extends keyof ExpozrEvents>(
+    event: K,
+    listener: (data: ExpozrEvents[K]) => void
+  ): void;
   emit<K extends keyof ExpozrEvents>(event: K, data: ExpozrEvents[K]): void;
 }

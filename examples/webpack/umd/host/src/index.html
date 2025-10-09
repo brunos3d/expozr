@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>UMD Calculator - Expozr Example</title>
+    <meta
+      name="description"
+      content="Calculator application demonstrating UMD module loading with Expozr"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <!-- Header -->
+      <header class="header">
+        <h1>🧮 UMD Calculator</h1>
+        <p>Powered by Remote UMD Modules via Expozr</p>
+      </header>
+
+      <!-- Status Section -->
+      <section class="status-section">
+        <div class="status-card">
+          <div class="status-header">
+            <span id="status-indicator" class="status-indicator">⏳</span>
+            <span id="status-text" class="status-text">Initializing...</span>
+          </div>
+          <div id="module-info" class="module-info">
+            <h4>📦 Loaded Modules:</h4>
+            <ul id="loaded-modules" class="module-list">
+              <!-- Will be populated by JavaScript -->
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Calculator -->
+      <main class="calculator">
+        <div class="calculator-screen">
+          <input type="text" id="display" class="display" value="0" readonly />
+        </div>
+
+        <div class="calculator-buttons">
+          <!-- Row 1: Advanced Functions -->
+          <button class="btn btn-advanced" onclick="calculatorApp.power()">
+            x^y
+          </button>
+          <button class="btn btn-advanced" onclick="calculatorApp.sqrt()">
+            √
+          </button>
+          <button class="btn btn-advanced" onclick="calculatorApp.factorial()">
+            x!
+          </button>
+          <button class="btn btn-advanced" onclick="calculatorApp.percentage()">
+            %
+          </button>
+
+          <!-- Row 2: Clear and Operations -->
+          <button class="btn btn-clear" onclick="calculatorApp.clearDisplay()">
+            C
+          </button>
+          <button class="btn btn-clear" onclick="calculatorApp.clearEntry()">
+            CE
+          </button>
+          <button
+            class="btn btn-operation"
+            onclick="calculatorApp.handleBackspace()"
+          >
+            ⌫
+          </button>
+          <button
+            class="btn btn-operation"
+            onclick="calculatorApp.handleOperation('/')"
+          >
+            /
+          </button>
+
+          <!-- Row 3: Numbers and Operations -->
+          <button
+            class="btn btn-number"
+            onclick="calculatorApp.inputNumber('7')"
+          >
+            7
+          </button>
+          <button
+            class="btn btn-number"
+            onclick="calculatorApp.inputNumber('8')"
+          >
+            8
+          </button>
+          <button
+            class="btn btn-number"
+            onclick="calculatorApp.inputNumber('9')"
+          >
+            9
+          </button>
+          <button
+            class="btn btn-operation"
+            onclick="calculatorApp.handleOperation('*')"
+          >
+            ×
+          </button>
+
+          <!-- Row 4: Numbers and Operations -->
+          <button
+            class="btn btn-number"
+            onclick="calculatorApp.inputNumber('4')"
+          >
+            4
+          </button>
+          <button
+            class="btn btn-number"
+            onclick="calculatorApp.inputNumber('5')"
+          >
+            5
+          </button>
+          <button
+            class="btn btn-number"
+            onclick="calculatorApp.inputNumber('6')"
+          >
+            6
+          </button>
+          <button
+            class="btn btn-operation"
+            onclick="calculatorApp.handleOperation('-')"
+          >
+            -
+          </button>
+
+          <!-- Row 5: Numbers and Operations -->
+          <button
+            class="btn btn-number"
+            onclick="calculatorApp.inputNumber('1')"
+          >
+            1
+          </button>
+          <button
+            class="btn btn-number"
+            onclick="calculatorApp.inputNumber('2')"
+          >
+            2
+          </button>
+          <button
+            class="btn btn-number"
+            onclick="calculatorApp.inputNumber('3')"
+          >
+            3
+          </button>
+          <button
+            class="btn btn-operation"
+            onclick="calculatorApp.handleOperation('+')"
+          >
+            +
+          </button>
+
+          <!-- Row 6: Zero, Decimal, and Equals -->
+          <button
+            class="btn btn-number btn-zero"
+            onclick="calculatorApp.inputNumber('0')"
+          >
+            0
+          </button>
+          <button class="btn btn-number" onclick="calculatorApp.inputDecimal()">
+            .
+          </button>
+          <button class="btn btn-equals" onclick="calculatorApp.calculate()">
+            =
+          </button>
+        </div>
+      </main>
+
+      <!-- Instructions -->
+      <section class="instructions">
+        <h3>🚀 How It Works</h3>
+        <ul>
+          <li>
+            <strong>Remote Loading:</strong> Math functions are loaded from a
+            UMD warehouse
+          </li>
+          <li>
+            <strong>Basic Operations:</strong> +, -, ×, ÷ using remote functions
+          </li>
+          <li>
+            <strong>Advanced Functions:</strong> Power, square root, factorial,
+            percentage
+          </li>
+          <li>
+            <strong>Error Handling:</strong> Comprehensive error handling for
+            network and calculation errors
+          </li>
+        </ul>
+      </section>
+
+      <!-- Footer -->
+      <footer class="footer">
+        <p>
+          Built with
+          <a href="https://github.com/brunos3d/expozr" target="_blank"
+            >Expozr</a
+          >
+          - A framework for loading remote modules dynamically
+        </p>
+      </footer>
+    </div>
+
+    <!-- The main application script will be injected by Webpack -->
+  </body>
+</html>

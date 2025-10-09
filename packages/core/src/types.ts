@@ -3,6 +3,104 @@
  */
 
 /**
+ * Supported module formats
+ */
+export type ModuleFormat = "esm" | "umd" | "cjs" | "amd" | "iife" | "system";
+
+/**
+ * Module loading strategy
+ */
+export type ModuleLoadingStrategy = "dynamic" | "static" | "lazy" | "eager";
+
+/**
+ * Module system configuration
+ */
+export interface ModuleSystemConfig {
+  /** Primary format to use */
+  primary: ModuleFormat;
+  /** Fallback formats in order of preference */
+  fallbacks?: ModuleFormat[];
+  /** Strategy for loading modules */
+  strategy?: ModuleLoadingStrategy;
+  /** Enable hybrid mode (both ESM and UMD) */
+  hybrid?: boolean;
+  /** Module resolution configuration */
+  resolution?: ModuleResolutionConfig;
+  /** External dependencies handling */
+  externals?: ExternalConfig;
+  /** Polyfills and compatibility */
+  compatibility?: CompatibilityConfig;
+}
+
+/**
+ * Module resolution configuration
+ */
+export interface ModuleResolutionConfig {
+  /** Module file extensions to resolve */
+  extensions?: string[];
+  /** Module alias mapping */
+  alias?: Record<string, string>;
+  /** Base URL for module resolution */
+  baseUrl?: string;
+  /** Paths mapping for module resolution */
+  paths?: Record<string, string[]>;
+}
+
+/**
+ * External dependencies configuration
+ */
+export interface ExternalConfig {
+  /** Dependencies to treat as external */
+  externals?: string[] | Record<string, string | ExternalDependencyConfig>;
+  /** Strategy for external dependencies */
+  strategy?: "cdn" | "global" | "import" | "mixed";
+  /** CDN base URL for external dependencies */
+  cdnUrl?: string;
+}
+
+/**
+ * External dependency configuration
+ */
+export interface ExternalDependencyConfig {
+  /** Global variable name */
+  global?: string;
+  /** CommonJS module name */
+  commonjs?: string;
+  /** CommonJS2 module name */
+  commonjs2?: string;
+  /** AMD module name */
+  amd?: string;
+  /** ESM module specifier */
+  esm?: string;
+  /** CDN URL */
+  cdn?: string;
+}
+
+/**
+ * Compatibility configuration
+ */
+export interface CompatibilityConfig {
+  /** Target ECMAScript version */
+  target?:
+    | "es5"
+    | "es6"
+    | "es2015"
+    | "es2017"
+    | "es2018"
+    | "es2019"
+    | "es2020"
+    | "es2021"
+    | "es2022"
+    | "esnext";
+  /** Browser compatibility targets */
+  browsers?: string[];
+  /** Enable legacy browser support */
+  legacy?: boolean;
+  /** Polyfills to include */
+  polyfills?: string[];
+}
+
+/**
  * A Cargo represents an individual module being exposed by a Warehouse
  */
 export interface Cargo {
@@ -155,7 +253,11 @@ export interface WarehouseBuildConfig {
   /** Minification settings */
   minify?: boolean;
   /** Target environment */
-  target?: 'browser' | 'node' | 'universal';
+  target?: "browser" | "node" | "universal";
+  /** Module output format */
+  format?: ModuleFormat | ModuleFormat[];
+  /** Module system configuration */
+  moduleSystem?: ModuleSystemConfig;
 }
 
 /**
@@ -203,7 +305,7 @@ export interface CatalogConfig {
  */
 export interface CacheConfig {
   /** Cache strategy */
-  strategy: 'memory' | 'localStorage' | 'indexedDB' | 'none';
+  strategy: "memory" | "localStorage" | "indexedDB" | "none";
   /** Time to live in milliseconds */
   ttl?: number;
   /** Maximum cache size */
@@ -276,4 +378,52 @@ export interface LoadedCargo<T = any> {
   loadedAt: number;
   /** Whether it was loaded from cache */
   fromCache: boolean;
+  /** Format used to load the module */
+  format: ModuleFormat;
+  /** Loading strategy used */
+  strategy: ModuleLoadingStrategy;
+}
+
+/**
+ * Module loader interface
+ */
+export interface ModuleLoader {
+  /** Load a module from a URL */
+  loadModule<T = any>(url: string, options?: LoadOptions): Promise<T>;
+  /** Check if a module is already loaded */
+  isModuleLoaded(url: string): boolean;
+  /** Preload a module without executing */
+  preloadModule?(url: string): Promise<void>;
+  /** Clear module cache */
+  clearCache?(): void;
+  /** Get supported formats */
+  getSupportedFormats(): ModuleFormat[];
+}
+
+/**
+ * Bundler adapter interface
+ */
+export interface BundlerAdapter {
+  /** Name of the bundler */
+  name: string;
+  /** Configure bundler for warehouse build */
+  configureWarehouse(config: WarehouseConfig, bundlerConfig: any): any;
+  /** Configure bundler for host application */
+  configureHost(config: HostConfig, bundlerConfig: any): any;
+  /** Get default configuration for this bundler */
+  getDefaultConfig(): any;
+  /** Check if bundler is available */
+  isAvailable(): boolean;
+}
+
+/**
+ * Module format detector interface
+ */
+export interface ModuleFormatDetector {
+  /** Detect format from URL or content */
+  detectFormat(urlOrContent: string): Promise<ModuleFormat | null>;
+  /** Check if format is supported in current environment */
+  isFormatSupported(format: ModuleFormat): boolean;
+  /** Get optimal format for current environment */
+  getOptimalFormat(availableFormats: ModuleFormat[]): ModuleFormat;
 }

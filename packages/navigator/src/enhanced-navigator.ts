@@ -1,0 +1,443 @@
+/**
+ * Enhanced Navigator with universal module system support
+ */
+
+import type {
+  INavigator,
+  CacheManager,
+  HostConfig,
+  LoadOptions,
+  LoadedCargo,
+  Inventory,
+  Cargo,
+  WarehouseReference,
+  EventEmitter,
+  ExpozrEvents,
+  ModuleFormat,
+  ModuleLoadingStrategy,
+} from "@expozr/core";
+
+import {
+  getGlobalModuleSystem,
+  ESMModuleLoader,
+  UMDModuleLoader,
+  HybridModuleLoader,
+  DefaultFormatDetector,
+  WarehouseNotFoundError,
+  CargoNotFoundError,
+  NetworkError,
+  validateInventory,
+  generateCargoKey,
+  joinUrl,
+  defaultHostConfig,
+  deepMerge,
+} from "@expozr/core";
+
+import { createCache } from "./cache";
+
+/**
+ * Simple event emitter implementation
+ */
+class SimpleEventEmitter implements EventEmitter {
+  private listeners = new Map<keyof ExpozrEvents, Array<(data: any) => void>>();
+
+  on<K extends keyof ExpozrEvents>(
+    event: K,
+    listener: (data: ExpozrEvents[K]) => void
+  ): void {
+    if (!this.listeners.has(event)) {
+      this.listeners.set(event, []);
+    }
+    this.listeners.get(event)!.push(listener);
+  }
+
+  off<K extends keyof ExpozrEvents>(
+    event: K,
+    listener: (data: ExpozrEvents[K]) => void
+  ): void {
+    const eventListeners = this.listeners.get(event);
+    if (eventListeners) {
+      const index = eventListeners.indexOf(listener);
+      if (index > -1) {
+        eventListeners.splice(index, 1);
+      }
+    }
+  }
+
+  emit<K extends keyof ExpozrEvents>(event: K, data: ExpozrEvents[K]): void {
+    const eventListeners = this.listeners.get(event);
+    if (eventListeners) {
+      eventListeners.forEach((listener) => listener(data));
+    }
+  }
+}
+
+/**
+ * Enhanced Navigator with universal module system support
+ */
+export class Navigator implements INavigator {
+  private config: HostConfig;
+  private cache: CacheManager;
+  private inventoryCache = new Map<string, Inventory>();
+  private loadedCargo = new Map<string, LoadedCargo>();
+  private eventEmitter: EventEmitter;
+
+  constructor(config: Partial<HostConfig> = {}) {
+    this.config = deepMerge(defaultHostConfig, config) as HostConfig;
+    this.cache = createCache(
+      this.config.cache?.strategy || "memory",
+      this.config.cache
+    );
+    this.eventEmitter = new SimpleEventEmitter();
+
+    // Initialize the module system
+    this.initializeModuleSystem();
+  }
+
+  /**
+   * Initialize the global module system with loaders
+   */
+  private initializeModuleSystem(): void {
+    const moduleSystem = getGlobalModuleSystem();
+    const registry = moduleSystem.getLoaderRegistry();
+
+    // Register module loaders
+    registry.registerLoader("esm", new ESMModuleLoader());
+    registry.registerLoader("umd", new UMDModuleLoader());
+
+    // Register hybrid loader as the default
+    const hybridLoader = new HybridModuleLoader();
+    registry.registerLoader("esm", hybridLoader); // Override ESM with hybrid
+
+    // Register format detector
+    registry.registerDetector(new DefaultFormatDetector());
+  }
+
+  /**
+   * Load a cargo from a warehouse
+   */
+  async loadCargo<T = any>(
+    warehouse: string,
+    cargo: string,
+    options?: LoadOptions
+  ): Promise<LoadedCargo<T>> {
+    const cacheKey = generateCargoKey(warehouse, cargo);
+
+    // Check if already loaded
+    if (this.loadedCargo.has(cacheKey)) {
+      const loaded = this.loadedCargo.get(cacheKey)!;
+      return loaded as LoadedCargo<T>;
+    }
+
+    this.eventEmitter.emit("cargo:loading", { warehouse, cargo });
+
+    try {
+      // Get warehouse info
+      const warehouseRef = this.config.warehouses[warehouse];
+      if (!warehouseRef) {
+        throw new WarehouseNotFoundError(warehouse);
+      }
+
+      // Get inventory
+      const inventory = await this.getInventory(warehouse);
+
+      // Find cargo
+      const cargoInfo = inventory.cargo[cargo];
+      if (!cargoInfo) {
+        throw new CargoNotFoundError(cargo, warehouse);
+      }
+
+      // Resolve cargo URLs for different formats
+      const cargoUrls = await this.resolveCargoUrls(warehouseRef, cargoInfo);
+
+      // Load the module using the universal module system
+      const {
+        module: loadedModule,
+        format,
+        strategy,
+      } = await this.loadModuleWithBestFormat(cargoUrls, options);
+
+      const loadedCargo: LoadedCargo<T> = {
+        module: loadedModule,
+        cargo: cargoInfo,
+        warehouse: inventory.warehouse,
+        loadedAt: Date.now(),
+        fromCache: false,
+        format,
+        strategy,
+      };
+
+      // Cache the loaded cargo
+      this.loadedCargo.set(cacheKey, loadedCargo);
+
+      this.eventEmitter.emit("cargo:loaded", {
+        warehouse,
+        cargo,
+        module: loadedModule,
+      });
+
+      return loadedCargo;
+    } catch (error) {
+      this.eventEmitter.emit("cargo:error", {
+        warehouse,
+        cargo,
+        error: error as Error,
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Load module with the best available format
+   */
+  private async loadModuleWithBestFormat<T = any>(
+    urls: { format: ModuleFormat; url: string }[],
+    options?: LoadOptions
+  ): Promise<{
+    module: T;
+    format: ModuleFormat;
+    strategy: ModuleLoadingStrategy;
+  }> {
+    const moduleSystem = getGlobalModuleSystem();
+
+    // Try each format in order of preference
+    let lastError: Error | null = null;
+
+    for (const { format, url } of urls) {
+      try {
+        const loader = moduleSystem.getLoaderRegistry().getLoader(format);
+        if (loader) {
+          const module = await loader.loadModule<T>(url, options);
+          return {
+            module,
+            format,
+            strategy: "dynamic", // Could be enhanced to detect actual strategy
+          };
+        }
+      } catch (error) {
+        lastError = error as Error;
+        console.warn(`Failed to load ${format} format from ${url}:`, error);
+      }
+    }
+
+    // If all formats failed, try the universal module system
+    try {
+      const module = await moduleSystem.loadModule<T>(urls[0].url, options);
+      return {
+        module,
+        format: urls[0].format,
+        strategy: "dynamic",
+      };
+    } catch (error) {
+      throw lastError || error;
+    }
+  }
+
+  /**
+   * Resolve cargo URLs for different formats
+   */
+  private async resolveCargoUrls(
+    warehouseRef: WarehouseReference,
+    cargoInfo: Cargo
+  ): Promise<{ format: ModuleFormat; url: string }[]> {
+    const baseUrl = warehouseRef.url.endsWith("/")
+      ? warehouseRef.url
+      : `${warehouseRef.url}/`;
+
+    // Try to detect available formats from the entry point
+    const entry = cargoInfo.entry;
+    const urls: { format: ModuleFormat; url: string }[] = [];
+
+    // Check for different format variants
+    const formatVariants: { format: ModuleFormat; patterns: string[] }[] = [
+      { format: "esm", patterns: [".mjs", ".esm.js", ".module.js"] },
+      { format: "umd", patterns: [".umd.js", ".js"] },
+      { format: "cjs", patterns: [".cjs", ".common.js"] },
+    ];
+
+    for (const { format, patterns } of formatVariants) {
+      for (const pattern of patterns) {
+        // Try different naming patterns
+        const potentialUrls = [
+          `${baseUrl}${entry.replace(/\.[^.]+$/, pattern)}`,
+          `${baseUrl}${entry}${pattern}`,
+          `${baseUrl}${entry}`,
+        ];
+
+        for (const url of potentialUrls) {
+          if (await this.urlExists(url)) {
+            urls.push({ format, url });
+            break; // Found one variant for this format
+          }
+        }
+      }
+    }
+
+    // If no specific formats found, use the original entry
+    if (urls.length === 0) {
+      const originalUrl = `${baseUrl}${entry}`;
+      const detector = new DefaultFormatDetector();
+      const detectedFormat = await detector.detectFormat(originalUrl);
+      urls.push({
+        format: detectedFormat || "esm",
+        url: originalUrl,
+      });
+    }
+
+    // Sort by preference (ESM first, then UMD, then others)
+    return urls.sort((a, b) => {
+      const preference = { esm: 0, umd: 1, cjs: 2, amd: 3, iife: 4, system: 5 };
+      return (preference[a.format] || 99) - (preference[b.format] || 99);
+    });
+  }
+
+  /**
+   * Check if URL exists (simplified implementation)
+   */
+  private async urlExists(url: string): Promise<boolean> {
+    try {
+      if (typeof fetch !== "undefined") {
+        const response = await fetch(url, { method: "HEAD" });
+        return response.ok;
+      } else {
+        // In Node.js, assume URL exists for now
+        // Real implementation would use HTTP head request
+        return true;
+      }
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Get inventory from a warehouse
+   */
+  async getInventory(warehouse: string): Promise<Inventory> {
+    // Check cache first
+    if (this.inventoryCache.has(warehouse)) {
+      return this.inventoryCache.get(warehouse)!;
+    }
+
+    const warehouseRef = this.config.warehouses[warehouse];
+    if (!warehouseRef) {
+      throw new WarehouseNotFoundError(warehouse);
+    }
+
+    try {
+      // Load inventory manifest
+      const inventoryUrl = joinUrl(warehouseRef.url, "expozr.inventory.json");
+      const response = await fetch(inventoryUrl);
+
+      if (!response.ok) {
+        throw new NetworkError(
+          inventoryUrl,
+          new Error(`HTTP ${response.status}`)
+        );
+      }
+
+      const inventory: Inventory = await response.json();
+
+      // Validate inventory
+      validateInventory(inventory);
+
+      // Cache the inventory
+      this.inventoryCache.set(warehouse, inventory);
+
+      this.eventEmitter.emit("warehouse:loaded", { warehouse, inventory });
+
+      return inventory;
+    } catch (error) {
+      throw new NetworkError(warehouseRef.url, error as Error);
+    }
+  }
+
+  /**
+   * Preload cargo from warehouses
+   */
+  async preload(warehouse: string, cargo?: string[]): Promise<void> {
+    const inventory = await this.getInventory(warehouse);
+    const cargoNames = cargo || Object.keys(inventory.cargo);
+
+    const preloadPromises = cargoNames.map(async (cargoName) => {
+      try {
+        await this.loadCargo(warehouse, cargoName, { cache: true });
+      } catch (error) {
+        console.warn(
+          `Failed to preload cargo ${cargoName} from ${warehouse}:`,
+          error
+        );
+      }
+    });
+
+    await Promise.all(preloadPromises);
+  }
+
+  /**
+   * Get the cache manager
+   */
+  getCache(): CacheManager {
+    return this.cache;
+  }
+
+  /**
+   * Get loaded warehouses
+   */
+  getLoadedWarehouses(): string[] {
+    return Array.from(this.inventoryCache.keys());
+  }
+
+  /**
+   * Get loaded cargo
+   */
+  getLoadedCargo(): Record<string, LoadedCargo> {
+    const result: Record<string, LoadedCargo> = {};
+    for (const [key, cargo] of this.loadedCargo.entries()) {
+      result[key] = cargo;
+    }
+    return result;
+  }
+
+  /**
+   * Clear all caches and loaded modules
+   */
+  async reset(): Promise<void> {
+    this.inventoryCache.clear();
+    this.loadedCargo.clear();
+    await this.cache.clear();
+
+    // Clear module loader caches
+    const moduleSystem = getGlobalModuleSystem();
+    const loaders = moduleSystem.getLoaderRegistry().getAvailableLoaders();
+    for (const loader of loaders.values()) {
+      if (loader.clearCache) {
+        loader.clearCache();
+      }
+    }
+
+    this.eventEmitter.emit("navigator:reset", {});
+  }
+
+  /**
+   * Get the event emitter for listening to navigator events
+   */
+  getEventEmitter(): EventEmitter {
+    return this.eventEmitter;
+  }
+
+  /**
+   * Update configuration
+   */
+  updateConfig(config: Partial<HostConfig>): void {
+    this.config = deepMerge(this.config, config) as HostConfig;
+  }
+}
+
+/**
+ * Create a new Navigator instance
+ */
+export function createNavigator(config?: Partial<HostConfig>): Navigator {
+  return new Navigator(config);
+}
+
+// Export the legacy Navigator for backward compatibility
+export { Navigator as ExpozrNavigator };

@@ -1,14 +1,10 @@
 const path = require("path");
-const {
-  createWarehousePlugin,
-  createWarehouseConfig,
-} = require("@expozr/webpack-adapter");
+const { createWarehousePlugin } = require("@expozr/webpack-adapter");
 
 module.exports = (env, argv) => {
   const isProduction = argv.mode === "production";
 
   return {
-    ...createWarehouseConfig(), // Apply Expozr warehouse optimizations
     // NOTE: Entries from expozr.config.ts are auto-populated. You can add custom entries here if needed.
     // Custom entries will take precedence over auto-generated ones with the same name.
     entry: {
@@ -17,6 +13,7 @@ module.exports = (env, argv) => {
     },
     mode: argv.mode || "development",
     devtool: isProduction ? "source-map" : "inline-source-map",
+
     module: {
       rules: [
         {
@@ -40,7 +37,20 @@ module.exports = (env, argv) => {
       // Automatically discovers expozr.config.ts
       createWarehousePlugin(),
     ],
-    // externals are now handled by createWarehouseConfig()
+    externals: {
+      react: {
+        commonjs: "react",
+        commonjs2: "react",
+        amd: "react",
+        root: "React",
+      },
+      "react-dom": {
+        commonjs: "react-dom",
+        commonjs2: "react-dom",
+        amd: "react-dom",
+        root: "ReactDOM",
+      },
+    },
     devServer: {
       static: {
         directory: path.join(__dirname, "dist"),
