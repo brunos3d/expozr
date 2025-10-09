@@ -4,6 +4,8 @@
 
 Expozr enables any web bundler to expose and consume modules at runtime, creating a truly decentralized application architecture that's simpler and more flexible than traditional module federation solutions.
 
+> **🚧 Current Status**: Expozr is in active development. The core functionality and Webpack adapter are working with examples available. See [examples](./examples) for working demos.
+
 ## 🎯 Core Concepts
 
 ### 🏪 **Warehouse** (Remote Application)
@@ -53,6 +55,18 @@ Universal runtime system that handles dynamic loading, dependency resolution, an
 
 ### 1. Create a Warehouse (Expose Modules)
 
+You can either use the CLI (in development) or set up manually:
+
+**Option A: Manual Setup (Recommended)**
+
+```bash
+mkdir my-components && cd my-components
+npm init -y
+npm install @expozr/webpack-adapter webpack webpack-cli typescript ts-loader
+```
+
+**Option B: CLI (Beta)**
+
 ```bash
 npx @expozr/cli init warehouse my-components
 cd my-components
@@ -68,9 +82,22 @@ export default defineWarehouseConfig({
   name: "my-components",
   version: "1.0.0",
   expose: {
-    "./Button": "./src/components/Button.tsx",
-    "./Card": "./src/components/Card.tsx",
-    "./utils": "./src/utils/index.ts",
+    "./Button": {
+      entry: "./src/components/Button.tsx",
+      exports: ["Button", "ButtonProps"],
+    },
+    "./Card": {
+      entry: "./src/components/Card.tsx",
+      exports: ["Card", "CardProps"],
+    },
+    "./utils": {
+      entry: "./src/utils/index.ts",
+      exports: ["add", "multiply"],
+    },
+  },
+  build: {
+    outDir: "dist",
+    publicPath: "http://localhost:3001/",
   },
 });
 ```
@@ -93,34 +120,67 @@ cd my-app
 npm install
 ```
 
-**expozr.host.config.ts:**
+**For React components, install React support:**
+
+```bash
+npm install @expozr/react react react-dom
+```
+
+**expozr.config.ts (Host):**
 
 ```typescript
-import { defineHostConfig } from "@expozr/core";
+import { defineWarehouseConfig } from "@expozr/core";
 
-export default defineHostConfig({
-  warehouses: {
-    components: {
-      url: "https://cdn.example.com/my-components",
-      version: "^1.0.0",
-    },
+export default defineWarehouseConfig({
+  name: "my-host",
+  version: "1.0.0",
+  expose: {
+    // Currently just a consumer, but ready to expose modules if needed
+  },
+  metadata: {
+    description: "Host application that consumes remote components",
+    author: "Your Name",
+    license: "MIT",
   },
 });
 ```
 
-**app.ts:**
+**app.tsx:**
 
 ```typescript
-import { Navigator } from "@expozr/navigator";
+import React from "react";
+import { loadReactWarehouse } from "@expozr/react";
 
-const navigator = new Navigator();
+const warehouse = loadReactWarehouse("http://localhost:3001");
 
-// Load components at runtime
-const Button = await navigator.loadCargo("components", "Button");
-const Card = await navigator.loadCargo("components", "Card");
+// Load React components dynamically
+const Button = React.lazy(() =>
+  warehouse.then((mod) => ({ default: mod.Button }))
+);
 
-// Use them in your app
-const button = Button.module({ text: "Click me!" });
+// Use them in your React app
+function App() {
+  return (
+    <div>
+      <Button onClick={() => console.log("Clicked!")}>
+        Click me!
+      </Button>
+    </div>
+  );
+}
+```
+
+## 📦 Installation
+
+```bash
+# Core packages
+npm install @expozr/core @expozr/navigator @expozr/webpack-adapter
+
+# React support
+npm install @expozr/react
+
+# CLI tools (beta)
+npm install -g @expozr/cli
 ```
 
 ## 📦 Packages
@@ -137,19 +197,23 @@ const button = Button.module({ text: "Click me!" });
 - **[@expozr/rollup-adapter](./packages/adapters/rollup)** - Rollup support _(coming soon)_
 - **[@expozr/rspack-adapter](./packages/adapters/rspack)** - Rspack support _(coming soon)_
 
+### Framework Utilities
+
+- **[@expozr/react](./packages/react)** - React component loading utilities
+
 ### Developer Tools
 
 - **[@expozr/cli](./packages/cli)** - Command line tools
 
 ## 🛠️ Bundler Support
 
-| Bundler    | Status         | Package                 |
-| ---------- | -------------- | ----------------------- |
-| Webpack 5+ | ✅ Ready       | @expozr/webpack-adapter |
-| Vite       | 🚧 In Progress | @expozr/vite-adapter    |
-| Rollup     | 📋 Planned     | @expozr/rollup-adapter  |
-| Rspack     | 📋 Planned     | @expozr/rspack-adapter  |
-| Parcel     | 📋 Planned     | @expozr/parcel-adapter  |
+| Bundler    | Status     | Package                 |
+| ---------- | ---------- | ----------------------- |
+| Webpack 5+ | ✅ Ready   | @expozr/webpack-adapter |
+| Vite       | 📋 Planned | @expozr/vite-adapter    |
+| Rollup     | 📋 Planned | @expozr/rollup-adapter  |
+| Rspack     | 📋 Planned | @expozr/rspack-adapter  |
+| Parcel     | 📋 Planned | @expozr/parcel-adapter  |
 
 ## 🔧 Configuration
 
@@ -178,21 +242,15 @@ export default defineWarehouseConfig({
 ### Host Configuration
 
 ```typescript
-export default defineHostConfig({
-  warehouses: {
-    ui: {
-      url: "https://cdn.example.com/ui-warehouse",
-      version: "^2.0.0",
-      alias: "ui-components",
-    },
+export default defineWarehouseConfig({
+  name: "my-host",
+  version: "1.0.0",
+  expose: {
+    // Hosts can also expose modules if needed
   },
-  cache: {
-    strategy: "localStorage",
-    ttl: 3600000, // 1 hour
-  },
-  loading: {
-    timeout: 30000,
-    retry: { attempts: 3, delay: 1000 },
+  metadata: {
+    description: "Host application consuming remote components",
+    author: "Your Name",
   },
 });
 ```
@@ -218,15 +276,15 @@ Try the Vanilla JavaScript example:
 # 1. Clone and setup
 git clone https://github.com/brunos3d/expozr.git
 cd expozr
-npm install
+npm install && npm run build
 
 # 2. Start the warehouse (port 3001)
 cd examples/webpack/vanilla/remote
-npm run dev
+npm install && npm run dev
 
 # 3. In a new terminal, start the host (port 3000)
 cd examples/webpack/vanilla/host
-npm run dev
+npm install && npm run dev
 
 # 4. Open http://localhost:3000 in your browser
 ```
@@ -247,34 +305,53 @@ For React component federation:
 
 ```bash
 # Start React warehouse
-cd examples/webpack/react/remote && npm run dev
+cd examples/webpack/react/remote && npm install && npm run dev
 
 # Start React host (new terminal)
-cd examples/webpack/react/host && npm run dev
+cd examples/webpack/react/host && npm install && npm run dev
 ```
 
 See React components loaded dynamically between applications!
 
+## 📚 Framework Support
+
+### ⚛️ React
+
+Expozr provides first-class React support with `@expozr/react`:
+
+```typescript
+import { loadReactWarehouse, setupReactGlobals } from "@expozr/react";
+
+// Setup React globals (call once at app start)
+setupReactGlobals();
+
+// Load React warehouse
+const warehouse = loadReactWarehouse("http://localhost:3001");
+
+// Use with React.lazy for automatic code splitting
+const Button = React.lazy(() =>
+  warehouse.then((mod) => ({ default: mod.Button }))
+);
+
+// Or load directly
+const { Button, Card } = await warehouse;
+```
+
+**Features:**
+
+- ✅ **React.lazy Integration**: Seamless lazy loading with Suspense
+- ✅ **Hot Reloading**: Works with React dev server
+- ✅ **Hook Sharing**: Share custom React hooks between apps
+- ✅ **Automatic Globals**: Sets up React/ReactDOM globals for UMD modules
+
 ---
 
-Check out the [examples](./examples) directory for complete working examples:
-
-- **[Warehouse React](./examples/warehouse-react)** - React components warehouse
-- **[Host Vanilla](./examples/host-vanilla)** - Vanilla JavaScript host
-- **Host React** _(coming soon)_
-- **Host Vue** _(coming soon)_
+Check out the [examples](./examples) directory for complete working examples and detailed setup instructions.
 
 ## 🌟 Why Expozr?
 
-### vs Module Federation
-
 - **Simpler**: No complex configuration or dependency management
-- **Universal**: Works with any bundler, not just Webpack
 - **Flexible**: Runtime discovery and loading
-- **Type-Safe**: Full TypeScript support
-
-### vs Micro-frontends
-
 - **Lightweight**: No framework lock-in or routing complexity
 - **Granular**: Share individual components, not entire applications
 - **Efficient**: Smart caching and dependency resolution
@@ -292,14 +369,18 @@ Check out the [examples](./examples) directory for complete working examples:
 - [x] Core library and types
 - [x] Navigator runtime system
 - [x] Webpack adapter
-- [x] Basic CLI tools
+- [x] React utilities
+- [x] Working examples (Vanilla JS + React)
+- [x] Basic CLI tools (in beta)
 
 ### Phase 2: Expansion 🚧
 
+- [ ] Stable CLI with templates
 - [ ] Vite adapter
 - [ ] Rollup adapter
 - [ ] Advanced CLI features
-- [ ] React/Vue examples
+- [ ] More framework examples
+- [ ] Documentation website
 
 ### Phase 3: Production 📋
 
@@ -307,6 +388,7 @@ Check out the [examples](./examples) directory for complete working examples:
 - [ ] Security features
 - [ ] Monitoring tools
 - [ ] Registry service
+- [ ] VS Code extension
 
 ### Phase 4: Ecosystem 🔮
 
