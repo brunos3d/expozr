@@ -1,6 +1,6 @@
 {
   "name": "simple-host-example",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "description": "Simple host example that consumes from warehouse",
   "scripts": {
@@ -9,11 +9,11 @@
     "start": "webpack serve --mode production --port 3000"
   },
   "devDependencies": {
+    "html-webpack-plugin": "^5.6.0",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.0.0",
     "webpack": "^5.90.0",
     "webpack-cli": "^5.1.4",
-    "webpack-dev-server": "^4.15.1",
-    "html-webpack-plugin": "^5.6.0",
-    "typescript": "^5.0.0",
-    "ts-loader": "^9.5.1"
+    "webpack-dev-server": "^4.15.1"
   }
 }

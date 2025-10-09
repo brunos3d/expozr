@@ -1,6 +1,6 @@
 {
   "name": "@expozr/react",
-  "version": "0.1.0",
+  "version": "1.1.0",
   "description": "React utilities for the Expozr ecosystem",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
@@ -24,7 +24,7 @@
   "author": "Bruno Silva",
   "license": "MIT",
   "dependencies": {
-    "@expozr/navigator": "^0.1.0"
+    "@expozr/navigator": "^1.1.0"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.0",
