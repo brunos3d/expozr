@@ -9,15 +9,17 @@ export interface ButtonProps {
   onClick?: () => void;
   variant?: "primary" | "secondary";
   disabled?: boolean;
+  style?: React.CSSProperties;
 }
 
 export const Button: React.FC<ButtonProps> = ({
   children,
   onClick,
   variant = "primary",
+  style = {},
   disabled = false,
 }) => {
-  const style: React.CSSProperties = {
+  const buttonDefaultStyle: React.CSSProperties = {
     padding: "8px 16px",
     border: "none",
     borderRadius: "4px",
@@ -28,7 +30,11 @@ export const Button: React.FC<ButtonProps> = ({
   };
 
   return (
-    <button style={style} onClick={onClick} disabled={disabled}>
+    <button
+      style={{ ...buttonDefaultStyle, ...style }}
+      onClick={onClick}
+      disabled={disabled}
+    >
       {children}
     </button>
   );

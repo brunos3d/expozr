@@ -9,8 +9,4 @@ export {
   setupReactGlobals,
   loadReactUMDModule,
   loadReactWarehouse,
-  bootstrapReactWarehouse,
 } from "./react-utils";
-
-// Re-export core navigator utilities for convenience
-export { loadUMDModule, loadWarehouseInventory } from "@expozr/navigator";

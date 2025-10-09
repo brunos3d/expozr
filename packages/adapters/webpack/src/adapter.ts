@@ -2,22 +2,22 @@
  * Webpack adapter for Expozr ecosystem
  */
 
-import { ExpozrAdapter } from '@expozr/core';
-import type { WarehouseConfig, HostConfig, Inventory } from '@expozr/core';
+import { ExpozrAdapter } from "@expozr/core";
+import type { WarehouseConfig, HostConfig, Inventory } from "@expozr/core";
 
-import { ExpozrWarehousePlugin } from './warehouse-plugin';
-import { ExpozrHostPlugin } from './host-plugin';
+import { ExpozrWarehousePlugin } from "./warehouse-plugin";
+import { ExpozrHostPlugin } from "./host-plugin";
 
 /**
  * Webpack adapter implementation
  */
 export class WebpackAdapter extends ExpozrAdapter {
   get bundlerName(): string {
-    return 'webpack';
+    return "webpack";
   }
 
   get supportedVersions(): string[] {
-    return ['^5.0.0'];
+    return ["^5.0.0"];
   }
 
   createWarehousePlugin(config: WarehouseConfig): ExpozrWarehousePlugin {
@@ -31,7 +31,9 @@ export class WebpackAdapter extends ExpozrAdapter {
   async generateInventory(config: WarehouseConfig): Promise<Inventory> {
     // This would be used in build tools or CLI
     // For now, throw as this is typically handled by the webpack plugin
-    throw new Error('generateInventory should be called through webpack plugin');
+    throw new Error(
+      "generateInventory should be called through webpack plugin"
+    );
   }
 }
 

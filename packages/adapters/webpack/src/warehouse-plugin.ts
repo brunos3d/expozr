@@ -150,8 +150,27 @@ export class ExpozrWarehousePlugin {
       exposedModules[cleanName] = path.resolve(compiler.context, entryPoint);
     }
 
-    // Set entries
-    compiler.options.entry = exposedModules;
+    // Merge entries: start with exposedModules from expozr.config.ts, then override with user-defined entries
+    const existingEntries = compiler.options.entry || {};
+    const hasExistingEntries =
+      Object.keys(existingEntries).length > 0 &&
+      !Object.keys(existingEntries).every((key) => key === "");
+
+    if (exposedModules && Object.keys(exposedModules).length > 0) {
+      compiler.options.entry = exposedModules;
+    }
+
+    if (hasExistingEntries) {
+      // Merge: exposedModules first, then user entries (user entries take precedence)
+      compiler.options.entry = {
+        ...exposedModules,
+        ...existingEntries,
+      };
+
+      console.log(
+        `📦 Merged entries: ${Object.keys(exposedModules).length} from expozr.config.ts + ${Object.keys(existingEntries).length} custom entries`
+      );
+    }
 
     // Force webpack mode to 'none' to prevent CLI overrides that break UMD
     compiler.options.mode = "none";

@@ -1,5 +1,6 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 const {
   createHostConfig,
   createWarehousePlugin,
@@ -11,8 +12,8 @@ module.exports = (env, argv) => {
   return {
     // Apply Expozr host optimizations
     ...createHostConfig(),
-    entry: "./src/index.tsx",
     mode: argv.mode || "development",
+    entry: "./src/bootstrap.tsx", // Use bootstrap.tsx as entry point
     devtool: isProduction ? "source-map" : "inline-source-map",
     module: {
       rules: [
@@ -22,6 +23,9 @@ module.exports = (env, argv) => {
           exclude: /node_modules/,
         },
       ],
+    },
+    resolve: {
+      extensions: [".tsx", ".ts", ".js"],
     },
     output: {
       path: path.resolve(__dirname, "dist"),
@@ -37,14 +41,26 @@ module.exports = (env, argv) => {
       // Automatically discovers expozr.config.ts
       createWarehousePlugin(),
       new HtmlWebpackPlugin({
-        template: "./src/index.html",
-        title: "Expozr Host Example",
+        template: "./public/index.html", // Use public/index.html as template
+      }),
+      new CopyWebpackPlugin({
+        patterns: [
+          {
+            from: "public",
+            to: "", // Copy to the root of the output directory (dist/)
+            globOptions: {
+              ignore: ["**/index.html"], // Don't copy index.html as it's handled by HtmlWebpackPlugin
+            },
+          },
+        ],
       }),
     ],
     devServer: {
-      static: {
-        directory: path.join(__dirname, "dist"),
-      },
+      static: [
+        {
+          directory: path.join(__dirname, "dist"),
+        },
+      ],
       port: 3000,
       open: true,
       hot: true,

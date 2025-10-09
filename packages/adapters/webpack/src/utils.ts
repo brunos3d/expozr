@@ -79,15 +79,26 @@ export function createHostConfig(
 /**
  * Creates a complete webpack configuration optimized for Expozr warehouse applications
  *
+ * ℹ️ Entries from expozr.config.ts are automatically populated by ExpozrWarehousePlugin.
+ * You can optionally define additional entries in your webpack config - they will be merged
+ * with custom entries taking precedence over auto-generated ones.
+ *
  * @param options - Configuration options
  * @returns Partial webpack configuration object
  *
  * @example
  * ```javascript
- * const { createWarehouseConfig } = require('@expozr/webpack-adapter');
+ * const { createWarehouseConfig, createWarehousePlugin } = require('@expozr/webpack-adapter');
  *
  * module.exports = {
  *   ...createWarehouseConfig(),
+ *   entry: {
+ *     // Optional: custom entries (merged with expozr.config.ts entries)
+ *     customEntry: './src/custom.ts'
+ *   },
+ *   plugins: [
+ *     createWarehousePlugin(), // Auto-populates entries from expozr.config.ts
+ *   ],
  *   // ... your custom config
  * };
  * ```
