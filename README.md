@@ -92,7 +92,16 @@ export default defineWarehouseConfig({
     "./utils": {
       entry: "./src/utils/index.ts",
       exports: ["add", "multiply"],
+      dependencies: {
+        lodash: "^4.17.21",
+        // ...other dependencies
+      },
     },
+  },
+  dependencies: {
+    react: "^18.0.0",
+    "react-dom": "^18.0.0",
+    // ...other shared dependencies
   },
   build: {
     outDir: "dist",
@@ -125,26 +134,7 @@ npm install
 npm install @expozr/react react react-dom
 ```
 
-**expozr.config.ts (Host):**
-
-```typescript
-import { defineWarehouseConfig } from "@expozr/core";
-
-export default defineWarehouseConfig({
-  name: "my-host",
-  version: "1.0.0",
-  expose: {
-    // Currently just a consumer, but ready to expose modules if needed
-  },
-  metadata: {
-    description: "Host application that consumes remote components",
-    author: "Your Name",
-    license: "MIT",
-  },
-});
-```
-
-**app.tsx:**
+**React Host app:**
 
 ```typescript
 import React from "react";
@@ -167,6 +157,25 @@ function App() {
     </div>
   );
 }
+```
+
+**Host Configuration (optional):**
+
+```typescript
+import { defineWarehouseConfig } from "@expozr/core";
+
+export default defineWarehouseConfig({
+  name: "my-host",
+  version: "1.0.0",
+  expose: {
+    // Currently just a consumer, but ready to expose modules if needed
+  },
+  metadata: {
+    description: "Host application that consumes remote components",
+    author: "Your Name",
+    license: "MIT",
+  },
+});
 ```
 
 ## 📦 Installation
@@ -319,9 +328,6 @@ Expozr provides first-class React support with `@expozr/react`:
 
 ```typescript
 import { loadReactWarehouse, setupReactGlobals } from "@expozr/react";
-
-// Setup React globals (call once at app start)
-setupReactGlobals();
 
 // Load React warehouse
 const warehouse = loadReactWarehouse("http://localhost:3001");
