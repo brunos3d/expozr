@@ -218,7 +218,7 @@ npm install -g @expozr/cli
 | Bundler    | Status     | Package                 |
 | ---------- | ---------- | ----------------------- |
 | Webpack 5+ | ✅ Ready   | @expozr/webpack-adapter |
-| Vite       | 📋 Planned | @expozr/vite-adapter    |
+| Vite       | ✅ Ready   | @expozr/vite-adapter    |
 | Rollup     | 📋 Planned | @expozr/rollup-adapter  |
 | Rspack     | 📋 Planned | @expozr/rspack-adapter  |
 | Parcel     | 📋 Planned | @expozr/parcel-adapter  |
