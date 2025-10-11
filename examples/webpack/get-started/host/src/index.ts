@@ -31,7 +31,7 @@ function init(): void {
 
 async function initRemote() {
   try {
-    const remoteUrl = "http://localhost:3001/bundle.js";
+    const remoteUrl = "http://localhost:3001/main.js";
     const remoteModule = await import(/* webpackIgnore: true */ remoteUrl);
     console.log("🌐 Remote module loaded successfully!");
 
