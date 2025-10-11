@@ -1,5 +1,5 @@
 const path = require("path");
-const { createWarehousePlugin } = require("@expozr/webpack-adapter");
+const { createExpozrPlugin } = require("@expozr/webpack-adapter");
 
 module.exports = {
   entry: {
@@ -20,7 +20,7 @@ module.exports = {
     ],
   },
   plugins: [
-    createWarehousePlugin(), // Will automatically discover expozr.config.ts
+    createExpozrPlugin(), // Will automatically discover expozr.config.ts
   ],
   devServer: {
     static: {

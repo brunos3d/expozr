@@ -31,7 +31,7 @@ export {
 // UMD module loader utilities
 export {
   loadUMDModule,
-  loadWarehouseInventory,
+  loadExpozrInventory,
   loadCargo as loadCargoUMD,
   type UMDLoadOptions,
   type UMDModuleInfo,

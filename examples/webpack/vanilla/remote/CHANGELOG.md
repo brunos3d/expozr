@@ -5,4 +5,4 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # 1.1.0 (2025-10-09)
 
-**Note:** Version bump only for package simple-warehouse-example
+**Note:** Version bump only for package simple-expozr-example

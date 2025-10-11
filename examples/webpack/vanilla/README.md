@@ -4,12 +4,12 @@ This example demonstrates basic module federation between vanilla JavaScript app
 
 ## Overview
 
-- **Remote/Warehouse** (port 3001): Exposes utility functions
+- **Remote/Expozr** (port 3001): Exposes utility functions
 - **Host** (port 3000): Consumes and uses the remote utilities
 
 ## Quick Start
 
-1. **Start the Remote/Warehouse**:
+1. **Start the Remote/Expozr**:
 
    ```bash
    cd remote
@@ -29,7 +29,7 @@ This example demonstrates basic module federation between vanilla JavaScript app
 
 ## What's Included
 
-### Remote/Warehouse (`./remote/`)
+### Remote/Expozr (`./remote/`)
 
 Exposes simple utility functions:
 
@@ -39,8 +39,8 @@ Exposes simple utility functions:
 **Configuration** (`expozr.config.ts`):
 
 ```typescript
-export default defineWarehouseConfig({
-  name: "simple-warehouse",
+export default defineExpozrConfig({
+  name: "simple-expozr",
   version: "1.0.0",
   expose: {
     "./hello": "./src/hello.ts",
@@ -51,9 +51,9 @@ export default defineWarehouseConfig({
 
 ### Host (`./host/`)
 
-Consumes utilities from the warehouse and demonstrates:
+Consumes utilities from the expozr and demonstrates:
 
-- Loading warehouse inventory
+- Loading expozr inventory
 - Dynamically importing remote modules
 - Error handling and connectivity testing
 - DOM manipulation with loaded functions
@@ -64,11 +64,11 @@ Consumes utilities from the warehouse and demonstrates:
 
 ```javascript
 // webpack.config.js - Zero configuration!
-const { createWarehousePlugin } = require("@expozr/webpack-adapter");
+const { createExpozrPlugin } = require("@expozr/webpack-adapter");
 
 module.exports = {
   plugins: [
-    createWarehousePlugin(), // Finds expozr.config.ts automatically
+    createExpozrPlugin(), // Finds expozr.config.ts automatically
   ],
 };
 ```
@@ -96,7 +96,7 @@ const sum = add(5, 3);
 
 ```
 webpack/vanilla/
-├── remote/                 # Warehouse application
+├── remote/                 # Expozr application
 │   ├── src/
 │   │   ├── hello.ts       # Greeting utilities
 │   │   └── utils.ts       # Math utilities
@@ -139,7 +139,7 @@ cd host && npm run build
 
 ### Testing the Connection
 
-1. Check that the warehouse is accessible:
+1. Check that the expozr is accessible:
    http://localhost:3001/expozr.inventory.json
 
 2. Verify modules are available:
@@ -148,7 +148,7 @@ cd host && npm run build
 
 ## Troubleshooting
 
-### "Warehouse not accessible"
+### "Expozr not accessible"
 
 - Ensure the remote is running on port 3001
 - Check for CORS issues in browser console

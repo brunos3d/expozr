@@ -4,21 +4,21 @@ export async function initCommand(type: string, name: string, options: any) {
 }
 
 export async function buildCommand(options: any) {
-  console.log('Building warehouse...');
+  console.log("Building expozr...");
   // Implementation will be added later
 }
 
 export async function devCommand(options: any) {
-  console.log('Starting development server...');
+  console.log("Starting development server...");
   // Implementation will be added later
 }
 
 export async function publishCommand(options: any) {
-  console.log('Publishing warehouse...');
+  console.log("Publishing expozr...");
   // Implementation will be added later
 }
 
-export async function addCommand(warehouse: string, options: any) {
-  console.log(`Adding warehouse: ${warehouse}`);
+export async function addCommand(expozr: string, options: any) {
+  console.log(`Adding expozr: ${expozr}`);
   // Implementation will be added later
 }

@@ -79,7 +79,7 @@ function extractFunctions(module: any): Record<string, Function> {
  * Create a calculator app with auto-loaded remote modules
  */
 export async function createCalculatorApp(
-  warehouseUrl: string = "http://localhost:3001/"
+  expozrUrl: string = "http://localhost:3001/"
 ): Promise<LoaderContext> {
   const context: LoaderContext = {
     modules: {},
@@ -92,9 +92,9 @@ export async function createCalculatorApp(
 
     // Create navigator instance
     const navigator = createNavigator({
-      warehouses: {
+      expozrs: {
         "math-utils": {
-          url: warehouseUrl,
+          url: expozrUrl,
           version: "^1.0.0",
         },
       },

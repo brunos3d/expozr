@@ -1,21 +1,18 @@
 /**
  * Webpack adapter for Expozr - Host Plugin
- * Enables consumption of modules from warehouses
+ * Enables consumption of modules from expozrs
  */
 
 // Dynamic imports for Node.js modules
 declare const require: any;
 
-import type { 
-  HostConfig,
-  WarehouseReference,
-} from '@expozr/core';
+import type { HostConfig, ExpozrReference } from "@expozr/core";
 
-import { 
-  validateWarehouseConfig,
+import {
+  validateExpozrConfig,
   defaultHostConfig,
   deepMerge,
-} from '@expozr/core';
+} from "@expozr/core";
 
 export interface HostPluginOptions {
   configFile?: string;
@@ -23,7 +20,7 @@ export interface HostPluginOptions {
 }
 
 /**
- * Webpack plugin for consuming from Expozr warehouses
+ * Webpack plugin for consuming from Expozr expozrs
  */
 export class ExpozrHostPlugin {
   private options: HostPluginOptions;
@@ -34,17 +31,20 @@ export class ExpozrHostPlugin {
   }
 
   apply(compiler: any): void {
-    const pluginName = 'ExpozrHostPlugin';
+    const pluginName = "ExpozrHostPlugin";
 
     // Load configuration
-    compiler.hooks.beforeRun.tapAsync(pluginName, async (compiler: any, callback: any) => {
-      try {
-        await this.loadConfig(compiler);
-        callback();
-      } catch (error) {
-        callback(error as Error);
+    compiler.hooks.beforeRun.tapAsync(
+      pluginName,
+      async (compiler: any, callback: any) => {
+        try {
+          await this.loadConfig(compiler);
+          callback();
+        } catch (error) {
+          callback(error as Error);
+        }
       }
-    });
+    );
 
     // Configure webpack for consuming external modules
     compiler.hooks.beforeCompile.tap(pluginName, () => {
@@ -53,8 +53,8 @@ export class ExpozrHostPlugin {
   }
 
   private async loadConfig(compiler: any): Promise<void> {
-    const path = require('path');
-    const fs = require('fs');
+    const path = require("path");
+    const fs = require("fs");
 
     if (this.options.config) {
       this.config = this.options.config;
@@ -62,8 +62,11 @@ export class ExpozrHostPlugin {
     }
 
     if (this.options.configFile) {
-      const configPath = path.resolve(compiler.context, this.options.configFile);
-      
+      const configPath = path.resolve(
+        compiler.context,
+        this.options.configFile
+      );
+
       if (fs.existsSync(configPath)) {
         try {
           const configModule = await import(configPath);
@@ -78,10 +81,10 @@ export class ExpozrHostPlugin {
     if (!this.config) {
       // Look for default config files
       const defaultConfigs = [
-        'expozr.host.config.ts',
-        'expozr.host.config.js',
-        'expozr.config.ts',
-        'expozr.config.js',
+        "expozr.host.config.ts",
+        "expozr.host.config.js",
+        "expozr.config.ts",
+        "expozr.config.js",
       ];
 
       for (const configFile of defaultConfigs) {
@@ -105,7 +108,7 @@ export class ExpozrHostPlugin {
     }
 
     if (!this.config) {
-      throw new Error('No Expozr host configuration found');
+      throw new Error("No Expozr host configuration found");
     }
 
     // Merge with defaults
@@ -115,14 +118,14 @@ export class ExpozrHostPlugin {
   private configureWebpack(compiler: any): void {
     if (!this.config) return;
 
-    // Configure externals for warehouse modules
+    // Configure externals for expozr modules
     const externals: Record<string, string> = {};
 
-    for (const [warehouseName, warehouseRef] of Object.entries(this.config.warehouses)) {
+    for (const [expozrName, expozrRef] of Object.entries(this.config.expozrs)) {
       // Create external entries that can be loaded at runtime
-      const ref = warehouseRef as WarehouseReference;
-      const alias = ref.alias || warehouseName;
-      externals[`@expozr/warehouse/${alias}`] = `expozr-warehouse-${alias}`;
+      const ref = expozrRef as ExpozrReference;
+      const alias = ref.alias || expozrName;
+      externals[`@expozr/expozr/${alias}`] = `expozr-expozr-${alias}`;
     }
 
     // Add externals to webpack config
@@ -138,6 +141,8 @@ export class ExpozrHostPlugin {
       dynamicImport: true,
     };
 
-    console.log(`🏠 Expozr host configured for ${Object.keys(this.config.warehouses).length} warehouses`);
+    console.log(
+      `🏠 Expozr host configured for ${Object.keys(this.config.expozrs).length} expozrs`
+    );
   }
 }

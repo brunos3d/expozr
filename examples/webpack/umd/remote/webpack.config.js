@@ -1,5 +1,5 @@
 const path = require("path");
-const { createWarehousePlugin } = require("@expozr/webpack-adapter");
+const { createExpozrPlugin } = require("@expozr/webpack-adapter");
 
 module.exports = {
   mode: "none", // Force mode to none for proper UMD
@@ -33,7 +33,7 @@ module.exports = {
     globalObject: "typeof self !== 'undefined' ? self : this",
   },
   plugins: [
-    createWarehousePlugin(), // Will automatically discover expozr.config.ts
+    createExpozrPlugin(), // Will automatically discover expozr.config.ts
   ],
   devServer: {
     static: {

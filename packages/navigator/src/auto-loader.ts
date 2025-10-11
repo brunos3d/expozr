@@ -8,7 +8,7 @@
 import { createNavigator } from "./enhanced-navigator";
 
 export interface AutoLoaderConfig {
-  warehouses: Record<
+  expozrs: Record<
     string,
     {
       url: string;
@@ -109,7 +109,7 @@ export async function createAutoLoader(
     console.log("🚀 Initializing auto-loader...");
 
     // Create navigator instance
-    const warehouseConfig = Object.entries(config.warehouses).reduce(
+    const expozrConfig = Object.entries(config.expozrs).reduce(
       (acc, [name, { url, version }]) => {
         acc[name] = { url, version: version || "^1.0.0" };
         return acc;
@@ -118,7 +118,7 @@ export async function createAutoLoader(
     );
 
     const navigator = createNavigator({
-      warehouses: warehouseConfig,
+      expozrs: expozrConfig,
       cache: {
         strategy: "memory",
         ttl: 300000, // 5 minutes
@@ -132,14 +132,12 @@ export async function createAutoLoader(
       },
     });
 
-    // Load all modules from all warehouses
-    for (const [warehouseName, warehouseConfig] of Object.entries(
-      config.warehouses
-    )) {
-      console.log(`📦 Loading modules from warehouse: ${warehouseName}`);
+    // Load all modules from all expozrs
+    for (const [expozrName, expozrConfig] of Object.entries(config.expozrs)) {
+      console.log(`📦 Loading modules from expozr: ${expozrName}`);
 
       for (const [moduleName, cargoName] of Object.entries(
-        warehouseConfig.modules
+        expozrConfig.modules
       )) {
         try {
           console.log(
@@ -147,7 +145,7 @@ export async function createAutoLoader(
           );
 
           const cargo = await navigator.loadCargo(
-            warehouseName,
+            expozrName,
             cargoName as string
           );
           const normalizedModule = normalizeUMDModule(cargo);

@@ -4,12 +4,12 @@ This example demonstrates React component federation between React applications 
 
 ## Overview
 
-- **Remote/Warehouse** (port 3001): Exposes React components and hooks
-- **Host** (port 3000): Consumes and renders React components from the warehouse
+- **Remote/Expozr** (port 3001): Exposes React components and hooks
+- **Host** (port 3000): Consumes and renders React components from the expozr
 
 ## Quick Start
 
-1. **Start the Remote/Warehouse**:
+1. **Start the Remote/Expozr**:
 
    ```bash
    cd remote
@@ -29,7 +29,7 @@ This example demonstrates React component federation between React applications 
 
 ## What's Included
 
-### Remote/Warehouse (`./remote/`)
+### Remote/Expozr (`./remote/`)
 
 Exposes React components and utilities:
 
@@ -40,7 +40,7 @@ Exposes React components and utilities:
 **Configuration** (`expozr.config.ts`):
 
 ```typescript
-export default defineWarehouseConfig({
+export default defineExpozrConfig({
   name: "react-components",
   version: "1.0.0",
   expose: {
@@ -64,7 +64,7 @@ export default defineWarehouseConfig({
 
 React application that:
 
-- Loads React component warehouse inventory
+- Loads React component expozr inventory
 - Dynamically imports React components at runtime
 - Demonstrates component usage with props and state
 - Provides comprehensive error handling
@@ -109,7 +109,7 @@ export const Button: React.FC<ButtonProps> = ({
 Share custom React hooks between applications:
 
 ```typescript
-// In the warehouse
+// In the expozr
 export function useCounter(initialValue = 0) {
   const [count, setCount] = useState(initialValue);
   const increment = () => setCount((c) => c + 1);
@@ -125,11 +125,11 @@ const { count, increment, decrement } = useCounter(0);
 
 ```javascript
 // webpack.config.js - Zero configuration!
-const { createWarehousePlugin } = require("@expozr/webpack-adapter");
+const { createExpozrPlugin } = require("@expozr/webpack-adapter");
 
 module.exports = {
   plugins: [
-    createWarehousePlugin(), // Finds expozr.config.ts automatically
+    createExpozrPlugin(), // Finds expozr.config.ts automatically
   ],
 };
 ```
@@ -138,7 +138,7 @@ module.exports = {
 
 ```
 webpack/react/
-├── remote/                      # React component warehouse
+├── remote/                      # React component expozr
 │   ├── src/
 │   │   ├── components/
 │   │   │   ├── Button.tsx      # Button component
@@ -231,7 +231,7 @@ cd host && npm run build
 
 ### Testing Components
 
-1. Check component warehouse:
+1. Check component expozr:
    http://localhost:3001/expozr.inventory.json
 
 2. Verify components are built:
@@ -245,7 +245,7 @@ cd host && npm run build
 
 - Ensure the remote React app is running on port 3001
 - Check browser console for React errors
-- Verify component exports in the warehouse
+- Verify component exports in the expozr
 
 ### TypeScript Issues
 
@@ -272,7 +272,7 @@ cd host && npm run build
 For sharing React context between host and remote:
 
 ```typescript
-// In the warehouse
+// In the expozr
 export const ThemeContext = React.createContext();
 
 // In the host

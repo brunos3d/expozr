@@ -3,7 +3,7 @@
  */
 
 import type {
-  WarehouseConfig,
+  ExpozrConfig,
   HostConfig,
   ModuleFormat,
   ModuleSystemConfig,
@@ -17,7 +17,7 @@ import type {
 export abstract class AbstractBundlerAdapter implements BundlerAdapter {
   abstract readonly name: string;
 
-  abstract configureWarehouse(config: WarehouseConfig, bundlerConfig: any): any;
+  abstract configureExpozr(config: ExpozrConfig, bundlerConfig: any): any;
   abstract configureHost(config: HostConfig, bundlerConfig: any): any;
   abstract getDefaultConfig(): any;
   abstract isAvailable(): boolean;
@@ -140,9 +140,9 @@ export abstract class AbstractBundlerAdapter implements BundlerAdapter {
   }
 
   /**
-   * Generate inventory from warehouse configuration
+   * Generate inventory from expozr configuration
    */
-  async generateInventory(config: WarehouseConfig): Promise<Inventory> {
+  async generateInventory(config: ExpozrConfig): Promise<Inventory> {
     const { name, version, expose, dependencies = {}, metadata = {} } = config;
     const { build = {} } = config;
     const { publicPath = "/", outDir = "dist" } = build;
@@ -173,7 +173,7 @@ export abstract class AbstractBundlerAdapter implements BundlerAdapter {
     const baseUrl = this.resolveBaseUrl(publicPath);
 
     return {
-      warehouse: {
+      expozr: {
         name,
         version,
         url: baseUrl,
@@ -224,7 +224,7 @@ export abstract class AbstractBundlerAdapter implements BundlerAdapter {
   }
 
   /**
-   * Resolve base URL for warehouse
+   * Resolve base URL for expozr
    */
   protected resolveBaseUrl(publicPath: string): string {
     if (publicPath.startsWith("http")) {
@@ -251,15 +251,15 @@ export abstract class AbstractBundlerAdapter implements BundlerAdapter {
   }
 
   /**
-   * Validate warehouse configuration
+   * Validate expozr configuration
    */
-  protected validateWarehouseConfig(config: WarehouseConfig): void {
+  protected validateExpozrConfig(config: ExpozrConfig): void {
     if (!config.name) {
-      throw new Error("Warehouse name is required");
+      throw new Error("Expozr name is required");
     }
 
     if (!config.version) {
-      throw new Error("Warehouse version is required");
+      throw new Error("Expozr version is required");
     }
 
     if (!config.expose || Object.keys(config.expose).length === 0) {
@@ -271,8 +271,8 @@ export abstract class AbstractBundlerAdapter implements BundlerAdapter {
    * Validate host configuration
    */
   protected validateHostConfig(config: HostConfig): void {
-    if (!config.warehouses || Object.keys(config.warehouses).length === 0) {
-      throw new Error("At least one warehouse must be configured");
+    if (!config.expozrs || Object.keys(config.expozrs).length === 0) {
+      throw new Error("At least one expozr must be configured");
     }
   }
 }

@@ -3,9 +3,9 @@
  */
 
 import {
-  createHybridWarehouseConfig,
-  createESMWarehouseConfig,
-  createUMDWarehouseConfig,
+  createHybridExpozrConfig,
+  createESMExpozrConfig,
+  createUMDExpozrConfig,
   createModernHostConfig,
   createNavigator,
   webpackAdapter,
@@ -15,10 +15,10 @@ import {
 import { WebpackAdapter } from "@expozr/webpack";
 
 /**
- * Example 1: Create a React component warehouse with hybrid ESM/UMD support
+ * Example 1: Create a React component expozr with hybrid ESM/UMD support
  */
-export function createReactWarehouse() {
-  const warehouseConfig = presets.reactWarehouse({
+export function createReactExpozr() {
+  const expozrConfig = presets.reactExpozr({
     name: "my-react-components",
     version: "1.0.0",
     expose: {
@@ -37,14 +37,14 @@ export function createReactWarehouse() {
     },
   });
 
-  return warehouseConfig;
+  return expozrConfig;
 }
 
 /**
- * Example 2: Create ESM-only warehouse for modern environments
+ * Example 2: Create ESM-only expozr for modern environments
  */
-export function createModernWarehouse() {
-  const warehouseConfig = createESMWarehouseConfig({
+export function createModernExpozr() {
+  const expozrConfig = createESMExpozrConfig({
     name: "modern-utils",
     version: "2.0.0",
     expose: {
@@ -59,14 +59,14 @@ export function createModernWarehouse() {
     },
   });
 
-  return warehouseConfig;
+  return expozrConfig;
 }
 
 /**
- * Example 3: Create UMD-only warehouse for legacy compatibility
+ * Example 3: Create UMD-only expozr for legacy compatibility
  */
-export function createLegacyWarehouse() {
-  const warehouseConfig = createUMDWarehouseConfig({
+export function createLegacyExpozr() {
+  const expozrConfig = createUMDExpozrConfig({
     name: "legacy-widgets",
     version: "1.5.0",
     expose: {
@@ -79,18 +79,18 @@ export function createLegacyWarehouse() {
     },
   });
 
-  return warehouseConfig;
+  return expozrConfig;
 }
 
 /**
  * Example 4: Configure Webpack with the new adapter
  */
 export function configureWebpack() {
-  const warehouseConfig = createReactWarehouse();
+  const expozrConfig = createReactExpozr();
   const adapter = new WebpackAdapter();
 
   // Get webpack configuration
-  const webpackConfig = adapter.configureWarehouse(warehouseConfig, {
+  const webpackConfig = adapter.configureExpozr(expozrConfig, {
     entry: "./src/index.ts",
     // ... other webpack options
   });
@@ -103,7 +103,7 @@ export function configureWebpack() {
  */
 export function createModernHost() {
   const hostConfig = createModernHostConfig({
-    warehouses: {
+    expozrs: {
       "react-components": {
         url: "https://cdn.example.com/react-components/",
         version: "^1.0.0",
@@ -204,17 +204,17 @@ export function getWebpackConfigs() {
   const adapter = new WebpackAdapter();
 
   // ESM-only configuration
-  const esmConfig = adapter.configureWarehouse(createModernWarehouse(), {
+  const esmConfig = adapter.configureExpozr(createModernExpozr(), {
     entry: "./src/index.ts",
   });
 
   // UMD-only configuration
-  const umdConfig = adapter.configureWarehouse(createLegacyWarehouse(), {
+  const umdConfig = adapter.configureExpozr(createLegacyExpozr(), {
     entry: "./src/index.js",
   });
 
   // Hybrid configuration (generates both ESM and UMD)
-  const hybridConfig = adapter.configureWarehouse(createReactWarehouse(), {
+  const hybridConfig = adapter.configureExpozr(createReactExpozr(), {
     entry: "./src/index.tsx",
   });
 
@@ -241,7 +241,7 @@ export function migrateLegacyProject() {
   };
 
   // Migrate to new format
-  const newConfig = createHybridWarehouseConfig({
+  const newConfig = createHybridExpozrConfig({
     name: legacyConfig.name,
     version: legacyConfig.version,
     expose: legacyConfig.expose,

@@ -1,7 +1,7 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
-const { createWarehousePlugin } = require("@expozr/webpack-adapter");
+const { createExpozrPlugin } = require("@expozr/webpack-adapter");
 
 module.exports = (env, argv) => {
   const isProduction = argv.mode === "production";
@@ -34,7 +34,7 @@ module.exports = (env, argv) => {
     },
     plugins: [
       // Automatically discovers expozr.config.ts
-      createWarehousePlugin(),
+      createExpozrPlugin(),
       new HtmlWebpackPlugin({
         template: "./public/index.html", // Use public/index.html as template
       }),

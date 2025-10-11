@@ -3,7 +3,7 @@
  */
 
 import type {
-  WarehouseConfig,
+  ExpozrConfig,
   HostConfig,
   Inventory,
   Cargo,
@@ -16,9 +16,9 @@ import type {
  */
 export abstract class ExpozrAdapter {
   /**
-   * Create a warehouse plugin for the specific bundler
+   * Create a expozr plugin for the specific bundler
    */
-  abstract createWarehousePlugin(config: WarehouseConfig): any;
+  abstract createExpozrPlugin(config: ExpozrConfig): any;
 
   /**
    * Create a host plugin for the specific bundler
@@ -26,9 +26,9 @@ export abstract class ExpozrAdapter {
   abstract createHostPlugin(config: HostConfig): any;
 
   /**
-   * Generate an inventory manifest from warehouse configuration
+   * Generate an inventory manifest from expozr configuration
    */
-  abstract generateInventory(config: WarehouseConfig): Promise<Inventory>;
+  abstract generateInventory(config: ExpozrConfig): Promise<Inventory>;
 
   /**
    * Get the bundler name this adapter supports
@@ -97,23 +97,23 @@ export interface DependencyResolver {
 }
 
 /**
- * Interface for warehouse discovery
+ * Interface for expozr discovery
  */
-export interface WarehouseDiscovery {
+export interface ExpozrDiscovery {
   /**
-   * Discover warehouses from a catalog
+   * Discover expozrs from a catalog
    */
-  discoverWarehouses(catalogUrl: string): Promise<string[]>;
+  discoverExpozrs(catalogUrl: string): Promise<string[]>;
 
   /**
-   * Get warehouse information
+   * Get expozr information
    */
-  getWarehouseInfo(warehouseUrl: string): Promise<Inventory>;
+  getExpozrInfo(expozrUrl: string): Promise<Inventory>;
 
   /**
-   * Check if a warehouse is available
+   * Check if a expozr is available
    */
-  isWarehouseAvailable(warehouseUrl: string): Promise<boolean>;
+  isExpozrAvailable(expozrUrl: string): Promise<boolean>;
 }
 
 /**
@@ -121,23 +121,23 @@ export interface WarehouseDiscovery {
  */
 export interface INavigator {
   /**
-   * Load a cargo from a warehouse
+   * Load a cargo from a expozr
    */
   loadCargo<T = any>(
-    warehouse: string,
+    expozr: string,
     cargo: string,
     options?: LoadOptions
   ): Promise<LoadedCargo<T>>;
 
   /**
-   * Get inventory from a warehouse
+   * Get inventory from a expozr
    */
-  getInventory(warehouse: string): Promise<Inventory>;
+  getInventory(expozr: string): Promise<Inventory>;
 
   /**
-   * Preload cargo from warehouses
+   * Preload cargo from expozrs
    */
-  preload(warehouse: string, cargo?: string[]): Promise<void>;
+  preload(expozr: string, cargo?: string[]): Promise<void>;
 
   /**
    * Get the cache manager
@@ -145,9 +145,9 @@ export interface INavigator {
   getCache(): CacheManager;
 
   /**
-   * Get loaded warehouses
+   * Get loaded expozrs
    */
-  getLoadedWarehouses(): string[];
+  getLoadedExpozrs(): string[];
 
   /**
    * Get loaded cargo
@@ -184,10 +184,10 @@ export interface ConfigManager {
  * Event types for the Expozr ecosystem
  */
 export interface ExpozrEvents {
-  "warehouse:loaded": { warehouse: string; inventory: Inventory };
-  "cargo:loading": { warehouse: string; cargo: string };
-  "cargo:loaded": { warehouse: string; cargo: string; module: any };
-  "cargo:error": { warehouse: string; cargo: string; error: Error };
+  "expozr:loaded": { expozr: string; inventory: Inventory };
+  "cargo:loading": { expozr: string; cargo: string };
+  "cargo:loaded": { expozr: string; cargo: string; module: any };
+  "cargo:error": { expozr: string; cargo: string; error: Error };
   "cache:hit": { key: string };
   "cache:miss": { key: string };
   "navigator:reset": {};

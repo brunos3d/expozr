@@ -1,40 +1,35 @@
 // Dynamic imports for Node.js modules
 declare const require: any;
 
-import type {
-  WarehouseConfig,
-  Inventory,
-  Cargo,
-  CargoConfig,
-} from "@expozr/core";
+import type { ExpozrConfig, Inventory, Cargo, CargoConfig } from "@expozr/core";
 
 import {
   generateChecksum,
   timestamp,
-  validateWarehouseConfig,
+  validateExpozrConfig,
   joinUrl,
 } from "@expozr/core";
 
-export interface WarehousePluginOptions {
+export interface ExpozrPluginOptions {
   configFile?: string;
-  config?: WarehouseConfig;
+  config?: ExpozrConfig;
   outputPath?: string;
   publicPath?: string;
 }
 
 /**
- * Webpack plugin for creating Expozr warehouses
+ * Webpack plugin for creating Expozr expozrs
  */
-export class ExpozrWarehousePlugin {
-  private options: WarehousePluginOptions;
-  private config?: WarehouseConfig;
+export class ExpozrPlugin {
+  private options: ExpozrPluginOptions;
+  private config?: ExpozrConfig;
 
-  constructor(options: WarehousePluginOptions = {}) {
+  constructor(options: ExpozrPluginOptions = {}) {
     this.options = options;
   }
 
   apply(compiler: any): void {
-    const pluginName = ExpozrWarehousePlugin.name;
+    const pluginName = ExpozrPlugin.name;
 
     // Helper function to setup configuration
     const setupConfig = async (compiler: any, callback: any) => {
@@ -124,11 +119,11 @@ export class ExpozrWarehousePlugin {
     }
 
     if (!this.config) {
-      throw new Error("No Expozr warehouse configuration found");
+      throw new Error("No Expozr expozr configuration found");
     }
 
-    if (!validateWarehouseConfig(this.config)) {
-      throw new Error("Invalid warehouse configuration");
+    if (!validateExpozrConfig(this.config)) {
+      throw new Error("Invalid expozr configuration");
     }
   }
 
@@ -269,7 +264,7 @@ export class ExpozrWarehousePlugin {
     }
 
     // Suppress Navigator dynamic import warnings for better DX
-    // This applies to both warehouse projects and host projects using Navigator
+    // This applies to both expozr projects and host projects using Navigator
     if (!compiler.options.ignoreWarnings) {
       compiler.options.ignoreWarnings = [];
     }
@@ -325,7 +320,7 @@ export class ExpozrWarehousePlugin {
       cargo[cleanName] = {
         name: cleanName,
         version: this.config.version,
-        entry: assetName, // Just the filename, publicPath is in warehouse.url
+        entry: assetName, // Just the filename, publicPath is in expozr.url
         exports: config.exports,
         dependencies: config.dependencies || {},
         metadata: config.metadata || {},
@@ -334,7 +329,7 @@ export class ExpozrWarehousePlugin {
 
     // Create inventory
     const inventory: Inventory = {
-      warehouse: {
+      expozr: {
         name: this.config.name,
         version: this.config.version,
         url: publicPath,
@@ -358,7 +353,7 @@ export class ExpozrWarehousePlugin {
 
     console.log(`📦 Expozr inventory generated: ${inventoryPath}`);
     console.log(
-      `🚚 Warehouse "${this.config.name}" ready with ${Object.keys(cargo).length} cargo`
+      `🚚 Expozr "${this.config.name}" ready with ${Object.keys(cargo).length} cargo`
     );
   }
 

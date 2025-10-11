@@ -4,18 +4,18 @@ async function loadModules() {
     console.log("🚀 Host application starting...");
 
     // Test basic connectivity first
-    console.log("🔍 Testing warehouse connectivity...");
+    console.log("🔍 Testing expozr connectivity...");
     const inventoryResponse = await fetch(
       "http://localhost:3001/expozr.inventory.json"
     );
 
     if (!inventoryResponse.ok) {
-      throw new Error(`Warehouse not accessible: ${inventoryResponse.status}`);
+      throw new Error(`Expozr not accessible: ${inventoryResponse.status}`);
     }
 
     const inventory = await inventoryResponse.json();
     console.log(
-      "✅ Warehouse accessible. Available modules:",
+      "✅ Expozr accessible. Available modules:",
       Object.keys(inventory.cargo)
     );
 
@@ -57,7 +57,7 @@ async function loadModules() {
       statusDiv.innerHTML = `
         <div class="status success">
           <span class="emoji">✅</span>Direct module loading completed successfully!
-          <br>Warehouse: ${inventory.warehouse.name}
+          <br>Expozr: ${inventory.expozr.name}
           <br>Modules available: ${Object.keys(inventory.cargo).join(", ")}
           <br>Hello module exports: ${Object.keys(actualExports || {}).join(", ")}
         </div>
@@ -83,7 +83,7 @@ document.addEventListener("DOMContentLoaded", () => {
     app.innerHTML = `
       <h1>Expozr Host Application</h1>
       <div id="status" class="status loading">
-        <span class="emoji">⏳</span>Loading modules from warehouse...
+        <span class="emoji">⏳</span>Loading modules from expozr...
       </div>
     `;
   }

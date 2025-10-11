@@ -3,25 +3,25 @@
  */
 
 import type {
-  WarehouseConfig,
+  ExpozrConfig,
   HostConfig,
   ModuleSystemConfig,
   ModuleFormat,
 } from "./types";
 
-import { defineWarehouseConfig, defineHostConfig } from "./config";
+import { defineExpozrConfig, defineHostConfig } from "./config";
 
 import { createDefaultModuleSystemConfig } from "./module-system";
 
 /**
- * Create ESM-only warehouse configuration
+ * Create ESM-only expozr configuration
  */
-export function createESMWarehouseConfig(
-  config: Omit<WarehouseConfig, "build"> & {
-    build?: Partial<WarehouseConfig["build"]>;
+export function createESMExpozrConfig(
+  config: Omit<ExpozrConfig, "build"> & {
+    build?: Partial<ExpozrConfig["build"]>;
   }
-): WarehouseConfig {
-  return defineWarehouseConfig({
+): ExpozrConfig {
+  return defineExpozrConfig({
     ...config,
     build: {
       ...config.build,
@@ -36,14 +36,14 @@ export function createESMWarehouseConfig(
 }
 
 /**
- * Create UMD-only warehouse configuration
+ * Create UMD-only expozr configuration
  */
-export function createUMDWarehouseConfig(
-  config: Omit<WarehouseConfig, "build"> & {
-    build?: Partial<WarehouseConfig["build"]>;
+export function createUMDExpozrConfig(
+  config: Omit<ExpozrConfig, "build"> & {
+    build?: Partial<ExpozrConfig["build"]>;
   }
-): WarehouseConfig {
-  return defineWarehouseConfig({
+): ExpozrConfig {
+  return defineExpozrConfig({
     ...config,
     build: {
       ...config.build,
@@ -58,14 +58,14 @@ export function createUMDWarehouseConfig(
 }
 
 /**
- * Create hybrid warehouse configuration (both ESM and UMD)
+ * Create hybrid expozr configuration (both ESM and UMD)
  */
-export function createHybridWarehouseConfig(
-  config: Omit<WarehouseConfig, "build"> & {
-    build?: Partial<WarehouseConfig["build"]>;
+export function createHybridExpozrConfig(
+  config: Omit<ExpozrConfig, "build"> & {
+    build?: Partial<ExpozrConfig["build"]>;
   }
-): WarehouseConfig {
-  return defineWarehouseConfig({
+): ExpozrConfig {
+  return defineExpozrConfig({
     ...config,
     build: {
       ...config.build,
@@ -81,16 +81,16 @@ export function createHybridWarehouseConfig(
 }
 
 /**
- * Create warehouse configuration with custom formats
+ * Create expozr configuration with custom formats
  */
-export function createCustomWarehouseConfig(
-  config: Omit<WarehouseConfig, "build"> & {
-    build?: Partial<WarehouseConfig["build"]>;
+export function createCustomExpozrConfig(
+  config: Omit<ExpozrConfig, "build"> & {
+    build?: Partial<ExpozrConfig["build"]>;
   },
   formats: ModuleFormat[],
   moduleSystemConfig?: Partial<ModuleSystemConfig>
-): WarehouseConfig {
-  return defineWarehouseConfig({
+): ExpozrConfig {
+  return defineExpozrConfig({
     ...config,
     build: {
       ...config.build,
@@ -112,7 +112,7 @@ export function createModernHostConfig(
   config: Partial<HostConfig> = {}
 ): HostConfig {
   return defineHostConfig({
-    warehouses: {},
+    expozrs: {},
     ...config,
     loading: {
       timeout: 30000,
@@ -142,7 +142,7 @@ export function createLegacyHostConfig(
   config: Partial<HostConfig> = {}
 ): HostConfig {
   return defineHostConfig({
-    warehouses: {},
+    expozrs: {},
     ...config,
     loading: {
       timeout: 60000, // Longer timeout for legacy browsers
@@ -172,7 +172,7 @@ export function createNodeHostConfig(
   config: Partial<HostConfig> = {}
 ): HostConfig {
   return defineHostConfig({
-    warehouses: {},
+    expozrs: {},
     ...config,
     loading: {
       timeout: 15000,
@@ -199,10 +199,10 @@ export function createNodeHostConfig(
  */
 export const presets = {
   /**
-   * React component library warehouse
+   * React component library expozr
    */
-  reactWarehouse: (config: Omit<WarehouseConfig, "build">) =>
-    createHybridWarehouseConfig({
+  reactExpozr: (config: Omit<ExpozrConfig, "build">) =>
+    createHybridExpozrConfig({
       ...config,
       build: {
         target: "browser",
@@ -229,10 +229,10 @@ export const presets = {
     }),
 
   /**
-   * Vue component library warehouse
+   * Vue component library expozr
    */
-  vueWarehouse: (config: Omit<WarehouseConfig, "build">) =>
-    createHybridWarehouseConfig({
+  vueExpozr: (config: Omit<ExpozrConfig, "build">) =>
+    createHybridExpozrConfig({
       ...config,
       build: {
         target: "browser",
@@ -254,10 +254,10 @@ export const presets = {
     }),
 
   /**
-   * Utility library warehouse
+   * Utility library expozr
    */
-  utilityWarehouse: (config: Omit<WarehouseConfig, "build">) =>
-    createHybridWarehouseConfig({
+  utilityExpozr: (config: Omit<ExpozrConfig, "build">) =>
+    createHybridExpozrConfig({
       ...config,
       build: {
         target: "universal",
@@ -294,11 +294,11 @@ export const presets = {
  */
 export function migrateLegacyConfig(
   legacyConfig: any
-): WarehouseConfig | HostConfig {
-  // Detect if it's a warehouse or host config
+): ExpozrConfig | HostConfig {
+  // Detect if it's a expozr or host config
   if (legacyConfig.expose) {
-    // It's a warehouse config
-    return createHybridWarehouseConfig({
+    // It's a expozr config
+    return createHybridExpozrConfig({
       name: legacyConfig.name || "unknown",
       version: legacyConfig.version || "1.0.0",
       expose: legacyConfig.expose,
@@ -314,10 +314,10 @@ export function migrateLegacyConfig(
           legacyConfig.target || legacyConfig.build?.target || "universal",
       },
     });
-  } else if (legacyConfig.warehouses) {
+  } else if (legacyConfig.expozrs) {
     // It's a host config
     return createModernHostConfig({
-      warehouses: legacyConfig.warehouses,
+      expozrs: legacyConfig.expozrs,
       catalog: legacyConfig.catalog,
       cache: legacyConfig.cache,
       loading: legacyConfig.loading,
@@ -330,7 +330,7 @@ export function migrateLegacyConfig(
 /**
  * Validate configuration and provide helpful error messages
  */
-export function validateConfiguration(config: WarehouseConfig | HostConfig): {
+export function validateConfiguration(config: ExpozrConfig | HostConfig): {
   valid: boolean;
   errors: string[];
   warnings: string[];
@@ -338,52 +338,44 @@ export function validateConfiguration(config: WarehouseConfig | HostConfig): {
   const errors: string[] = [];
   const warnings: string[] = [];
 
-  // Check if it's a warehouse config
+  // Check if it's a expozr config
   if ("expose" in config) {
-    const warehouseConfig = config as WarehouseConfig;
+    const expozrConfig = config as ExpozrConfig;
 
-    if (!warehouseConfig.name) {
-      errors.push("Warehouse name is required");
+    if (!expozrConfig.name) {
+      errors.push("Expozr name is required");
     }
 
-    if (!warehouseConfig.version) {
-      errors.push("Warehouse version is required");
+    if (!expozrConfig.version) {
+      errors.push("Expozr version is required");
     }
 
-    if (
-      !warehouseConfig.expose ||
-      Object.keys(warehouseConfig.expose).length === 0
-    ) {
+    if (!expozrConfig.expose || Object.keys(expozrConfig.expose).length === 0) {
       errors.push("At least one cargo must be exposed");
     }
 
-    if (warehouseConfig.build?.format) {
-      const formats = Array.isArray(warehouseConfig.build.format)
-        ? warehouseConfig.build.format
-        : [warehouseConfig.build.format];
+    if (expozrConfig.build?.format) {
+      const formats = Array.isArray(expozrConfig.build.format)
+        ? expozrConfig.build.format
+        : [expozrConfig.build.format];
 
-      if (formats.length > 1 && !warehouseConfig.build.moduleSystem?.hybrid) {
+      if (formats.length > 1 && !expozrConfig.build.moduleSystem?.hybrid) {
         warnings.push("Multiple formats specified but hybrid mode is disabled");
       }
     }
   }
 
   // Check if it's a host config
-  if ("warehouses" in config) {
+  if ("expozrs" in config) {
     const hostConfig = config as HostConfig;
 
-    if (
-      !hostConfig.warehouses ||
-      Object.keys(hostConfig.warehouses).length === 0
-    ) {
-      errors.push("At least one warehouse must be configured");
+    if (!hostConfig.expozrs || Object.keys(hostConfig.expozrs).length === 0) {
+      errors.push("At least one expozr must be configured");
     }
 
-    for (const [name, warehouse] of Object.entries(
-      hostConfig.warehouses || {}
-    )) {
-      if (!warehouse.url) {
-        errors.push(`Warehouse '${name}' is missing URL`);
+    for (const [name, expozr] of Object.entries(hostConfig.expozrs || {})) {
+      if (!expozr.url) {
+        errors.push(`Expozr '${name}' is missing URL`);
       }
     }
   }

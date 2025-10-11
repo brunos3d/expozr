@@ -1,10 +1,10 @@
 /**
- * React-specific utilities for UMD module loading and warehouse consumption
+ * React-specific utilities for UMD module loading and expozr consumption
  */
 
 import React from "react";
 import { createRoot } from "react-dom/client";
-import { loadUMDModule, loadWarehouseInventory } from "@expozr/navigator";
+import { loadUMDModule, loadExpozrInventory } from "@expozr/navigator";
 
 /**
  * Automatically sets up React globals required for UMD modules
@@ -106,21 +106,21 @@ export async function loadReactUMDModule(
 }
 
 /**
- * Load a complete React warehouse with multiple components
+ * Load a complete React expozr with multiple components
  *
- * @param warehouseUrl - URL of the warehouse
+ * @param expozrUrl - URL of the expozr
  * @param componentNames - Array of component names to load, or 'all' for all components
  * @returns Promise resolving to an object with all loaded components
  */
-export async function loadReactWarehouse(
-  warehouseUrl: string,
+export async function loadReactExpozr(
+  expozrUrl: string,
   componentNames: string[] | "all" = "all"
 ) {
   // Ensure React globals are set up
   setupReactGlobals();
 
   // Load inventory
-  const inventory = await loadWarehouseInventory(warehouseUrl);
+  const inventory = await loadExpozrInventory(expozrUrl);
 
   // Determine which components to load
   const cargoNames =
@@ -130,12 +130,12 @@ export async function loadReactWarehouse(
   const loadPromises = cargoNames.map(async (cargoName) => {
     const cargo = inventory.cargo[cargoName];
     if (!cargo) {
-      throw new Error(`Cargo "${cargoName}" not found in warehouse`);
+      throw new Error(`Cargo "${cargoName}" not found in expozr`);
     }
 
-    const moduleUrl = inventory.warehouse.url.endsWith("/")
-      ? `${inventory.warehouse.url}${cargo.entry}`
-      : `${inventory.warehouse.url}/${cargo.entry}`;
+    const moduleUrl = inventory.expozr.url.endsWith("/")
+      ? `${inventory.expozr.url}${cargo.entry}`
+      : `${inventory.expozr.url}/${cargo.entry}`;
 
     const result = await loadReactUMDModule(moduleUrl, {
       expectedGlobalName: cargoName,

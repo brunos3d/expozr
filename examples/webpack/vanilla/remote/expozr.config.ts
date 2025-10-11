@@ -1,11 +1,11 @@
 /**
- * Simple warehouse configuration
+ * Simple expozr configuration
  */
 
-import { defineWarehouseConfig } from "@expozr/core";
+import { defineExpozrConfig } from "@expozr/core";
 
-export default defineWarehouseConfig({
-  name: "simple-warehouse",
+export default defineExpozrConfig({
+  name: "simple-expozr",
   version: "1.0.0",
   expose: {
     "./hello": {
@@ -22,7 +22,7 @@ export default defineWarehouseConfig({
     publicPath: "http://localhost:3001/",
   },
   metadata: {
-    description: "Simple warehouse example with basic utilities",
+    description: "Simple expozr example with basic utilities",
     author: "Expozr Team",
     license: "MIT",
     tags: ["utilities", "example", "simple"],

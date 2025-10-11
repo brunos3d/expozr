@@ -1,4 +1,4 @@
-# UMD Remote - Math Utils Warehouse
+# UMD Remote - Math Utils Expozr
 
 This is a UMD (Universal Module Definition) remote application that exposes mathematical utility functions for consumption by host applications.
 
@@ -74,7 +74,7 @@ round(3.14159, 2); // Returns: 3.14
 import { createNavigator } from "@expozr/navigator";
 
 const navigator = createNavigator({
-  warehouses: {
+  expozrs: {
     "math-utils": {
       url: "http://localhost:3001/",
     },
@@ -114,7 +114,7 @@ src/
 └── advanced.ts      # Advanced math functions
 
 Configuration:
-├── expozr.config.ts # Warehouse configuration
+├── expozr.config.ts # Expozr configuration
 ├── webpack.config.js # Webpack build setup
 ├── tsconfig.json    # TypeScript configuration
 └── package.json     # Dependencies and scripts
@@ -159,7 +159,7 @@ This remote is designed to be consumed by the [UMD Host example](../host/README.
 
 ## 🔧 Configuration
 
-The warehouse is configured in `expozr.config.ts`:
+The expozr is configured in `expozr.config.ts`:
 
 - **UMD Format**: Optimized for universal compatibility
 - **Multiple Entries**: Separate modules for different functionalities
