@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ESM Host Application</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+        background-color: #f5f5f5;
+      }
+      .container {
+        background: white;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        color: #333;
+        border-bottom: 2px solid #28a745;
+        padding-bottom: 0.5rem;
+      }
+      .status {
+        background: #d1ecf1;
+        color: #0c5460;
+        padding: 1rem;
+        border-radius: 5px;
+        margin: 1rem 0;
+      }
+      .console-output {
+        background: white;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        margin-top: 2rem;
+      }
+      .console {
+        overflow-y: auto;
+        background: #f8f9fa;
+        border: 1px solid #ccc;
+        padding: 1rem;
+        border-radius: 5px;
+        max-height: 300px;
+        overflow-x: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🏠 ESM Host Application</h1>
+      <div class="status">
+        ✅ ESM Host application is running! <strong>Port:</strong> 3000<br />
+        📦 Using Expozr webpack adapter with ESM modules<br />
+        🔄 Webpack is watching for changes with hot reload
+      </div>
+    </div>
+    <script>
+      // Capture console output and display it in the HTML
+      (function () {
+        const originalLog = console.log;
+        const originalError = console.error;
+        const logContainer = document.createElement("div");
+        logContainer.className = "console-output";
+        logContainer.innerHTML = `<h2>Console Output:</h2><pre class="console"><code></code></pre>`;
+        document.body.appendChild(logContainer);
+        const codeElement = logContainer.querySelector("code");
+
+        function appendMessage(message, type) {
+          const msg = document.createElement("div");
+          msg.textContent = message;
+          msg.style.color = type === "error" ? "red" : "black";
+          codeElement.appendChild(msg);
+        }
+
+        console.log = function (...args) {
+          originalLog.apply(console, args);
+          appendMessage(args.join(" "), "log");
+        };
+
+        console.error = function (...args) {
+          originalError.apply(console, args);
+          appendMessage(args.join(" "), "error");
+        };
+      })();
+    </script>
+
+    <!-- Load the compiled TypeScript as an ES module -->
+    <script type="module" src="main.js"></script>
+  </body>
+</html>
