@@ -2,8 +2,13 @@
  * Module loaders for different environments
  */
 
-import type { ModuleLoader, LoadOptions } from '@expozr/core';
-import { LoadTimeoutError, NetworkError, createTimeout, retry } from '@expozr/core';
+import type { ModuleLoader, LoadOptions } from "@expozr/core";
+import {
+  LoadTimeoutError,
+  NetworkError,
+  createTimeout,
+  retry,
+} from "@expozr/core";
 
 /**
  * Browser-based module loader using dynamic imports
@@ -27,7 +32,7 @@ export class BrowserModuleLoader implements ModuleLoader {
         async () => {
           return Promise.race([
             this.dynamicImport(url),
-            createTimeout(timeout)
+            createTimeout(timeout),
           ]);
         },
         retryConfig.attempts,
@@ -46,7 +51,7 @@ export class BrowserModuleLoader implements ModuleLoader {
         return options.fallback();
       }
 
-      if (error instanceof Error && error.message.includes('timed out')) {
+      if (error instanceof Error && error.message.includes("timed out")) {
         throw new LoadTimeoutError(url, timeout);
       }
 
@@ -56,7 +61,7 @@ export class BrowserModuleLoader implements ModuleLoader {
 
   private async dynamicImport(url: string): Promise<any> {
     // Handle different module formats
-    if (url.endsWith('.json')) {
+    if (url.endsWith(".json")) {
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -65,7 +70,7 @@ export class BrowserModuleLoader implements ModuleLoader {
     }
 
     // For JavaScript modules, use dynamic import
-    return import(/* webpackIgnore: true */ url);
+    return import(/* webpackIgnore: true */ /* @vite-ignore */ url);
   }
 
   isModuleLoaded(url: string): boolean {
@@ -74,9 +79,9 @@ export class BrowserModuleLoader implements ModuleLoader {
 
   async preloadModule(url: string): Promise<void> {
     // For browsers, we can use <link rel="modulepreload">
-    if (typeof document !== 'undefined') {
-      const link = document.createElement('link');
-      link.rel = 'modulepreload';
+    if (typeof document !== "undefined") {
+      const link = document.createElement("link");
+      link.rel = "modulepreload";
       link.href = url;
       document.head.appendChild(link);
     }
@@ -109,7 +114,7 @@ export class NodeModuleLoader implements ModuleLoader {
         async () => {
           return Promise.race([
             this.loadNodeModule(url),
-            createTimeout(timeout)
+            createTimeout(timeout),
           ]);
         },
         retryConfig.attempts,
@@ -128,7 +133,7 @@ export class NodeModuleLoader implements ModuleLoader {
         return options.fallback();
       }
 
-      if (error instanceof Error && error.message.includes('timed out')) {
+      if (error instanceof Error && error.message.includes("timed out")) {
         throw new LoadTimeoutError(url, timeout);
       }
 
@@ -137,20 +142,20 @@ export class NodeModuleLoader implements ModuleLoader {
   }
 
   private async loadNodeModule(url: string): Promise<any> {
-    if (url.startsWith('http://') || url.startsWith('https://')) {
+    if (url.startsWith("http://") || url.startsWith("https://")) {
       // For HTTP URLs, fetch and evaluate
       const module = await this.fetchModule(url);
       return module;
     } else {
       // For local files, use require or import
       try {
-        return await import(url);
+        return await import(/* @vite-ignore */ url);
       } catch {
         // Fallback to require for CommonJS modules (Node.js only)
-        if (typeof globalThis !== 'undefined' && 'require' in globalThis) {
+        if (typeof globalThis !== "undefined" && "require" in globalThis) {
           return (globalThis as any).require(url);
         }
-        throw new Error('Module loading failed');
+        throw new Error("Module loading failed");
       }
     }
   }
@@ -158,7 +163,7 @@ export class NodeModuleLoader implements ModuleLoader {
   private async fetchModule(url: string): Promise<any> {
     // This would need a proper implementation with dynamic evaluation
     // For now, throwing as HTTP module loading in Node.js requires special handling
-    throw new Error('HTTP module loading in Node.js not implemented yet');
+    throw new Error("HTTP module loading in Node.js not implemented yet");
   }
 
   isModuleLoaded(url: string): boolean {
@@ -188,7 +193,7 @@ export class UniversalModuleLoader implements ModuleLoader {
 
   constructor() {
     // Auto-detect environment
-    if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+    if (typeof window !== "undefined" && typeof document !== "undefined") {
       this.loader = new BrowserModuleLoader();
     } else {
       this.loader = new NodeModuleLoader();
