@@ -1,17 +1,28 @@
 {
-  "version": "0.1.0",
+  "version": "1.2.0",
   "npmClient": "npm",
   "command": {
     "publish": {
       "conventionalCommits": true,
       "registry": "https://registry.npmjs.org/",
-      "ignoreChanges": ["**/*.md", "**/test/**", "**/examples/**"],
-      "ignore": ["expozr"]
+      "ignoreChanges": [
+        "**/*.md",
+        "**/test/**",
+        "**/examples/**"
+      ],
+      "ignore": [
+        "expozr"
+      ]
     },
     "bootstrap": {
       "ignore": "component-*",
-      "npmClientArgs": ["--no-package-lock"]
+      "npmClientArgs": [
+        "--no-package-lock"
+      ]
     }
   },
-  "packages": ["packages/*", "packages/adapters/*"]
+  "packages": [
+    "packages/*",
+    "packages/adapters/*"
+  ]
 }
