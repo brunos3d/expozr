@@ -74,14 +74,26 @@ React application that:
 ### ⚛️ React Component Federation
 
 ```typescript
-// Load React components at runtime
-const buttonModule = await import('http://localhost:3001/Button.js');
-const Button = buttonModule.Button;
+// Load React components at runtime using Navigator
+const navigator = new Navigator({
+  expozrs: {
+    "react-components": {
+      url: "http://localhost:3001",
+      version: "^1.0.0",
+    },
+  },
+});
+
+const loadedCargo = await navigator.loadCargo(
+  "react-components",
+  "Button"
+);
+const RemoteButton = loadedCargo.module.Button;
 
 // Use them like normal React components
-<Button variant="primary" onClick={handleClick}>
+<RemoteButton variant="primary" onClick={handleClick}>
   Click me!
-</Button>
+</RemoteButton>
 ```
 
 ### 🔧 TypeScript Support
@@ -131,6 +143,7 @@ module.exports = {
   plugins: [
     createExpozrPlugin(), // Finds expozr.config.ts automatically
   ],
+  // ... other webpack config
 };
 ```
 
@@ -292,6 +305,7 @@ export { theme, colors } from "./design-system";
 
 ## Next Steps
 
+- Try the [Vite React example](../../vite/react/) for modern bundler comparison
 - Try the [Vanilla JavaScript example](../vanilla/) for simpler module sharing
 - Explore [advanced React patterns](../../../docs/react-patterns.md)
 - Learn about [performance optimization](../../../docs/performance.md)

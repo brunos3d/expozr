@@ -201,7 +201,7 @@ npm install -g @expozr/cli
 ### Bundler Adapters
 
 - **[@expozr/webpack-adapter](./packages/adapters/webpack)** - Webpack 5+ support
-- **[@expozr/vite-adapter](./packages/adapters/vite)** - Vite support _(coming soon)_
+- **[@expozr/vite-adapter](./packages/adapters/vite)** - Vite support
 - **[@expozr/rollup-adapter](./packages/adapters/rollup)** - Rollup support _(coming soon)_
 - **[@expozr/rspack-adapter](./packages/adapters/rspack)** - Rspack support _(coming soon)_
 
@@ -271,14 +271,18 @@ The fastest way to understand Expozr is to run the examples! We have working exa
 
 **➡️ [View all examples](./examples/)**
 
-| Example                                              | Description             | Stack                   | Demo                      |
-| ---------------------------------------------------- | ----------------------- | ----------------------- | ------------------------- |
-| [**Webpack + Vanilla**](./examples/webpack/vanilla/) | Basic module federation | Vanilla JS + TypeScript | [▶️ Try it](#quick-start) |
-| [**Webpack + React**](./examples/webpack/react/)     | React component sharing | React + TypeScript      | [▶️ Try it](#quick-start) |
+| Example                                                      | Description             | Stack                   | Demo                      |
+| ------------------------------------------------------------ | ----------------------- | ----------------------- | ------------------------- |
+| [**Webpack + Get Started**](./examples/webpack/get-started/) | Simplest possible setup | TypeScript              | [▶️ Try it](#quick-start) |
+| [**Webpack + Vanilla**](./examples/webpack/vanilla/)         | Basic module federation | Vanilla JS + TypeScript | [▶️ Try it](#quick-start) |
+| [**Webpack + React**](./examples/webpack/react/)             | React component sharing | React + TypeScript      | [▶️ Try it](#quick-start) |
+| [**Webpack + ESM**](./examples/webpack/esm/)                 | Modern ES modules       | ESM + TypeScript        | [▶️ Try it](#quick-start) |
+| [**Webpack + UMD**](./examples/webpack/umd/)                 | Universal module format | UMD + TypeScript        | [▶️ Try it](#quick-start) |
+| [**Vite + React**](./examples/vite/react/)                   | Vite React components   | Vite + React + TS       | [▶️ Try it](#quick-start) |
 
 ### ⚡ Quick Start (2 minutes)
 
-Try the Vanilla JavaScript example:
+Try the simplest Get Started example:
 
 ```bash
 # 1. Clone and setup
@@ -287,11 +291,11 @@ cd expozr
 npm install && npm run build
 
 # 2. Start the expozr (port 3001)
-cd examples/webpack/vanilla/remote
+cd examples/webpack/get-started/remote
 npm install && npm run dev
 
 # 3. In a new terminal, start the host (port 3000)
-cd examples/webpack/vanilla/host
+cd examples/webpack/get-started/host
 npm install && npm run dev
 
 # 4. Open http://localhost:3000 in your browser
@@ -306,19 +310,25 @@ npm install && npm run dev
 - ✅ **Hot Reloading**: Changes update instantly in development
 - ✅ **Error Handling**: Clear error messages and troubleshooting
 
-### 🚀 Try React Components
+### 🚀 Try More Examples
 
-For React component federation:
+**For Vite + React components:**
 
 ```bash
-# Start React expozr
-cd examples/webpack/react/remote && npm install && npm run dev
+# Start Vite React expozr (port 5001)
+cd examples/vite/react/remote && npm install && npm run dev
 
-# Start React host (new terminal)
-cd examples/webpack/react/host && npm install && npm run dev
+# Start Vite React host (port 5000) - new terminal
+cd examples/vite/react/host && npm install && npm run dev
 ```
 
-See React components loaded dynamically between applications!
+**For advanced Webpack examples:**
+
+```bash
+# Try the UMD Calculator example
+cd examples/webpack/umd/remote && npm install && npm run dev
+cd examples/webpack/umd/host && npm install && npm run dev
+```
 
 ## 📚 Framework Support
 
@@ -373,17 +383,17 @@ Check out the [examples](./examples) directory for complete working examples and
 - [x] Core library and types
 - [x] Navigator runtime system
 - [x] Webpack adapter
+- [x] Vite adapter
 - [x] React utilities
-- [x] Working examples (Vanilla JS + React)
+- [x] Working examples (Get Started, Vanilla, React, ESM, UMD, Vite)
 - [x] Basic CLI tools (in beta)
 
 ### Phase 2: Expansion 🚧
 
 - [ ] Stable CLI with templates
-- [ ] Vite adapter
 - [ ] Rollup adapter
 - [ ] Advanced CLI features
-- [ ] More framework examples
+- [ ] More framework examples (Vue, Angular, Svelte)
 - [ ] Documentation website
 
 ### Phase 3: Production 📋

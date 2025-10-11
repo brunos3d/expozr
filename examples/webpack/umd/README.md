@@ -1,73 +1,198 @@
-# UMD Calculator Example
+# Webpack + UMD Example
 
-This example demonstrates how to use Expozr to load UMD (Universal Module Definition) modules from a remote expozr. The calculator application loads mathematical functions from a remote UMD bundle and provides a complete calculator interface.
+This example demonstrates Universal Module Definition (UMD) module federation using Expozr and Webpack. The calculator application loads mathematical functions from a remote UMD expozr.
 
-## Project Structure
+## Overview
+
+- **Remote/Expozr** (port 3001): Exposes UMD mathematical functions
+- **Host** (port 3000): Calculator application consuming remote UMD modules
+
+## Quick Start
+
+1. **Start the Remote/Expozr**:
+
+   ```bash
+   cd remote
+   npm install
+   npm run dev  # Starts on http://localhost:3001
+   ```
+
+2. **Start the Host** (in a new terminal):
+
+   ```bash
+   cd host
+   npm install
+   npm run dev  # Starts on http://localhost:3000
+   ```
+
+3. **Open your browser** to http://localhost:3000
+
+## What's Included
+
+### Remote/Expozr (`./remote/`)
+
+Exposes mathematical functions as UMD modules:
+
+- **`calculator`**: Basic math operations (add, subtract, multiply, divide)
+- **`advanced`**: Advanced math operations (power, sqrt, factorial, percentage)
+
+**Configuration** (`expozr.config.ts`):
+
+```typescript
+export default defineExpozrConfig({
+  name: "math-functions",
+  version: "1.0.0",
+  expose: {
+    "./calculator": {
+      entry: "./src/calculator.ts",
+      exports: ["add", "subtract", "multiply", "divide"],
+    },
+    "./advanced": {
+      entry: "./src/advanced.ts",
+      exports: ["power", "sqrt", "factorial", "percentage"],
+    },
+  },
+  build: {
+    format: "umd",
+    outDir: "dist",
+    publicPath: "http://localhost:3001/",
+  },
+});
+```
+
+### Host (`./host/`)
+
+Calculator application that:
+
+- Loads UMD modules from the remote expozr
+- Provides a modern calculator interface
+- Demonstrates both basic and advanced operations
+- Handles errors gracefully with user feedback
+
+## Key Features
+
+### 🌍 UMD Module Format
+
+Universal Module Definition provides broad compatibility:
+
+```typescript
+// UMD modules work in multiple environments
+// - Browser globals
+// - AMD/RequireJS
+// - CommonJS/Node.js
+// - ES modules
+
+// Load UMD modules using Navigator
+const navigator = new Navigator({
+  expozrs: {
+    "math-functions": {
+      url: "http://localhost:3001",
+      version: "^1.0.0",
+    },
+  },
+});
+
+const calculatorModule = await navigator.loadCargo(
+  "math-functions",
+  "calculator"
+);
+const { add, multiply } = calculatorModule.module;
+```
+
+### 🧮 Calculator Interface
+
+Complete calculator with:
+
+- Basic arithmetic operations
+- Advanced mathematical functions
+- Error handling and validation
+- Responsive design
+- Keyboard support
+
+### 🔧 TypeScript Support
+
+Full type safety with UMD modules:
+
+```typescript
+// Type definitions for remote modules
+interface CalculatorFunctions {
+  add(a: number, b: number): number;
+  subtract(a: number, b: number): number;
+  multiply(a: number, b: number): number;
+  divide(a: number, b: number): number;
+}
+
+interface AdvancedFunctions {
+  power(base: number, exponent: number): number;
+  sqrt(value: number): number;
+  factorial(n: number): number;
+  percentage(value: number, percent: number): number;
+}
+```
+
+## File Structure
 
 ```
-umd/
-├── host/          # Calculator application that consumes remote functions
+webpack/umd/
+├── remote/                 # UMD modules expozr
 │   ├── src/
-│   │   ├── index.ts       # Main application logic
-│   │   ├── index.html     # HTML template
-│   │   ├── styles.css     # Calculator styling
-│   │   └── types.d.ts     # Type definitions
-│   ├── package.json
-│   ├── webpack.config.js
-│   ├── tsconfig.json
-│   └── expozr.config.ts
-└── remote/        # UMD modules expozr
-    ├── src/
-    │   ├── calculator.ts  # Basic math operations
-    │   └── advanced.ts    # Advanced math operations
-    ├── package.json
-    ├── webpack.config.js
-    ├── tsconfig.json
-    └── expozr.config.ts
+│   │   ├── calculator.ts   # Basic math operations
+│   │   └── advanced.ts     # Advanced math operations
+│   ├── expozr.config.ts    # Expozr configuration
+│   ├── webpack.config.js   # Webpack config with UMD output
+│   ├── tsconfig.json       # TypeScript configuration
+│   └── package.json
+├── host/                   # Calculator application
+│   ├── src/
+│   │   ├── index.ts        # Main application logic
+│   │   ├── index.html      # HTML template
+│   │   ├── styles.css      # Calculator styling
+│   │   └── types.d.ts      # Type definitions
+│   ├── expozr.config.ts    # Host configuration
+│   ├── webpack.config.js   # Webpack config
+│   ├── tsconfig.json       # TypeScript configuration
+│   └── package.json
+└── README.md               # This file
 ```
 
-## Features
+## Calculator Features
 
-- **Basic Operations**: Addition, subtraction, multiplication, division
-- **Advanced Operations**: Power, square root, factorial, percentage
-- **Remote Loading**: Mathematical functions loaded dynamically from UMD expozr
-- **Error Handling**: Comprehensive error handling for network and calculation errors
-- **Modern UI**: Clean, responsive calculator interface
-- **TypeScript**: Full type safety with remote module interfaces
+### Basic Operations
 
-## How It Works
+- **Addition**: Add two numbers
+- **Subtraction**: Subtract second number from first
+- **Multiplication**: Multiply two numbers
+- **Division**: Divide first number by second (with zero check)
 
-1. **Remote Expozr**: The `remote` application exposes mathematical functions as UMD modules
-2. **Host Application**: The `host` application uses Expozr Navigator to load these remote functions
-3. **Dynamic Loading**: Functions are loaded on-demand from the remote expozr
-4. **Type Safety**: TypeScript interfaces ensure type safety even with remote modules
+### Advanced Operations
 
-## Running the Example
+- **Power**: Raise base to exponent
+- **Square Root**: Calculate square root (with negative check)
+- **Factorial**: Calculate factorial (with validation)
+- **Percentage**: Calculate percentage of a value
 
-### 1. Start the Remote Expozr
+### User Interface
+
+- Clean, modern calculator design
+- Responsive layout for different screen sizes
+- Error handling with user-friendly messages
+- Keyboard support for number input
+- Clear and reset functionality
+
+## Development
+
+### Running in Development Mode
+
+Both applications support hot reloading:
 
 ```bash
-cd examples/webpack/umd/remote
-npm install
-npm run dev
+# Terminal 1 - Remote
+cd remote && npm run dev
+
+# Terminal 2 - Host
+cd host && npm run dev
 ```
 
-This starts the UMD expozr server on `http://localhost:3001/`
-
-### 2. Start the Host Application
-
-```bash
-cd examples/webpack/umd/host
-npm install
-npm run dev
-```
-
-This starts the calculator application on `http://localhost:3000/`
-
-### 3. Use the Calculator
-
-- Open your browser to `http://localhost:3000/`
-- The calculator will automatically load remote math functions
 - Use the calculator interface to perform calculations
 - Check the browser console for detailed loading and calculation logs
 
@@ -152,6 +277,25 @@ interface CalculatorModule {
 }
 ```
 
+### Building for Production
+
+```bash
+# Build remote first
+cd remote && npm run build
+
+# Then build host
+cd host && npm run build
+```
+
+### Testing the Calculator
+
+1. Check that the expozr is accessible:
+   http://localhost:3001/expozr.inventory.json
+
+2. Verify UMD modules are available:
+   - http://localhost:3001/calculator.js
+   - http://localhost:3001/advanced.js
+
 ## Troubleshooting
 
 ### Connection Issues
@@ -166,15 +310,56 @@ interface CalculatorModule {
 - Verify module paths in the expozr configuration
 - Ensure UMD modules are properly built and accessible
 
+### Calculator Issues
+
+- Check that mathematical operations return expected results
+- Verify error handling for invalid inputs (divide by zero, negative sqrt)
+- Test keyboard input and UI responsiveness
+
 ### TypeScript Errors
 
 - Verify type definitions match the actual remote module exports
 - Check that all required dependencies are installed
 - Ensure tsconfig.json includes all necessary files
 
+## Advanced Usage
+
+### Custom Calculator Functions
+
+Add new mathematical operations:
+
+```typescript
+// In remote/src/advanced.ts
+export function logarithm(value: number, base: number = Math.E): number {
+  return Math.log(value) / Math.log(base);
+}
+
+export function sin(angle: number): number {
+  return Math.sin(angle);
+}
+```
+
+### Error Boundaries
+
+Implement graceful error handling:
+
+```typescript
+try {
+  const result = await navigator.loadCargo("math-functions", "calculator");
+  return result.module;
+} catch (error) {
+  console.error("Failed to load calculator functions:", error);
+  // Fallback to local implementations
+  return getLocalCalculatorFunctions();
+}
+```
+
 ## Next Steps
 
-- Try modifying the remote modules and see hot-reloading in action
-- Add new mathematical functions to the remote expozr
+- Try the [React example](../react/) for component sharing
+- Try the [ESM example](../esm/) for modern ES modules
+- Try the [Vanilla example](../vanilla/) for simpler use cases
+- Try the [Vite React example](../../vite/react/) for modern bundler comparison
 - Experiment with different caching strategies
-- Add offline support with fallback modules
+- Add new mathematical functions to the remote expozr
+- Learn about [deployment strategies](../../../docs/deployment.md)

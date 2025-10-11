@@ -1,10 +1,10 @@
-# Webpack + Vanilla JavaScript Example
+# Webpack + Get Started Example
 
-This example demonstrates basic module federation between vanilla JavaScript applications using Expozr and Webpack.
+This is the simplest possible example to get started with Expozr. It demonstrates basic module federation between TypeScript applications using Expozr and Webpack.
 
 ## Overview
 
-- **Remote/Expozr** (port 3001): Exposes utility functions
+- **Remote/Expozr** (port 3001): Exposes simple utility functions
 - **Host** (port 3000): Consumes and uses the remote utilities
 
 ## Quick Start
@@ -33,34 +33,36 @@ This example demonstrates basic module federation between vanilla JavaScript app
 
 Exposes simple utility functions:
 
-- **`hello`**: Greeting functions (`sayHello`, `hello`)
-- **`utils`**: Math utilities (`add`, `multiply`)
+- **`greet`**: Simple greeting function
+- **`add`**: Addition function
+- **`multiply`**: Multiplication function
 
 **Configuration** (`expozr.config.ts`):
 
 ```typescript
 export default defineExpozrConfig({
-  name: "simple-expozr",
+  name: "get-started-remote",
   version: "1.0.0",
   expose: {
-    "./hello": "./src/hello.ts",
-    "./utils": "./src/utils.ts",
+    "./utils": {
+      entry: "./src/index.ts",
+      exports: ["greet", "add", "multiply"],
+    },
   },
 });
 ```
 
 ### Host (`./host/`)
 
-Consumes utilities from the expozr and demonstrates:
+Simple application that:
 
-- Loading expozr inventory
-- Dynamically importing remote modules
-- Error handling and connectivity testing
-- DOM manipulation with loaded functions
+- Loads utilities from the remote expozr
+- Demonstrates usage of remote functions
+- Shows basic error handling
 
 ## Key Features
 
-### 🔍 Automatic Configuration Discovery
+### 🔍 Minimal Configuration
 
 ```javascript
 // webpack.config.js - Zero configuration!
@@ -74,54 +76,58 @@ module.exports = {
 };
 ```
 
-### 📦 Simple Module Sharing
+### 📦 Simple Module Loading
 
-```javascript
-// Remote modules are loaded using Navigator:
+```typescript
+// Load remote modules using Navigator
 const navigator = new Navigator({
   expozrs: {
-    "simple-expozr": {
+    "get-started-remote": {
       url: "http://localhost:3001",
       version: "^1.0.0",
     },
   },
 });
 
-// Load remote modules
-const helloModule = await navigator.loadCargo("simple-expozr", "hello");
-const utilsModule = await navigator.loadCargo("simple-expozr", "utils");
+// Load and use remote functions
+const utilsModule = await navigator.loadCargo("get-started-remote", "utils");
+const { greet, add, multiply } = utilsModule.module;
 
 // Use them normally:
-const greeting = helloModule.module.sayHello("World");
-const sum = utilsModule.module.add(5, 3);
+const greeting = greet("World");
+const sum = add(2, 3);
+const product = multiply(4, 5);
 ```
 
-### 🔧 Development Experience
+### 🔧 TypeScript Support
 
-- Hot reloading for both applications
-- Automatic inventory generation
-- Clear error messages and troubleshooting
-- Console logging for debugging
+Full TypeScript support with proper type definitions:
+
+```typescript
+// Type-safe remote function usage
+const result: number = add(5, 3);
+const message: string = greet("Expozr");
+```
 
 ## File Structure
 
 ```
-webpack/vanilla/
+webpack/get-started/
 ├── remote/                 # Expozr application
 │   ├── src/
-│   │   ├── hello.ts       # Greeting utilities
-│   │   └── utils.ts       # Math utilities
-│   ├── expozr.config.ts   # Expozr configuration
-│   ├── webpack.config.js  # Webpack config
+│   │   └── index.ts        # Utility functions
+│   ├── expozr.config.ts    # Expozr configuration
+│   ├── webpack.config.js   # Webpack configuration
+│   ├── tsconfig.json       # TypeScript configuration
 │   └── package.json
 ├── host/                   # Host application
 │   ├── src/
-│   │   ├── index.html     # HTML template
-│   │   └── index.ts       # Main application
-│   ├── expozr.config.ts   # Host configuration
-│   ├── webpack.config.js  # Webpack config
+│   │   └── index.ts        # Main application
+│   ├── expozr.config.ts    # Host configuration
+│   ├── webpack.config.js   # Webpack configuration
+│   ├── tsconfig.json       # TypeScript configuration
 │   └── package.json
-└── README.md              # This file
+└── README.md               # This file
 ```
 
 ## Development
@@ -154,7 +160,6 @@ cd host && npm run build
    http://localhost:3001/expozr.inventory.json
 
 2. Verify modules are available:
-   - http://localhost:3001/hello.js
    - http://localhost:3001/utils.js
 
 ## Troubleshooting
@@ -178,6 +183,7 @@ cd host && npm run build
 
 ## Next Steps
 
+- Try the [Vanilla example](../vanilla/) for more detailed implementation
 - Try the [React example](../react/) for component sharing
 - Try the [UMD example](../umd/) for universal module format
 - Try the [ESM example](../esm/) for modern ES modules

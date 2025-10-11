@@ -1,6 +1,6 @@
 # UMD Remote - Math Utils Expozr
 
-This is a UMD (Universal Module Definition) remote application that exposes mathematical utility functions for consumption by host applications.
+This is a UMD (Universal Module Definition) remote application that exposes mathematical utility functions for consumption by host applications using Expozr.
 
 ## 📋 Features
 
@@ -28,6 +28,8 @@ npm install
 # Start development server on port 3001
 npm run dev
 ```
+
+This starts the UMD expozr server that exposes math functions at `http://localhost:3001/`
 
 ### Production Build
 

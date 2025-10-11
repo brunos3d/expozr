@@ -6,13 +6,26 @@ This directory contains example applications demonstrating how to use Expozr for
 
 ```
 examples/
+├── vite/
+│   └── react/
+│       ├── host/     # React host application (port 5000)
+│       └── remote/   # React component expozr (port 5001)
 ├── webpack/
+│   ├── get-started/
+│   │   ├── host/     # Basic host application (port 3000)
+│   │   └── remote/   # Basic expozr (port 3001)
 │   ├── vanilla/
 │   │   ├── host/     # Vanilla JS host application (port 3000)
 │   │   └── remote/   # Vanilla JS expozr (port 3001)
-│   └── react/
-│       ├── host/     # React host application (port 3000)
-│       └── remote/   # React component expozr (port 3001)
+│   ├── react/
+│   │   ├── host/     # React host application (port 3000)
+│   │   └── remote/   # React component expozr (port 3001)
+│   ├── esm/
+│   │   ├── host/     # ESM host application (port 3000)
+│   │   └── remote/   # ESM expozr (port 3001)
+│   └── umd/
+│       ├── host/     # UMD host application (port 3000)
+│       └── remote/   # UMD expozr (port 3001)
 └── README.md         # This file
 ```
 
@@ -45,6 +58,21 @@ Each example consists of two applications:
 
 ## Examples
 
+### 🔧 Webpack + Get Started
+
+**Location**: `examples/webpack/get-started/`
+
+The simplest possible example to get started with Expozr:
+
+- **Remote** (port 3001): Exposes basic utility functions
+- **Host** (port 3000): Loads and uses the remote utilities
+
+**Features**:
+
+- Minimal configuration
+- Basic module sharing
+- Perfect for learning Expozr basics
+
 ### 🔧 Webpack + Vanilla JavaScript
 
 **Location**: `examples/webpack/vanilla/`
@@ -57,7 +85,7 @@ Demonstrates basic module sharing between vanilla JavaScript applications:
 **Features**:
 
 - Simple utility function sharing
-- Basic runtime module loading
+- Runtime module loading
 - Automatic config discovery
 
 ### ⚛️ Webpack + React
@@ -75,6 +103,52 @@ Demonstrates React component sharing between React applications:
 - TypeScript support
 - Component library sharing
 - React hooks sharing
+
+### 📦 Webpack + ESM
+
+**Location**: `examples/webpack/esm/`
+
+Demonstrates ES module sharing with modern JavaScript:
+
+- **Remote** (port 3001): Exposes ES modules with modern syntax
+- **Host** (port 3000): Loads and uses ES modules at runtime
+
+**Features**:
+
+- Native ES module support
+- Tree shaking capabilities
+- Modern JavaScript features
+
+### 🌍 Webpack + UMD
+
+**Location**: `examples/webpack/umd/`
+
+Demonstrates Universal Module Definition (UMD) module sharing:
+
+- **Remote** (port 3001): Exposes UMD modules for broad compatibility
+- **Host** (port 3000): Calculator app using remote math functions
+
+**Features**:
+
+- Universal module format
+- Calculator example application
+- Cross-platform compatibility
+
+### ⚡ Vite + React
+
+**Location**: `examples/vite/react/`
+
+Demonstrates React component sharing using Vite bundler:
+
+- **Remote** (port 5001): Exposes React components using Vite
+- **Host** (port 5000): Loads and uses React components from Vite expozr
+
+**Features**:
+
+- Vite integration with fast HMR
+- React component federation
+- ESM-first approach
+- Modern development experience
 
 ## Key Features Demonstrated
 
@@ -122,14 +196,21 @@ export default defineExpozrConfig({
 
 ## Port Configuration
 
-All examples follow a consistent port structure:
+Examples follow consistent port structures by bundler:
+
+### Webpack Examples
 
 - **Host applications**: Port `3000`
 - **Remote/Expozr applications**: Port `3001`
 
-This makes it easy to switch between examples while keeping the same URLs and workflow.
+### Vite Examples
 
-**Note**: Only run one example at a time since they share the same ports.
+- **Host applications**: Port `5000`
+- **Remote/Expozr applications**: Port `5001`
+
+This makes it easy to switch between examples while keeping the same workflow.
+
+**Note**: Only run one example per bundler at a time since they share the same ports.
 
 ## Troubleshooting
 
@@ -137,21 +218,27 @@ This makes it easy to switch between examples while keeping the same URLs and wo
 
 1. **"Expozr not accessible"**
    - Make sure the remote/expozr is running first
-   - Check that it's accessible at http://localhost:3001/
+   - Check that it's accessible at the correct URL:
+     - Webpack examples: http://localhost:3001/
+     - Vite examples: http://localhost:5001/
 
 2. **"Module not found"**
    - Ensure both applications are built (`npm run build`)
-   - Check the inventory at http://localhost:3001/expozr.inventory.json
+   - Check the inventory file:
+     - Webpack: http://localhost:3001/expozr.inventory.json
+     - Vite: http://localhost:5001/expozr.inventory.json
 
 3. **CORS errors**
    - Make sure both applications are running on the correct ports
-   - Check webpack dev server configuration
+   - Check dev server configuration in webpack.config.js or vite.config.ts
 
 ### Development Workflow
 
-1. Start remote/expozr first (`npm run dev` on port 3001)
-2. Start host application (`npm run dev` on port 3000)
-3. Open browser to http://localhost:3000
+1. Start remote/expozr first (`npm run dev`)
+2. Start host application (`npm run dev` in a new terminal)
+3. Open browser to the host URL:
+   - Webpack examples: http://localhost:3000
+   - Vite examples: http://localhost:5000
 4. Check browser console for loading progress
 5. Check network tab for module loading
 
@@ -159,6 +246,7 @@ This makes it easy to switch between examples while keeping the same URLs and wo
 
 - [Expozr Documentation](../docs/)
 - [Webpack Adapter](../packages/adapters/webpack/)
+- [Vite Adapter](../packages/adapters/vite/)
 - [Core API](../packages/core/)
 
 ## Contributing

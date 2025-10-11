@@ -1,76 +1,41 @@
-# Vite React Example - Expozr
+# Vite + React Example
 
-This example demonstrates how to use Expozr with Vite and React to create a micro-frontend architecture with a host application consuming components from a remote warehouse.
+This example demonstrates React component federation between React applications using Expozr and Vite.
 
-## Architecture
+## Overview
 
-- **Host** (port 5000): Consumes remote components
-- **Remote** (port 5001): Exposes React components as a warehouse
+- **Remote/Expozr** (port 5001): Exposes React components
+- **Host** (port 5000): Consumes and renders React components from the expozr
 
-## Components
+## Quick Start
 
-### Remote Warehouse
+1. **Start the Remote/Expozr**:
 
-- **Button**: A styled React button component with multiple variants and sizes
+   ```bash
+   cd remote
+   npm install
+   npm run dev  # Starts on http://localhost:5001
+   ```
 
-### Host Application
+2. **Start the Host** (in a new terminal):
 
-- Dynamically loads and uses the Button component from the remote warehouse
+   ```bash
+   cd host
+   npm install
+   npm run dev  # Starts on http://localhost:5000
+   ```
 
-## Getting Started
+3. **Open your browser** to http://localhost:5000
 
-### Prerequisites
+## What's Included
 
-Make sure you have the Expozr packages built:
+### Remote/Expozr (`./remote/`)
 
-```bash
-# From the root of the expozr project
-npm run build
-```
+Exposes React components:
 
-### Installation
+- **`Button`**: Reusable button component with variants and sizes
 
-1. **Install dependencies for both applications:**
-
-```bash
-# Install remote dependencies
-cd remote
-npm install
-
-# Install host dependencies
-cd ../host
-npm install
-```
-
-### Running the Example
-
-1. **Start the remote warehouse (in one terminal):**
-
-```bash
-cd remote
-npm run dev
-```
-
-This will start the remote warehouse on http://localhost:5001
-
-2. **Start the host application (in another terminal):**
-
-```bash
-cd host
-npm run dev
-```
-
-This will start the host application on http://localhost:5000
-
-3. **Open your browser and navigate to http://localhost:5000**
-
-You should see the host application successfully loading and using the Button component from the remote warehouse.
-
-## How It Works
-
-### Remote Warehouse Configuration
-
-The remote application uses an `expozr.config.ts` file to define what components to expose:
+**Configuration** (`expozr.config.ts`):
 
 ```typescript
 export default defineExpozrConfig({
@@ -82,29 +47,51 @@ export default defineExpozrConfig({
       exports: ["Button", "ButtonProps"],
     },
   },
-  // ... other configuration
+  dependencies: {
+    react: "^18.0.0",
+    "react-dom": "^18.0.0",
+  },
+  build: {
+    outDir: "dist",
+    publicPath: "http://localhost:5001/",
+    format: "esm",
+  },
 });
 ```
 
-### Vite Plugin Integration
+### Host (`./host/`)
 
-The remote's `vite.config.ts` uses the Expozr Vite adapter:
+React application that:
+
+- Loads React component expozr inventory
+- Dynamically imports React components at runtime
+- Demonstrates component usage with props and interactions
+- Provides comprehensive error handling
+
+## Key Features
+
+### ⚡ Vite Integration
+
+Fast development with Vite's lightning-fast HMR:
 
 ```typescript
+// vite.config.ts
 export default defineConfig({
   plugins: [
     react(),
     createWarehousePlugin(), // Automatically discovers expozr.config.ts
   ],
-  // ... other configuration
+  server: {
+    port: 5001,
+    cors: true,
+  },
 });
 ```
 
-### Host Application Loading
-
-The host application uses the Navigator to load remote components:
+### ⚛️ React Component Federation
 
 ```typescript
+// Load React components at runtime using Navigator
 const navigator = new Navigator({
   expozrs: {
     "vite-react-components": {
@@ -119,49 +106,180 @@ const loadedCargo = await navigator.loadCargo(
   "Button"
 );
 const RemoteButton = loadedCargo.module.Button;
+
+// Use them like normal React components
+<RemoteButton variant="primary" onClick={handleClick}>
+  Click me!
+</RemoteButton>
 ```
 
-## Key Features
+### 🔧 TypeScript Support
 
-- ✅ **Vite Integration**: Full integration with Vite's development server and build process
-- ✅ **ESM Support**: Native ES modules support for modern browsers
-- ✅ **Hot Reload**: Development server with hot module replacement
-- ✅ **TypeScript**: Full TypeScript support with type safety
-- ✅ **Automatic Discovery**: Expozr configuration files are automatically discovered
-- ✅ **Dynamic Loading**: Components are loaded at runtime, not build time
-- ✅ **Component Isolation**: Remote components maintain their own styling and behavior
+Full TypeScript support with proper type definitions:
 
-## Building for Production
+```typescript
+interface ButtonProps {
+  variant?: "primary" | "secondary";
+  size?: "small" | "medium" | "large";
+  onClick?: () => void;
+  children: React.ReactNode;
+}
 
-### Build the remote warehouse:
+export const Button: React.FC<ButtonProps> = ({
+  variant = "primary",
+  size = "medium",
+  onClick,
+  children,
+}) => {
+  // Component implementation
+};
+```
+
+### 🔍 Automatic Configuration Discovery
+
+```typescript
+// expozr.config.ts - Zero configuration webpack setup!
+export default defineExpozrConfig({
+  name: "vite-react-components",
+  version: "1.0.0",
+  expose: {
+    "./Button": {
+      entry: "./src/components/Button.tsx",
+      exports: ["Button", "ButtonProps"],
+    },
+  },
+});
+```
+
+## File Structure
+
+```
+vite/react/
+├── remote/                      # React component expozr
+│   ├── src/
+│   │   ├── components/
+│   │   │   └── Button.tsx      # Button component
+│   │   ├── App.tsx             # Remote app (demo)
+│   │   └── main.tsx            # Remote entry point
+│   ├── expozr.config.ts        # Expozr configuration
+│   ├── vite.config.ts          # Vite config with expozr adapter
+│   ├── index.html              # HTML template
+│   └── package.json
+├── host/                        # React host application
+│   ├── src/
+│   │   ├── App.tsx             # Host app with remote loading
+│   │   └── main.tsx            # Host entry point
+│   ├── vite.config.ts          # Vite config
+│   ├── index.html              # HTML template
+│   └── package.json
+└── README.md                   # This file
+```
+
+## Component Details
+
+### Button Component
+
+Reusable button with multiple variants and sizes:
+
+```typescript
+interface ButtonProps {
+  variant?: "primary" | "secondary";
+  size?: "small" | "medium" | "large";
+  onClick?: () => void;
+  children: React.ReactNode;
+}
+```
+
+**Features**:
+
+- Primary and secondary variants
+- Small, medium, and large sizes
+- Customizable styling
+- Click event handling
+- Proper TypeScript definitions
+
+## Development
+
+### Running in Development Mode
+
+Both applications support hot reloading:
 
 ```bash
-cd remote
-npm run build
+# Terminal 1 - Remote
+cd remote && npm run dev
+
+# Terminal 2 - Host
+cd host && npm run dev
 ```
 
-This generates:
-
-- Built components in `dist/`
-- `expozr.inventory.json` manifest file
-
-### Build the host application:
+### Building for Production
 
 ```bash
-cd host
-npm run build
+# Build remote first
+cd remote && npm run build
+
+# Then build host
+cd host && npm run build
 ```
+
+### Testing Components
+
+1. Check component expozr:
+   http://localhost:5001/expozr.inventory.json
+
+2. Verify components are built:
+   - http://localhost:5001/Button.js
 
 ## Troubleshooting
 
-1. **Make sure the remote is running first** before starting the host
-2. **Check the browser console** for any loading errors
-3. **Verify the ports** - remote should be on 5001, host on 5000
-4. **CORS issues**: Both applications are configured with CORS enabled
+### "Components not loading"
+
+- Ensure the remote React app is running on port 5001
+- Check browser console for React errors
+- Verify component exports in the expozr
+
+### TypeScript Issues
+
+- Make sure both apps use compatible React versions
+- Check that TypeScript definitions are properly exported
+- Verify Vite TypeScript configuration
+
+### Runtime Errors
+
+- Check React component compatibility
+- Ensure proper React context sharing
+- Verify component props are correctly passed
+
+### Development Issues
+
+- Clear browser cache for component updates
+- Restart both applications after config changes
+- Check Vite output for build errors
+
+## Advanced Usage
+
+### Component Library Pattern
+
+The remote can act as a complete component library:
+
+```typescript
+// Export multiple components together
+export { Button, Card, Input, Modal } from "./components";
+export { useCounter, useToggle, useApi } from "./hooks";
+export { theme, colors } from "./design-system";
+```
+
+### Performance Optimization
+
+Vite provides automatic optimizations:
+
+- ES modules for faster loading
+- Tree shaking for smaller bundles
+- Hot module replacement for fast development
 
 ## Next Steps
 
-- Try adding more components to the remote warehouse
-- Experiment with different component types (hooks, contexts, etc.)
-- Add error boundaries for better error handling
-- Implement component versioning and fallbacks
+- Try the [Webpack React example](../../webpack/react/) for comparison
+- Explore [advanced React patterns](../../../docs/react-patterns.md)
+- Learn about [performance optimization](../../../docs/performance.md)
+- Check out [deployment strategies](../../../docs/deployment.md)
