@@ -7,7 +7,9 @@
     "packages/*",
     "packages/adapters/*",
     "examples/webpack/*/host",
-    "examples/webpack/*/remote"
+    "examples/webpack/*/remote",
+    "examples/vite/*/host",
+    "examples/vite/*/remote"
   ],
   "scripts": {
     "build": "lerna run build",

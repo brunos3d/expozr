@@ -1,4 +1,3 @@
-const path = require("path");
 const { createExpozrPlugin } = require("@expozr/webpack-adapter");
 
 /**
@@ -13,14 +12,19 @@ module.exports = (env, argv) => {
   return {
     mode: "none", // Use 'none' for minimal webpack overhead
     devtool: false, // No source maps for cleaner output
-
     optimization: {
       minimize: false,
       concatenateModules: false,
       usedExports: false,
       sideEffects: false,
       runtimeChunk: false,
-      splitChunks: false, // Disable chunk splitting
+      splitChunks: {
+        chunks: "all",
+        cacheGroups: {
+          default: false,
+          vendors: false,
+        },
+      },
     },
     resolve: {
       extensions: [".ts", ".js"],
@@ -34,7 +38,7 @@ module.exports = (env, argv) => {
             options: {
               compilerOptions: {
                 target: "ES2020",
-                module: "ES2020", // Output ES modules
+                module: "ES2020",
                 moduleResolution: "node",
                 esModuleInterop: true,
                 allowSyntheticDefaultImports: true,
@@ -45,18 +49,12 @@ module.exports = (env, argv) => {
         },
       ],
     },
-    output: {
-      filename: "[name].js",
-      path: path.resolve(__dirname, "dist"),
-      clean: true,
-      // Let the expozr plugin handle the output format based on expozr.config.ts
-    },
     plugins: [
       createExpozrPlugin(), // Will automatically discover expozr.config.ts and apply ESM config
     ],
     devServer: {
       static: {
-        directory: path.join(__dirname, "dist"),
+        directory: "./dist",
       },
       port: 3001,
       open: false,

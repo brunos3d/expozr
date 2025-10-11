@@ -1,6 +1,14 @@
 // Dynamic imports for Node.js modules
 declare const require: any;
 
+import type {
+  Compiler,
+  Compilation,
+  RuleSetRule,
+  EntryObject,
+  ModuleOptions,
+  EntryNormalized,
+} from "webpack";
 import type { ExpozrConfig, Inventory, Cargo, CargoConfig } from "@expozr/core";
 
 import {
@@ -28,32 +36,33 @@ export class ExpozrPlugin {
     this.options = options;
   }
 
-  apply(compiler: any): void {
+  apply(compiler: Compiler): void {
     const pluginName = ExpozrPlugin.name;
 
     // Helper function to setup configuration
-    const setupConfig = async (compiler: any, callback: any) => {
+    const setupConfig = (compiler: Compiler) => {
       try {
-        await this.loadConfig(compiler);
+        this.loadConfig(compiler);
         if (this.config) {
           this.configureWebpack(compiler);
         }
-        callback();
       } catch (error) {
-        callback(error as Error);
+        // Log error and continue - webpack will handle the error appropriately
+        console.error(`Expozr Plugin Error: ${(error as Error).message}`);
+        throw error;
       }
     };
 
     // Load config and configure webpack for regular builds
-    compiler.hooks.beforeRun.tapAsync(pluginName, setupConfig);
+    compiler.hooks.beforeRun.tap(pluginName, setupConfig);
 
     // Load config and configure webpack for watch mode (--watch)
-    compiler.hooks.watchRun.tapAsync(pluginName, setupConfig);
+    compiler.hooks.watchRun.tap(pluginName, setupConfig);
 
     // Generate inventory after compilation
     compiler.hooks.afterEmit.tapAsync(
       pluginName,
-      async (compilation: any, callback: any) => {
+      async (compilation: Compilation, callback: (error?: Error) => void) => {
         try {
           if (this.config) {
             await this.generateInventory(compiler, compilation);
@@ -66,7 +75,7 @@ export class ExpozrPlugin {
     );
   }
 
-  private async loadConfig(compiler: any): Promise<void> {
+  private loadConfig(compiler: Compiler): void {
     const path = require("path");
     const fs = require("fs");
 
@@ -82,28 +91,27 @@ export class ExpozrPlugin {
       );
 
       if (fs.existsSync(configPath)) {
-        // Dynamic import for ESM/TypeScript config files
+        // Use require for both JS and TS config files
         try {
-          const configModule = await import(configPath);
-          this.config = configModule.default || configModule;
-        } catch {
-          // Fallback to require for CommonJS
           delete require.cache[configPath];
-          this.config = require(configPath);
+          const configModule = require(configPath);
+          this.config = configModule.default || configModule;
+        } catch (error) {
+          throw new Error(
+            `Failed to load config file ${configPath}: ${(error as Error).message}`
+          );
         }
       }
     }
 
     if (!this.config) {
-      // Look for default config files (TypeScript preferred)
-      const defaultConfigs = ["expozr.config.ts", "expozr.config.js"];
+      // Look for default config files (JavaScript preferred for synchronous loading)
+      const defaultConfigs = ["expozr.config.js", "expozr.config.ts"];
 
       for (const configFile of defaultConfigs) {
         const configPath = path.resolve(compiler.context, configFile);
         if (fs.existsSync(configPath)) {
           try {
-            // For TypeScript files, try to require the compiled JS version
-            // or use ts-node if available, otherwise fall back to require
             delete require.cache[configPath];
             const configModule = require(configPath);
             this.config = configModule.default || configModule;
@@ -127,11 +135,14 @@ export class ExpozrPlugin {
     }
   }
 
-  private configureWebpack(compiler: any): void {
+  private configureWebpack(compiler: Compiler): void {
     if (!this.config) return;
 
     const path = require("path");
-    const exposedModules: Record<string, string> = {};
+    const exposedModules: EntryNormalized = {};
+
+    console.log(`🔧 Configuring webpack for Expozr "${this.config.name}"...`);
+    console.log(`📦 Exposing ${Object.keys(this.config.expose).join(",")}`);
 
     // Convert expose configuration to webpack entries
     for (const [name, cargoConfig] of Object.entries(this.config.expose)) {
@@ -152,13 +163,13 @@ export class ExpozrPlugin {
       !Object.keys(existingEntries).every((key) => key === "");
 
     if (exposedModules && Object.keys(exposedModules).length > 0) {
-      compiler.options.entry = exposedModules;
+      compiler.options.entry = exposedModules as EntryNormalized;
     }
 
     if (hasExistingEntries) {
       // Merge: exposedModules first, then user entries (user entries take precedence)
       compiler.options.entry = {
-        ...exposedModules,
+        ...(exposedModules as EntryNormalized),
         ...existingEntries,
       };
 
@@ -186,25 +197,32 @@ export class ExpozrPlugin {
         type: "umd",
         export: "default",
       },
-      umdNamedDefine: true,
       globalObject: "typeof self !== 'undefined' ? self : this",
       publicPath: publicPath,
     };
 
+    // Set UMD specific options using any for webpack 5 compatibility
+    (compiler.options.output as any).umdNamedDefine = true;
+
     // Ensure TypeScript compiles to CommonJS for proper UMD generation
     // This is critical when workspace has "type": "module" packages
     if (!compiler.options.module) {
-      compiler.options.module = { rules: [] };
+      compiler.options.module = { rules: [] } as any;
     }
 
     // Find and update ts-loader rule to force CommonJS output
     const tsRule = compiler.options.module.rules.find(
-      (rule: any) => rule.test && rule.test.toString().includes("\\.ts")
-    );
+      (rule: any) =>
+        rule &&
+        typeof rule === "object" &&
+        rule !== "..." &&
+        rule.test &&
+        rule.test.toString().includes("\\.ts")
+    ) as RuleSetRule | undefined;
 
-    if (tsRule && tsRule.use) {
+    if (tsRule && "use" in tsRule && tsRule.use) {
       if (typeof tsRule.use === "string" && tsRule.use.includes("ts-loader")) {
-        tsRule.use = {
+        (tsRule as any).use = {
           loader: tsRule.use,
           options: {
             compilerOptions: {
@@ -216,14 +234,14 @@ export class ExpozrPlugin {
           },
         };
       } else if (typeof tsRule.use === "object" && !Array.isArray(tsRule.use)) {
-        tsRule.use.options = {
-          ...tsRule.use.options,
+        (tsRule.use as any).options = {
+          ...(tsRule.use as any).options,
           compilerOptions: {
             module: "commonjs",
             target: "es5",
             esModuleInterop: true,
             allowSyntheticDefaultImports: true,
-            ...(tsRule.use.options?.compilerOptions || {}),
+            ...((tsRule.use as any).options?.compilerOptions || {}),
           },
         };
       }
@@ -271,17 +289,20 @@ export class ExpozrPlugin {
 
     // Add warning suppressions for common Expozr ecosystem patterns
     const expozrWarningSuppressions = [
-      {
-        // Navigator package dynamic imports
-        module: /navigator\/dist\/index\.esm\.js/,
-        message:
-          /Critical dependency: the request of a dependency is an expression/,
-      },
-      {
-        // Any @expozr package dynamic imports
-        module: /@expozr\/.*\/dist\/.*\.js/,
-        message:
-          /Critical dependency: the request of a dependency is an expression/,
+      (warning: Error, compilation: Compilation) => {
+        const message = warning.message;
+        return (
+          // Navigator package dynamic imports
+          (message.includes(
+            "Critical dependency: the request of a dependency is an expression"
+          ) &&
+            message.includes("navigator/dist/index.esm.js")) ||
+          // Any @expozr package dynamic imports
+          (message.includes(
+            "Critical dependency: the request of a dependency is an expression"
+          ) &&
+            message.includes("@expozr/"))
+        );
       },
     ];
 
@@ -291,8 +312,8 @@ export class ExpozrPlugin {
   }
 
   private async generateInventory(
-    compiler: any,
-    compilation: any
+    compiler: Compiler,
+    compilation: Compilation
   ): Promise<void> {
     if (!this.config) return;
 
@@ -300,7 +321,10 @@ export class ExpozrPlugin {
     const fs = require("fs");
 
     const outputPath = compilation.outputOptions.path || compiler.outputPath;
-    const publicPath = compilation.outputOptions.publicPath || "/";
+    const publicPath =
+      typeof compilation.outputOptions.publicPath === "string"
+        ? compilation.outputOptions.publicPath
+        : "/";
 
     // Generate cargo entries
     const cargo: Record<string, Cargo> = {};
@@ -357,7 +381,10 @@ export class ExpozrPlugin {
     );
   }
 
-  private findCompiledAsset(compilation: any, entryName: string): string {
+  private findCompiledAsset(
+    compilation: Compilation,
+    entryName: string
+  ): string {
     // Look for the compiled asset for this entry
     const entrypoints = compilation.entrypoints;
     const entrypoint = entrypoints.get(entryName);
