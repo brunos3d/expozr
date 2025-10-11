@@ -5,7 +5,8 @@
     "publish": {
       "conventionalCommits": true,
       "registry": "https://registry.npmjs.org/",
-      "ignoreChanges": ["**/*.md", "**/test/**", "**/examples/**"]
+      "ignoreChanges": ["**/*.md", "**/test/**", "**/examples/**"],
+      "ignore": ["expozr"]
     },
     "bootstrap": {
       "ignore": "component-*",
