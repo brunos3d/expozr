@@ -142,7 +142,11 @@ export class ESMModuleLoader extends BaseModuleLoader {
     const esmUrl = this.normalizeESMUrl(url);
 
     // Use dynamic import
-    const module = await import(/* webpackIgnore: true */ esmUrl);
+    const module = await import(
+      /* webpackIgnore: true */
+      /* @vite-ignore */
+      esmUrl
+    );
 
     // Return the module (check for default export)
     return (module.default || module) as T;
@@ -262,7 +266,7 @@ export class UMDModuleLoader extends BaseModuleLoader {
   private async loadUMDInNode<T = any>(url: string): Promise<T> {
     // In Node.js, try dynamic import or require
     try {
-      const module = await import(url);
+      const module = await import(/* @vite-ignore */ url);
       return (module.default || module) as T;
     } catch (error) {
       // Fallback to require if available

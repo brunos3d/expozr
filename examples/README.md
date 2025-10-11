@@ -9,10 +9,10 @@ examples/
 ├── webpack/
 │   ├── vanilla/
 │   │   ├── host/     # Vanilla JS host application (port 3000)
-│   │   └── remote/   # Vanilla JS warehouse (port 3001)
+│   │   └── remote/   # Vanilla JS expozr (port 3001)
 │   └── react/
 │       ├── host/     # React host application (port 3000)
-│       └── remote/   # React component warehouse (port 3001)
+│       └── remote/   # React component expozr (port 3001)
 └── README.md         # This file
 ```
 
@@ -20,12 +20,12 @@ examples/
 
 Each example consists of two applications:
 
-- **Remote/Warehouse**: Exposes modules/components for sharing
-- **Host**: Consumes modules/components from the warehouse
+- **Remote/Expozr**: Exposes modules/components for sharing
+- **Host**: Consumes modules/components from the expozr
 
 ### Running an Example
 
-1. **Start the Remote/Warehouse** (always run this first):
+1. **Start the Remote/Expozr** (always run this first):
 
    ```bash
    cd examples/webpack/vanilla/remote  # or react/remote
@@ -67,7 +67,7 @@ Demonstrates basic module sharing between vanilla JavaScript applications:
 Demonstrates React component sharing between React applications:
 
 - **Remote** (port 3001): Exposes React components (`Button`, `Card`, `hooks`)
-- **Host** (port 3000): Loads and uses React components from warehouse
+- **Host** (port 3000): Loads and uses React components from expozr
 
 **Features**:
 
@@ -84,11 +84,11 @@ All examples use Expozr's automatic configuration discovery:
 
 ```javascript
 // webpack.config.js - No configuration needed!
-const { createWarehousePlugin } = require("@expozr/webpack-adapter");
+const { createExpozrPlugin } = require("@expozr/webpack-adapter");
 
 module.exports = {
   plugins: [
-    createWarehousePlugin(), // Automatically finds expozr.config.ts
+    createExpozrPlugin(), // Automatically finds expozr.config.ts
   ],
 };
 ```
@@ -99,10 +99,10 @@ Examples use TypeScript configuration files with automatic discovery:
 
 ```typescript
 // expozr.config.ts
-import { defineWarehouseConfig } from "@expozr/core";
+import { defineExpozrConfig } from "@expozr/core";
 
-export default defineWarehouseConfig({
-  name: "my-warehouse",
+export default defineExpozrConfig({
+  name: "my-expozr",
   version: "1.0.0",
   expose: {
     "./Component": {
@@ -125,7 +125,7 @@ export default defineWarehouseConfig({
 All examples follow a consistent port structure:
 
 - **Host applications**: Port `3000`
-- **Remote/Warehouse applications**: Port `3001`
+- **Remote/Expozr applications**: Port `3001`
 
 This makes it easy to switch between examples while keeping the same URLs and workflow.
 
@@ -135,8 +135,8 @@ This makes it easy to switch between examples while keeping the same URLs and wo
 
 ### Common Issues
 
-1. **"Warehouse not accessible"**
-   - Make sure the remote/warehouse is running first
+1. **"Expozr not accessible"**
+   - Make sure the remote/expozr is running first
    - Check that it's accessible at http://localhost:3001/
 
 2. **"Module not found"**
@@ -149,7 +149,7 @@ This makes it easy to switch between examples while keeping the same URLs and wo
 
 ### Development Workflow
 
-1. Start remote/warehouse first (`npm run dev` on port 3001)
+1. Start remote/expozr first (`npm run dev` on port 3001)
 2. Start host application (`npm run dev` on port 3000)
 3. Open browser to http://localhost:3000
 4. Check browser console for loading progress

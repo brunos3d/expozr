@@ -1,10 +1,10 @@
 /**
- * Example React warehouse configuration
+ * Example React expozr configuration
  */
 
-import { defineWarehouseConfig } from "@expozr/core";
+import { defineExpozrConfig } from "@expozr/core";
 
-export default defineWarehouseConfig({
+export default defineExpozrConfig({
   name: "react-components",
   version: "1.0.0",
   expose: {
@@ -30,7 +30,7 @@ export default defineWarehouseConfig({
     publicPath: "http://localhost:3001/",
   },
   metadata: {
-    description: "Example React components warehouse",
+    description: "Example React components expozr",
     author: "Expozr Team",
     license: "MIT",
     tags: ["react", "components", "ui"],

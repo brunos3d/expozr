@@ -101,7 +101,7 @@ export interface CompatibilityConfig {
 }
 
 /**
- * A Cargo represents an individual module being exposed by a Warehouse
+ * A Cargo represents an individual module being exposed by a Expozr
  */
 export interface Cargo {
   /** Unique name identifier for the cargo */
@@ -133,11 +133,11 @@ export interface CargoMetadata {
 }
 
 /**
- * Inventory represents the complete manifest of all Cargo exposed by a Warehouse
+ * Inventory represents the complete manifest of all Cargo exposed by a Expozr
  */
 export interface Inventory {
-  /** Information about the warehouse itself */
-  warehouse: WarehouseInfo;
+  /** Information about the expozr itself */
+  expozr: ExpozrInfo;
   /** Map of cargo name to cargo definition */
   cargo: Record<string, Cargo>;
   /** Global dependencies shared across all cargo */
@@ -149,27 +149,27 @@ export interface Inventory {
 }
 
 /**
- * Information about a Warehouse
+ * Information about a Expozr
  */
-export interface WarehouseInfo {
-  /** Unique name of the warehouse */
+export interface ExpozrInfo {
+  /** Unique name of the expozr */
   name: string;
-  /** Semantic version of the warehouse */
+  /** Semantic version of the expozr */
   version: string;
-  /** Base URL where the warehouse is hosted */
+  /** Base URL where the expozr is hosted */
   url: string;
   /** Human readable description */
   description?: string;
-  /** Warehouse maintainer */
+  /** Expozr maintainer */
   author?: string;
 }
 
 /**
- * Catalog represents a registry of available Warehouses
+ * Catalog represents a registry of available Expozrs
  */
 export interface Catalog {
-  /** Map of warehouse name to warehouse information */
-  warehouses: Record<string, CatalogWarehouseEntry>;
+  /** Map of expozr name to expozr information */
+  expozrs: Record<string, CatalogExpozrEntry>;
   /** Last time the catalog was updated */
   lastUpdated: number;
   /** Catalog version for compatibility */
@@ -177,12 +177,12 @@ export interface Catalog {
 }
 
 /**
- * Warehouse entry in a catalog
+ * Expozr entry in a catalog
  */
-export interface CatalogWarehouseEntry {
-  /** Base URL of the warehouse */
+export interface CatalogExpozrEntry {
+  /** Base URL of the expozr */
   url: string;
-  /** Warehouse name */
+  /** Expozr name */
   name: string;
   /** Current version */
   version: string;
@@ -192,30 +192,30 @@ export interface CatalogWarehouseEntry {
   inventoryUrl: string;
   /** Available versions */
   versions?: string[];
-  /** Warehouse tags for discovery */
+  /** Expozr tags for discovery */
   tags?: string[];
 }
 
 /**
- * Configuration for a Warehouse (used at build time)
+ * Configuration for a Expozr (used at build time)
  */
-export interface WarehouseConfig {
-  /** Name of the warehouse */
+export interface ExpozrConfig {
+  /** Name of the expozr */
   name: string;
-  /** Version of the warehouse */
+  /** Version of the expozr */
   version: string;
   /** Map of cargo name to cargo configuration */
   expose: Record<string, string | CargoConfig>;
-  /** Global dependencies for the warehouse */
+  /** Global dependencies for the expozr */
   dependencies?: Record<string, string>;
-  /** Warehouse metadata */
-  metadata?: WarehouseMetadata;
+  /** Expozr metadata */
+  metadata?: ExpozrMetadata;
   /** Build configuration */
-  build?: WarehouseBuildConfig;
+  build?: ExpozrBuildConfig;
 }
 
 /**
- * Configuration for individual Cargo in a Warehouse
+ * Configuration for individual Cargo in a Expozr
  */
 export interface CargoConfig {
   /** Entry point file path */
@@ -229,9 +229,9 @@ export interface CargoConfig {
 }
 
 /**
- * Metadata for a Warehouse
+ * Metadata for a Expozr
  */
-export interface WarehouseMetadata {
+export interface ExpozrMetadata {
   description?: string;
   author?: string;
   license?: string;
@@ -241,9 +241,9 @@ export interface WarehouseMetadata {
 }
 
 /**
- * Build configuration for a Warehouse
+ * Build configuration for a Expozr
  */
-export interface WarehouseBuildConfig {
+export interface ExpozrBuildConfig {
   /** Output directory for built assets */
   outDir?: string;
   /** Public path for assets */
@@ -264,9 +264,9 @@ export interface WarehouseBuildConfig {
  * Configuration for a Host application
  */
 export interface HostConfig {
-  /** Map of warehouse references */
-  warehouses: Record<string, WarehouseReference>;
-  /** Catalog configuration for warehouse discovery */
+  /** Map of expozr references */
+  expozrs: Record<string, ExpozrReference>;
+  /** Catalog configuration for expozr discovery */
   catalog?: string | CatalogConfig;
   /** Caching configuration */
   cache?: CacheConfig;
@@ -275,14 +275,14 @@ export interface HostConfig {
 }
 
 /**
- * Reference to a warehouse from a host
+ * Reference to a expozr from a host
  */
-export interface WarehouseReference {
-  /** URL where the warehouse is hosted */
+export interface ExpozrReference {
+  /** URL where the expozr is hosted */
   url: string;
   /** Version constraint (semver) */
   version?: string;
-  /** Local alias for the warehouse */
+  /** Local alias for the expozr */
   alias?: string;
   /** Fallback URL in case primary fails */
   fallback?: string;
@@ -342,7 +342,7 @@ export interface RetryConfig {
  * Preloading configuration
  */
 export interface PreloadConfig {
-  /** Whether to preload all cargo from warehouses */
+  /** Whether to preload all cargo from expozrs */
   enabled: boolean;
   /** Which cargo to preload (if not all) */
   include?: string[];
@@ -372,8 +372,8 @@ export interface LoadedCargo<T = any> {
   module: T;
   /** Cargo metadata */
   cargo: Cargo;
-  /** Warehouse it came from */
-  warehouse: WarehouseInfo;
+  /** Expozr it came from */
+  expozr: ExpozrInfo;
   /** When it was loaded */
   loadedAt: number;
   /** Whether it was loaded from cache */
@@ -406,8 +406,8 @@ export interface ModuleLoader {
 export interface BundlerAdapter {
   /** Name of the bundler */
   name: string;
-  /** Configure bundler for warehouse build */
-  configureWarehouse(config: WarehouseConfig, bundlerConfig: any): any;
+  /** Configure bundler for expozr build */
+  configureExpozr(config: ExpozrConfig, bundlerConfig: any): any;
   /** Configure bundler for host application */
   configureHost(config: HostConfig, bundlerConfig: any): any;
   /** Get default configuration for this bundler */

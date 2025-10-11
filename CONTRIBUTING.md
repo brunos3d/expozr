@@ -112,7 +112,7 @@ cd examples/webpack/vanilla/host && npm run dev
 We use [Conventional Commits](https://www.conventionalcommits.org/) for consistent commit messages:
 
 ```bash
-git commit -m "feat: add new warehouse configuration option"
+git commit -m "feat: add new expozr configuration option"
 git commit -m "fix: resolve module loading issue in React components"
 git commit -m "docs: update README with new examples"
 git commit -m "test: add unit tests for navigator cache"
@@ -160,7 +160,7 @@ npm test -- --watch
 
 - Write unit tests for all new functionality
 - Follow the existing test patterns in each package
-- Use descriptive test names: `should load React component from warehouse`
+- Use descriptive test names: `should load React component from expozr`
 - Test both success and error cases
 - Mock external dependencies appropriately
 
@@ -168,15 +168,15 @@ npm test -- --watch
 
 ```typescript
 describe("Navigator", () => {
-  describe("loadWarehouse", () => {
-    it("should successfully load warehouse inventory", async () => {
+  describe("loadExpozr", () => {
+    it("should successfully load expozr inventory", async () => {
       // Arrange
       const mockInventory = {
         /* ... */
       };
 
       // Act
-      const result = await navigator.loadWarehouse(url);
+      const result = await navigator.loadExpozr(url);
 
       // Assert
       expect(result).toEqual(expectedResult);
@@ -201,7 +201,7 @@ describe("Navigator", () => {
 
 ```typescript
 /**
- * Configuration for warehouse module exposure
+ * Configuration for expozr module exposure
  */
 export interface ExposureConfig {
   /** Entry point for the module */
@@ -236,7 +236,7 @@ npm run lint
 
 ### File Naming
 
-- **kebab-case** for file names: `warehouse-config.ts`
+- **kebab-case** for file names: `expozr-config.ts`
 - **PascalCase** for components: `NavigatorProvider.tsx`
 - **camelCase** for utilities: `loadModule.ts`
 
@@ -249,9 +249,9 @@ npm run lint
 
 ````typescript
 /**
- * Loads a module from a remote warehouse
+ * Loads a module from a remote expozr
  *
- * @param warehouseUrl - URL of the warehouse
+ * @param expozrUrl - URL of the expozr
  * @param moduleName - Name of the module to load
  * @returns Promise that resolves to the loaded module
  *
@@ -261,7 +261,7 @@ npm run lint
  * ```
  */
 export async function loadModule(
-  warehouseUrl: string,
+  expozrUrl: string,
   moduleName: string
 ): Promise<any> {
   // Implementation

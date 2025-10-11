@@ -6,7 +6,7 @@ import * as fs from "fs";
 import * as path from "path";
 import inquirer from "inquirer";
 import chalk from "chalk";
-import { defineWarehouseConfig, defineHostConfig } from "@expozr/core";
+import { defineExpozrConfig, defineHostConfig } from "@expozr/core";
 
 export async function initCommand(type: string, name: string, options: any) {
   console.log(
@@ -37,14 +37,12 @@ export async function initCommand(type: string, name: string, options: any) {
     // Create directory
     fs.mkdirSync(targetPath, { recursive: true });
 
-    if (type === "warehouse") {
-      await initWarehouse(name, targetPath, options);
+    if (type === "expozr") {
+      await initExpozr(name, targetPath, options);
     } else if (type === "host") {
       await initHost(name, targetPath, options);
     } else {
-      throw new Error(
-        `Unknown project type: ${type}. Use 'warehouse' or 'host'.`
-      );
+      throw new Error(`Unknown project type: ${type}. Use 'expozr' or 'host'.`);
     }
 
     console.log(chalk.green(`\n✅ Successfully initialized ${type} project!`));
@@ -61,11 +59,11 @@ export async function initCommand(type: string, name: string, options: any) {
   }
 }
 
-async function initWarehouse(name: string, targetPath: string, options: any) {
+async function initExpozr(name: string, targetPath: string, options: any) {
   const packageJson = {
     name: name,
     version: "1.0.0",
-    description: "Expozr warehouse project",
+    description: "Expozr expozr project",
     main: "dist/index.js",
     scripts: {
       build: "webpack --mode production",
@@ -83,21 +81,21 @@ async function initWarehouse(name: string, targetPath: string, options: any) {
     dependencies: {},
   };
 
-  const warehouseConfig = defineWarehouseConfig({
+  const expozrConfig = defineExpozrConfig({
     name: name,
     version: "1.0.0",
     expose: {
       "./hello": "./src/hello.ts",
     },
     metadata: {
-      description: "Example Expozr warehouse",
+      description: "Example Expozr expozr",
       author: "Your Name",
       license: "MIT",
     },
   });
 
   const webpackConfig = `
-const { createWarehousePlugin } = require('@expozr/webpack-adapter');
+const { createExpozrPlugin } = require('@expozr/webpack-adapter');
 
 module.exports = {
   entry: './src/index.ts',
@@ -116,7 +114,7 @@ module.exports = {
     ],
   },
   plugins: [
-    createWarehousePlugin(),
+    createExpozrPlugin(),
   ],
 };
 `;
@@ -139,7 +137,7 @@ module.exports = {
 
   const helloExample = `
 export function hello(name: string = 'World'): string {
-  return \`Hello, \${name}! From Expozr warehouse "\${require('../package.json').name}"\`;
+  return \`Hello, \${name}! From Expozr expozr "\${require('../package.json').name}"\`;
 }
 
 export default hello;
@@ -156,7 +154,7 @@ export { hello } from './hello';
   );
   fs.writeFileSync(
     path.join(targetPath, "expozr.config.js"),
-    `module.exports = ${JSON.stringify(warehouseConfig, null, 2)};`
+    `module.exports = ${JSON.stringify(expozrConfig, null, 2)};`
   );
   fs.writeFileSync(path.join(targetPath, "webpack.config.js"), webpackConfig);
   fs.writeFileSync(
@@ -173,7 +171,7 @@ export { hello } from './hello';
   const readme = `
 # ${name}
 
-An Expozr warehouse project.
+An Expozr expozr project.
 
 ## Getting Started
 
@@ -221,8 +219,8 @@ async function initHost(name: string, targetPath: string, options: any) {
   };
 
   const hostConfig = defineHostConfig({
-    warehouses: {
-      // Example warehouse - users should add their own
+    expozrs: {
+      // Example expozr - users should add their own
       // 'my-components': {
       //   url: 'https://cdn.example.com/my-components',
       //   version: '^1.0.0'
@@ -272,17 +270,17 @@ import { Navigator } from '@expozr/navigator';
 
 async function main() {
   const navigator = new Navigator({
-    warehouses: {
-      // Add warehouse configurations here
+    expozrs: {
+      // Add expozr configurations here
     }
   });
 
   console.log('🏠 Expozr host application started!');
-  console.log('Add warehouses to expozr.host.config.js to start loading remote modules.');
+  console.log('Add expozrs to expozr.host.config.js to start loading remote modules.');
 
-  // Example of loading a module (uncomment when you have warehouses configured):
+  // Example of loading a module (uncomment when you have expozrs configured):
   // try {
-  //   const hello = await navigator.loadCargo('my-warehouse', 'hello');
+  //   const hello = await navigator.loadCargo('my-expozr', 'hello');
   //   console.log(hello.module('Expozr'));
   // } catch (error) {
   //   console.error('Failed to load module:', error);
@@ -340,13 +338,13 @@ npm install
 npm start
 \`\`\`
 
-## Adding Warehouses
+## Adding Expozrs
 
-Edit \`expozr.host.config.js\` to add warehouse configurations:
+Edit \`expozr.host.config.js\` to add expozr configurations:
 
 \`\`\`javascript
 module.exports = {
-  warehouses: {
+  expozrs: {
     'my-components': {
       url: 'https://cdn.example.com/my-components',
       version: '^1.0.0'

@@ -8,7 +8,7 @@ Clean, simple webpack configurations for the Expozr ecosystem.
 
 ```javascript
 const {
-  createWarehousePlugin,
+  createExpozrPlugin,
   suppressExpozrWarnings,
 } = require("@expozr/webpack-adapter");
 
@@ -16,19 +16,19 @@ module.exports = {
   ignoreWarnings: suppressExpozrWarnings(), // 🎯 Suppress Expozr warnings
   plugins: [
     // 🚀 Auto-discovers expozr.config.ts (includes warning suppression)
-    createWarehousePlugin(), // optional, you can use just in case you want to expose some module/crate
+    createExpozrPlugin(), // optional, you can use just in case you want to expose some module/crate
   ],
 };
 ```
 
-### For Warehouse Applications (providing remote modules):
+### For Expozr Applications (providing remote modules):
 
 ```javascript
-const { createWarehousePlugin } = require("@expozr/webpack-adapter");
+const { createExpozrPlugin } = require("@expozr/webpack-adapter");
 
 module.exports = {
   plugins: [
-    createWarehousePlugin(), // 🚀 Auto-discovers expozr.config.ts (includes warning suppression)
+    createExpozrPlugin(), // 🚀 Auto-discovers expozr.config.ts (includes warning suppression)
   ],
   // ... your custom config
 };
@@ -40,11 +40,11 @@ module.exports = {
 
 - ✅ Suppresses all common Expozr dynamic import warnings
 - ✅ Covers Navigator, Core, and all @expozr packages
-- ✅ Automatically included in `createWarehousePlugin()` and `createHostPlugin()`
+- ✅ Automatically included in `createExpozrPlugin()` and `createHostPlugin()`
 
 ### Webpack Plugins
 
-- ✅ `createWarehousePlugin()` - Auto-discovers expozr.config.ts + warning suppression
+- ✅ `createExpozrPlugin()` - Auto-discovers expozr.config.ts + warning suppression
 - ✅ `createHostPlugin()` - Configures host applications + warning suppression
 
 ## Benefits
@@ -55,14 +55,14 @@ module.exports = {
 🔧 **Flexible** - Use what you need, customize the rest
 
 ```javascript
-const { createWarehousePlugin } = require("@expozr/webpack-adapter");
+const { createExpozrPlugin } = require("@expozr/webpack-adapter");
 
 module.exports = {
   entry: "./src/index.tsx",
   resolve: {
     extensions: [".ts", ".tsx", ".js", ".jsx"],
   },
-  plugins: [createWarehousePlugin()],
+  plugins: [createExpozrPlugin()],
 };
 ```
 

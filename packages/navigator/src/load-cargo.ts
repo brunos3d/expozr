@@ -1,32 +1,32 @@
 import { Navigator } from "./navigator";
 
 /**
- * Convenience function to load a module (cargo) from a warehouse
+ * Convenience function to load a module (cargo) from a expozr
  * This is a simplified API for common use cases
  */
 export async function loadCargo(
-  warehouseUrl: string,
+  expozrUrl: string,
   cargoName: string
 ): Promise<any> {
-  // Create a simple warehouse name from the URL
-  const warehouseName = "default";
+  // Create a simple expozr name from the URL
+  const expozrName = "default";
 
   try {
-    // Create a navigator with the warehouse pre-configured
+    // Create a navigator with the expozr pre-configured
     const navigator = new Navigator({
       cache: {
         strategy: "memory",
       },
-      warehouses: {
-        [warehouseName]: {
-          url: warehouseUrl,
+      expozrs: {
+        [expozrName]: {
+          url: expozrUrl,
           version: "1.0.0",
         },
       },
     });
 
     // Load the module and return its module property
-    const loadedCargo = await navigator.loadCargo(warehouseName, cargoName);
+    const loadedCargo = await navigator.loadCargo(expozrName, cargoName);
     return loadedCargo.module;
   } catch (error) {
     console.error("Error in loadCargo:", error);

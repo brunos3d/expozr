@@ -179,19 +179,15 @@ export class UniversalModuleSystem {
   }
 
   /**
-   * Configure a bundler for warehouse build
+   * Configure a bundler for expozr build
    */
-  configureBundler(
-    bundlerName: string,
-    config: any,
-    warehouseConfig: any
-  ): any {
+  configureBundler(bundlerName: string, config: any, expozrConfig: any): any {
     const adapter = this.bundlerRegistry.getAdapter(bundlerName);
     if (!adapter) {
       throw new Error(`Bundler adapter not found: ${bundlerName}`);
     }
 
-    return adapter.configureWarehouse(warehouseConfig, config);
+    return adapter.configureExpozr(expozrConfig, config);
   }
 
   /**

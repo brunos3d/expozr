@@ -11,13 +11,13 @@ import type {
   LoadedCargo,
   Inventory,
   Cargo,
-  WarehouseReference,
+  ExpozrReference,
   EventEmitter,
   ExpozrEvents,
-} from '@expozr/core';
+} from "@expozr/core";
 
 import {
-  WarehouseNotFoundError,
+  ExpozrNotFoundError,
   CargoNotFoundError,
   NetworkError,
   validateInventory,
@@ -25,10 +25,10 @@ import {
   joinUrl,
   defaultHostConfig,
   deepMerge,
-} from '@expozr/core';
+} from "@expozr/core";
 
-import { createCache } from './cache';
-import { UniversalModuleLoader } from './loader';
+import { createCache } from "./cache";
+import { UniversalModuleLoader } from "./loader";
 
 /**
  * Simple event emitter implementation
@@ -36,14 +36,20 @@ import { UniversalModuleLoader } from './loader';
 class SimpleEventEmitter implements EventEmitter {
   private listeners = new Map<keyof ExpozrEvents, Array<(data: any) => void>>();
 
-  on<K extends keyof ExpozrEvents>(event: K, listener: (data: ExpozrEvents[K]) => void): void {
+  on<K extends keyof ExpozrEvents>(
+    event: K,
+    listener: (data: ExpozrEvents[K]) => void
+  ): void {
     if (!this.listeners.has(event)) {
       this.listeners.set(event, []);
     }
     this.listeners.get(event)!.push(listener);
   }
 
-  off<K extends keyof ExpozrEvents>(event: K, listener: (data: ExpozrEvents[K]) => void): void {
+  off<K extends keyof ExpozrEvents>(
+    event: K,
+    listener: (data: ExpozrEvents[K]) => void
+  ): void {
     const eventListeners = this.listeners.get(event);
     if (eventListeners) {
       const index = eventListeners.indexOf(listener);
@@ -56,7 +62,7 @@ class SimpleEventEmitter implements EventEmitter {
   emit<K extends keyof ExpozrEvents>(event: K, data: ExpozrEvents[K]): void {
     const eventListeners = this.listeners.get(event);
     if (eventListeners) {
-      eventListeners.forEach(listener => listener(data));
+      eventListeners.forEach((listener) => listener(data));
     }
   }
 }
@@ -75,7 +81,7 @@ export class Navigator implements INavigator {
   constructor(config: Partial<HostConfig> = {}) {
     this.config = deepMerge(defaultHostConfig, config) as HostConfig;
     this.cache = createCache(
-      this.config.cache?.strategy || 'memory',
+      this.config.cache?.strategy || "memory",
       this.config.cache
     );
     this.moduleLoader = new UniversalModuleLoader();
@@ -83,14 +89,14 @@ export class Navigator implements INavigator {
   }
 
   /**
-   * Load a cargo from a warehouse
+   * Load a cargo from a expozr
    */
   async loadCargo<T = any>(
-    warehouse: string,
+    expozr: string,
     cargo: string,
     options?: LoadOptions
   ): Promise<LoadedCargo<T>> {
-    const cacheKey = generateCargoKey(warehouse, cargo);
+    const cacheKey = generateCargoKey(expozr, cargo);
 
     // Check if already loaded
     if (this.loadedCargo.has(cacheKey)) {
@@ -98,32 +104,35 @@ export class Navigator implements INavigator {
       return loaded as LoadedCargo<T>;
     }
 
-    this.eventEmitter.emit('cargo:loading', { warehouse, cargo });
+    this.eventEmitter.emit("cargo:loading", { expozr, cargo });
 
     try {
-      // Get warehouse info
-      const warehouseRef = this.config.warehouses[warehouse];
-      if (!warehouseRef) {
-        throw new WarehouseNotFoundError(warehouse);
+      // Get expozr info
+      const expozrRef = this.config.expozrs[expozr];
+      if (!expozrRef) {
+        throw new ExpozrNotFoundError(expozr);
       }
 
       // Get inventory
-      const inventory = await this.getInventory(warehouse);
-      
+      const inventory = await this.getInventory(expozr);
+
       // Find cargo
       const cargoInfo = inventory.cargo[cargo];
       if (!cargoInfo) {
-        throw new CargoNotFoundError(cargo, warehouse);
+        throw new CargoNotFoundError(cargo, expozr);
       }
 
       // Load the module
-      const moduleUrl = this.resolveCargoUrl(warehouseRef, cargoInfo);
-      const loadedModule = await this.moduleLoader.loadModule<T>(moduleUrl, options);
+      const moduleUrl = this.resolveCargoUrl(expozrRef, cargoInfo);
+      const loadedModule = await this.moduleLoader.loadModule<T>(
+        moduleUrl,
+        options
+      );
 
       const loadedCargo: LoadedCargo<T> = {
         module: loadedModule,
         cargo: cargoInfo,
-        warehouse: inventory.warehouse,
+        expozr: inventory.expozr,
         loadedAt: Date.now(),
         fromCache: false,
       };
@@ -131,54 +140,65 @@ export class Navigator implements INavigator {
       // Cache the loaded cargo
       this.loadedCargo.set(cacheKey, loadedCargo);
 
-      this.eventEmitter.emit('cargo:loaded', { warehouse, cargo, module: loadedModule });
+      this.eventEmitter.emit("cargo:loaded", {
+        expozr,
+        cargo,
+        module: loadedModule,
+      });
 
       return loadedCargo;
     } catch (error) {
-      this.eventEmitter.emit('cargo:error', { warehouse, cargo, error: error as Error });
+      this.eventEmitter.emit("cargo:error", {
+        expozr,
+        cargo,
+        error: error as Error,
+      });
       throw error;
     }
   }
 
   /**
-   * Get inventory from a warehouse
+   * Get inventory from a expozr
    */
-  async getInventory(warehouse: string): Promise<Inventory> {
+  async getInventory(expozr: string): Promise<Inventory> {
     // Check cache first
-    if (this.inventoryCache.has(warehouse)) {
-      return this.inventoryCache.get(warehouse)!;
+    if (this.inventoryCache.has(expozr)) {
+      return this.inventoryCache.get(expozr)!;
     }
 
-    const warehouseRef = this.config.warehouses[warehouse];
-    if (!warehouseRef) {
-      throw new WarehouseNotFoundError(warehouse);
+    const expozrRef = this.config.expozrs[expozr];
+    if (!expozrRef) {
+      throw new ExpozrNotFoundError(expozr);
     }
 
     try {
-      const inventoryUrl = joinUrl(warehouseRef.url, 'expozr.inventory.json');
+      const inventoryUrl = joinUrl(expozrRef.url, "expozr.inventory.json");
       const inventoryData = await this.fetchInventory(inventoryUrl);
 
       if (!validateInventory(inventoryData)) {
-        throw new Error('Invalid inventory format');
+        throw new Error("Invalid inventory format");
       }
 
       // Cache the inventory
-      this.inventoryCache.set(warehouse, inventoryData);
+      this.inventoryCache.set(expozr, inventoryData);
 
-      this.eventEmitter.emit('warehouse:loaded', { warehouse, inventory: inventoryData });
+      this.eventEmitter.emit("expozr:loaded", {
+        expozr,
+        inventory: inventoryData,
+      });
 
       return inventoryData;
     } catch (error) {
-      throw new NetworkError(warehouseRef.url, error as Error);
+      throw new NetworkError(expozrRef.url, error as Error);
     }
   }
 
   /**
-   * Preload cargo from warehouses
+   * Preload cargo from expozrs
    */
-  async preload(warehouse: string, cargo?: string[]): Promise<void> {
-    const inventory = await this.getInventory(warehouse);
-    const warehouseRef = this.config.warehouses[warehouse];
+  async preload(expozr: string, cargo?: string[]): Promise<void> {
+    const inventory = await this.getInventory(expozr);
+    const expozrRef = this.config.expozrs[expozr];
 
     const cargoToPreload = cargo || Object.keys(inventory.cargo);
 
@@ -186,7 +206,7 @@ export class Navigator implements INavigator {
       cargoToPreload.map(async (cargoName) => {
         const cargoInfo = inventory.cargo[cargoName];
         if (cargoInfo) {
-          const moduleUrl = this.resolveCargoUrl(warehouseRef, cargoInfo);
+          const moduleUrl = this.resolveCargoUrl(expozrRef, cargoInfo);
           await this.moduleLoader.preloadModule(moduleUrl);
         }
       })
@@ -201,9 +221,9 @@ export class Navigator implements INavigator {
   }
 
   /**
-   * Get loaded warehouses
+   * Get loaded expozrs
    */
-  getLoadedWarehouses(): string[] {
+  getLoadedExpozrs(): string[] {
     return Array.from(this.inventoryCache.keys());
   }
 
@@ -212,7 +232,7 @@ export class Navigator implements INavigator {
    */
   getLoadedCargo(): Record<string, LoadedCargo> {
     const result: Record<string, LoadedCargo> = {};
-    
+
     for (const [key, cargo] of this.loadedCargo.entries()) {
       result[key] = cargo;
     }
@@ -229,20 +249,26 @@ export class Navigator implements INavigator {
     this.moduleLoader.clearCache();
     await this.cache.clear();
 
-    this.eventEmitter.emit('navigator:reset', {});
+    this.eventEmitter.emit("navigator:reset", {});
   }
 
   /**
    * Add event listener
    */
-  on<K extends keyof ExpozrEvents>(event: K, listener: (data: ExpozrEvents[K]) => void): void {
+  on<K extends keyof ExpozrEvents>(
+    event: K,
+    listener: (data: ExpozrEvents[K]) => void
+  ): void {
     this.eventEmitter.on(event, listener);
   }
 
   /**
    * Remove event listener
    */
-  off<K extends keyof ExpozrEvents>(event: K, listener: (data: ExpozrEvents[K]) => void): void {
+  off<K extends keyof ExpozrEvents>(
+    event: K,
+    listener: (data: ExpozrEvents[K]) => void
+  ): void {
     this.eventEmitter.off(event, listener);
   }
 
@@ -253,17 +279,17 @@ export class Navigator implements INavigator {
     // Check cache first
     const cacheKey = `inventory:${url}`;
     const cached = await this.cache.get<Inventory>(cacheKey);
-    
+
     if (cached) {
-      this.eventEmitter.emit('cache:hit', { key: cacheKey });
+      this.eventEmitter.emit("cache:hit", { key: cacheKey });
       return cached;
     }
 
-    this.eventEmitter.emit('cache:miss', { key: cacheKey });
+    this.eventEmitter.emit("cache:miss", { key: cacheKey });
 
     // Fetch from network
     const response = await fetch(url);
-    
+
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
@@ -280,7 +306,7 @@ export class Navigator implements INavigator {
   /**
    * Resolve the full URL for a cargo module
    */
-  private resolveCargoUrl(warehouseRef: WarehouseReference, cargo: Cargo): string {
-    return joinUrl(warehouseRef.url, cargo.entry);
+  private resolveCargoUrl(expozrRef: ExpozrReference, cargo: Cargo): string {
+    return joinUrl(expozrRef.url, cargo.entry);
   }
 }

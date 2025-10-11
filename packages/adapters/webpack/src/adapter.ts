@@ -5,14 +5,14 @@
 import {
   AbstractBundlerAdapter,
   BundlerUtils,
-  type WarehouseConfig,
+  type ExpozrConfig,
   type HostConfig,
   type Inventory,
   type ModuleFormat,
   type ModuleSystemConfig,
 } from "@expozr/core";
 
-import { ExpozrWarehousePlugin } from "./warehouse-plugin";
+import { ExpozrPlugin } from "./expozr-plugin";
 import { ExpozrHostPlugin } from "./host-plugin";
 import { suppressExpozrWarnings } from "./utils";
 
@@ -39,8 +39,8 @@ export class WebpackAdapter extends AbstractBundlerAdapter {
     }
   }
 
-  configureWarehouse(config: WarehouseConfig, bundlerConfig: any): any {
-    this.validateWarehouseConfig(config);
+  configureExpozr(config: ExpozrConfig, bundlerConfig: any): any {
+    this.validateExpozrConfig(config);
 
     const { build = {} } = config;
     const {
@@ -227,19 +227,19 @@ export class WebpackAdapter extends AbstractBundlerAdapter {
 
   private createHostExternals(config: HostConfig): any {
     // Host applications typically don't need externals
-    // but might need to exclude warehouse modules
+    // but might need to exclude expozr modules
     return {};
   }
 
-  createWarehousePlugin(config: WarehouseConfig): ExpozrWarehousePlugin {
-    return new ExpozrWarehousePlugin({ config });
+  createExpozrPlugin(config: ExpozrConfig): ExpozrPlugin {
+    return new ExpozrPlugin({ config });
   }
 
   createHostPlugin(config: HostConfig): ExpozrHostPlugin {
     return new ExpozrHostPlugin({ config });
   }
 
-  async generateInventory(config: WarehouseConfig): Promise<Inventory> {
+  async generateInventory(config: ExpozrConfig): Promise<Inventory> {
     return super.generateInventory(config);
   }
 }
@@ -248,11 +248,11 @@ export class WebpackAdapter extends AbstractBundlerAdapter {
 export const webpackAdapter = new WebpackAdapter();
 
 // Export plugins for direct use
-export { ExpozrWarehousePlugin, ExpozrHostPlugin };
+export { ExpozrPlugin, ExpozrHostPlugin };
 
 // Export convenience functions
-export function createWarehousePlugin(options?: any) {
-  return new ExpozrWarehousePlugin(options);
+export function createExpozrPlugin(options?: any) {
+  return new ExpozrPlugin(options);
 }
 
 export function createHostPlugin(options?: any) {

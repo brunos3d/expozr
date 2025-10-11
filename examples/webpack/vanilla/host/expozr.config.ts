@@ -3,9 +3,9 @@
  * This host primarily consumes modules but could also expose some
  */
 
-import { defineWarehouseConfig } from "@expozr/core";
+import { defineExpozrConfig } from "@expozr/core";
 
-export default defineWarehouseConfig({
+export default defineExpozrConfig({
   name: "simple-host",
   version: "1.0.0",
   expose: {

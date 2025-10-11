@@ -1,13 +1,13 @@
 /**
- * UMD Math Utils Warehouse Configuration
+ * UMD Math Utils Expozr Configuration
  *
  * This configuration exposes math utility functions as UMD modules
  * that can be consumed by any host application.
  */
 
-import { defineWarehouseConfig } from "@expozr/core";
+import { defineExpozrConfig } from "@expozr/core";
 
-export default defineWarehouseConfig({
+export default defineExpozrConfig({
   name: "math-utils",
   version: "1.0.0",
   expose: {

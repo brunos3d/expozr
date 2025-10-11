@@ -1,7 +1,7 @@
 /**
  * UMD Host Calculator Application
  *
- * This application demonstrates consuming UMD modules from a remote warehouse
+ * This application demonstrates consuming UMD modules from a remote expozr
  * using the Expozr navigator with automatic remote module loading.
  */
 

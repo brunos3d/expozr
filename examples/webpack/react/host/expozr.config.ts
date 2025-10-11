@@ -1,11 +1,11 @@
 /**
  * React host configuration
- * This host consumes React components from the React warehouse
+ * This host consumes React components from the React expozr
  */
 
-import { defineWarehouseConfig } from "@expozr/core";
+import { defineExpozrConfig } from "@expozr/core";
 
-export default defineWarehouseConfig({
+export default defineExpozrConfig({
   name: "react-host",
   version: "1.0.0",
   expose: {

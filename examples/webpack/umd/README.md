@@ -1,6 +1,6 @@
 # UMD Calculator Example
 
-This example demonstrates how to use Expozr to load UMD (Universal Module Definition) modules from a remote warehouse. The calculator application loads mathematical functions from a remote UMD bundle and provides a complete calculator interface.
+This example demonstrates how to use Expozr to load UMD (Universal Module Definition) modules from a remote expozr. The calculator application loads mathematical functions from a remote UMD bundle and provides a complete calculator interface.
 
 ## Project Structure
 
@@ -16,7 +16,7 @@ umd/
 │   ├── webpack.config.js
 │   ├── tsconfig.json
 │   └── expozr.config.ts
-└── remote/        # UMD modules warehouse
+└── remote/        # UMD modules expozr
     ├── src/
     │   ├── calculator.ts  # Basic math operations
     │   └── advanced.ts    # Advanced math operations
@@ -30,21 +30,21 @@ umd/
 
 - **Basic Operations**: Addition, subtraction, multiplication, division
 - **Advanced Operations**: Power, square root, factorial, percentage
-- **Remote Loading**: Mathematical functions loaded dynamically from UMD warehouse
+- **Remote Loading**: Mathematical functions loaded dynamically from UMD expozr
 - **Error Handling**: Comprehensive error handling for network and calculation errors
 - **Modern UI**: Clean, responsive calculator interface
 - **TypeScript**: Full type safety with remote module interfaces
 
 ## How It Works
 
-1. **Remote Warehouse**: The `remote` application exposes mathematical functions as UMD modules
+1. **Remote Expozr**: The `remote` application exposes mathematical functions as UMD modules
 2. **Host Application**: The `host` application uses Expozr Navigator to load these remote functions
-3. **Dynamic Loading**: Functions are loaded on-demand from the remote warehouse
+3. **Dynamic Loading**: Functions are loaded on-demand from the remote expozr
 4. **Type Safety**: TypeScript interfaces ensure type safety even with remote modules
 
 ## Running the Example
 
-### 1. Start the Remote Warehouse
+### 1. Start the Remote Expozr
 
 ```bash
 cd examples/webpack/umd/remote
@@ -52,7 +52,7 @@ npm install
 npm run dev
 ```
 
-This starts the UMD warehouse server on `http://localhost:3001/`
+This starts the UMD expozr server on `http://localhost:3001/`
 
 ### 2. Start the Host Application
 
@@ -75,7 +75,7 @@ This starts the calculator application on `http://localhost:3000/`
 
 ### Remote Modules
 
-The remote warehouse exposes two UMD modules:
+The remote expozr exposes two UMD modules:
 
 - **Calculator Module** (`./calculator`): Basic math operations (add, subtract, multiply, divide)
 - **Advanced Module** (`./advanced`): Advanced operations (power, sqrt, factorial, percentage)
@@ -86,7 +86,7 @@ The host application configures the Navigator with:
 
 ```typescript
 const navigator = new Navigator({
-  warehouses: {
+  expozrs: {
     "math-utils": {
       url: "http://localhost:3001/",
       version: "^1.0.0",
@@ -156,14 +156,14 @@ interface CalculatorModule {
 
 ### Connection Issues
 
-- Ensure the remote warehouse is running on port 3001
+- Ensure the remote expozr is running on port 3001
 - Check browser console for network errors
 - Verify CORS settings if accessing from different domains
 
 ### Module Loading Errors
 
 - Check the browser network tab for failed requests
-- Verify module paths in the warehouse configuration
+- Verify module paths in the expozr configuration
 - Ensure UMD modules are properly built and accessible
 
 ### TypeScript Errors
@@ -175,6 +175,6 @@ interface CalculatorModule {
 ## Next Steps
 
 - Try modifying the remote modules and see hot-reloading in action
-- Add new mathematical functions to the remote warehouse
+- Add new mathematical functions to the remote expozr
 - Experiment with different caching strategies
 - Add offline support with fallback modules

@@ -6,10 +6,10 @@
 export { WebpackAdapter, webpackAdapter } from "./adapter";
 
 // Plugins
-export { ExpozrWarehousePlugin, ExpozrHostPlugin } from "./adapter";
+export { ExpozrPlugin, ExpozrHostPlugin } from "./adapter";
 
 // Convenience functions
-export { createWarehousePlugin, createHostPlugin } from "./adapter";
+export { createExpozrPlugin, createHostPlugin } from "./adapter";
 
 // Utilities for cleaner webpack configs
 export { suppressExpozrWarnings } from "./utils";

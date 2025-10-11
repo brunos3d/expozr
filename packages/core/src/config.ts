@@ -3,20 +3,18 @@
  */
 
 import type {
-  WarehouseConfig,
+  ExpozrConfig,
   HostConfig,
   CargoConfig,
-  WarehouseMetadata,
+  ExpozrMetadata,
   ModuleSystemConfig,
 } from "./types";
 import { createDefaultModuleSystemConfig } from "./module-system";
 
 /**
- * Helper to define warehouse configuration with type safety
+ * Helper to define expozr configuration with type safety
  */
-export function defineWarehouseConfig(
-  config: WarehouseConfig
-): WarehouseConfig {
+export function defineExpozrConfig(config: ExpozrConfig): ExpozrConfig {
   // Ensure module system configuration is present
   if (config.build && !config.build.moduleSystem) {
     config.build.moduleSystem = createDefaultModuleSystemConfig();
@@ -40,9 +38,9 @@ export function defineCargoConfig(config: CargoConfig): CargoConfig {
 }
 
 /**
- * Default warehouse configuration
+ * Default expozr configuration
  */
-export const defaultWarehouseConfig: Partial<WarehouseConfig> = {
+export const defaultExpozrConfig: Partial<ExpozrConfig> = {
   build: {
     outDir: "dist",
     publicPath: "/",
@@ -86,13 +84,13 @@ export const defaultHostConfig: Partial<HostConfig> = {
       enabled: false,
     },
   },
-  warehouses: {},
+  expozrs: {},
 };
 
 /**
- * Schema for validating warehouse configuration
+ * Schema for validating expozr configuration
  */
-export const warehouseConfigSchema = {
+export const expozrConfigSchema = {
   type: "object",
   properties: {
     name: { type: "string", minLength: 1 },
@@ -177,7 +175,7 @@ export const warehouseConfigSchema = {
 export const hostConfigSchema = {
   type: "object",
   properties: {
-    warehouses: {
+    expozrs: {
       type: "object",
       additionalProperties: {
         type: "object",
@@ -254,6 +252,6 @@ export const hostConfigSchema = {
       additionalProperties: false,
     },
   },
-  required: ["warehouses"],
+  required: ["expozrs"],
   additionalProperties: false,
 };

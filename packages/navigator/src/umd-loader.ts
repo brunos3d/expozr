@@ -198,44 +198,42 @@ function isWebpackGlobal(name: string): boolean {
 }
 
 /**
- * Simple function to load an Expozr warehouse inventory
+ * Simple function to load an Expozr expozr inventory
  */
-export async function loadWarehouseInventory(
-  warehouseUrl: string
-): Promise<any> {
-  const inventoryUrl = warehouseUrl.endsWith("/")
-    ? `${warehouseUrl}expozr.inventory.json`
-    : `${warehouseUrl}/expozr.inventory.json`;
+export async function loadExpozrInventory(expozrUrl: string): Promise<any> {
+  const inventoryUrl = expozrUrl.endsWith("/")
+    ? `${expozrUrl}expozr.inventory.json`
+    : `${expozrUrl}/expozr.inventory.json`;
 
   const response = await fetch(inventoryUrl);
   if (!response.ok) {
-    throw new Error(`Failed to load warehouse inventory: ${response.status}`);
+    throw new Error(`Failed to load expozr inventory: ${response.status}`);
   }
 
   return response.json();
 }
 
 /**
- * Simple function to load a cargo from a warehouse
+ * Simple function to load a cargo from a expozr
  */
 export async function loadCargo(
-  warehouseUrl: string,
+  expozrUrl: string,
   cargoName: string,
   options: UMDLoadOptions = {}
 ): Promise<any> {
   // Load inventory
-  const inventory = await loadWarehouseInventory(warehouseUrl);
+  const inventory = await loadExpozrInventory(expozrUrl);
 
   // Find cargo
   const cargo = inventory.cargo[cargoName];
   if (!cargo) {
-    throw new Error(`Cargo "${cargoName}" not found in warehouse`);
+    throw new Error(`Cargo "${cargoName}" not found in expozr`);
   }
 
   // Construct module URL
-  const moduleUrl = warehouseUrl.endsWith("/")
-    ? `${warehouseUrl}${cargo.entry}`
-    : `${warehouseUrl}/${cargo.entry}`;
+  const moduleUrl = expozrUrl.endsWith("/")
+    ? `${expozrUrl}${cargo.entry}`
+    : `${expozrUrl}/${cargo.entry}`;
 
   // Load the UMD module
   const moduleInfo = await loadUMDModule(moduleUrl, {

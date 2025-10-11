@@ -1,5 +1,5 @@
 const path = require("path");
-const { createWarehousePlugin } = require("@expozr/webpack-adapter");
+const { createExpozrPlugin } = require("@expozr/webpack-adapter");
 
 module.exports = (env, argv) => {
   const isProduction = argv.mode === "production";
@@ -35,7 +35,7 @@ module.exports = (env, argv) => {
     },
     plugins: [
       // Automatically discovers expozr.config.ts
-      createWarehousePlugin(),
+      createExpozrPlugin(),
     ],
     externals: {
       react: {
