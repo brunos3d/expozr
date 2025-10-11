@@ -24,7 +24,7 @@ export default function App() {
     <div className="container">
       <div id="app">
         <h1>
-          <span className="emoji">🚀</span>Expozr Host Application
+          <span className="emoji">🚀</span>Vite React Host Application
         </h1>
 
         <div style={{ marginBottom: "20px" }}>

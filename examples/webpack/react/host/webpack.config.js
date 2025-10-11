@@ -1,7 +1,10 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
-const { createExpozrPlugin } = require("@expozr/webpack-adapter");
+const {
+  createExpozrPlugin,
+  suppressExpozrWarnings,
+} = require("@expozr/webpack-adapter");
 
 module.exports = (env, argv) => {
   const isProduction = argv.mode === "production";
@@ -10,6 +13,7 @@ module.exports = (env, argv) => {
     mode: argv.mode || "development",
     entry: "./src/bootstrap.tsx", // Use bootstrap.tsx as entry point
     devtool: isProduction ? "source-map" : "inline-source-map",
+    ignoreWarnings: suppressExpozrWarnings(),
     module: {
       rules: [
         {
