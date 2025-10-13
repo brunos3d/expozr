@@ -10,6 +10,9 @@ export function getCurrentTime(): string {
   return new Date().toLocaleTimeString();
 }
 
+export * from "./math-utils";
+export * from "./string-utils";
+
 // Default export for easier importing
 export default {
   greet,

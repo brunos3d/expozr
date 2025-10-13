@@ -35,6 +35,8 @@ async function init(): Promise<void> {
       "utils"
     );
 
+    console.log("🚚 Remote utils cargo:", JSON.stringify(remoteUtils));
+
     if (remoteUtils && remoteUtils.module) {
       console.log("✅ Remote ESM functions loaded successfully!");
 
