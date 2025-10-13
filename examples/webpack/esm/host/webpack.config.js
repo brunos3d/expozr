@@ -1,6 +1,7 @@
-const HtmlWebpackPlugin = require("html-webpack-plugin");
-const { createHostPlugin } = require("@expozr/webpack-adapter");
 const path = require("path");
+const webpack = require("webpack");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const { suppressExpozrWarnings } = require("@expozr/webpack-adapter");
 
 /**
  * Webpack configuration for ESM host
@@ -15,38 +16,23 @@ module.exports = (env, argv) => {
     entry: "./src/index.ts",
     mode: "none", // Use 'none' for minimal output
     devtool: false, // No source maps for cleaner output
-
-    optimization: {
-      minimize: false,
-      concatenateModules: false,
-      usedExports: false,
-      sideEffects: false,
-      runtimeChunk: false,
-      splitChunks: false, // Disable chunk splitting
-    },
-
+    ignoreWarnings: suppressExpozrWarnings(),
     module: {
       rules: [
         {
           test: /\.tsx?$/,
-          use: {
-            loader: "ts-loader",
-            options: {
-              compilerOptions: {
-                target: "ES2020",
-                module: "ES2020", // Output ES modules
-                moduleResolution: "node",
-                esModuleInterop: true,
-                allowSyntheticDefaultImports: true,
-              },
-            },
-          },
+          use: "ts-loader",
           exclude: /node_modules/,
         },
       ],
     },
     resolve: {
       extensions: [".ts", ".js"],
+      fallback: {
+        crypto: require.resolve("crypto-browserify"),
+        stream: require.resolve("stream-browserify"),
+        buffer: require.resolve("buffer"),
+      },
     },
     output: {
       filename: "[name].js",
@@ -68,11 +54,14 @@ module.exports = (env, argv) => {
       outputModule: true, // Enable ES module output
     },
     plugins: [
+      new webpack.ProvidePlugin({
+        Buffer: ["buffer", "Buffer"],
+        process: "process/browser",
+      }),
       new HtmlWebpackPlugin({
         template: "./src/index.html",
         filename: "index.html",
       }),
-      createHostPlugin(), // Will automatically discover expozr.config.ts for host
     ],
     devServer: {
       static: {

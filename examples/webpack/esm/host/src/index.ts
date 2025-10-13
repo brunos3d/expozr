@@ -18,14 +18,21 @@ async function init(): Promise<void> {
   console.log(greetUser("Developer"));
 
   // Initialize Expozr Navigator
-  const navigator = createNavigator();
+  const navigator = createNavigator({
+    expozrs: {
+      "remote-esm-functions": {
+        url: "http://localhost:3001",
+        version: "^1.0.0",
+      },
+    },
+  });
 
   try {
     // Load the remote ESM expozr
     console.log("🌐 Loading remote ESM functions...");
     const remoteUtils = await navigator.loadCargo(
       "remote-esm-functions",
-      "./utils"
+      "utils"
     );
 
     if (remoteUtils && remoteUtils.module) {
@@ -66,7 +73,7 @@ async function init(): Promise<void> {
 
 async function initRemote() {
   try {
-    const remoteUrl = "http://localhost:3001/main.js";
+    const remoteUrl = "http://localhost:3001/utils.js";
     const remoteModule = await import(/* webpackIgnore: true */ remoteUrl);
     console.log("🌐 Remote module loaded successfully!");
 

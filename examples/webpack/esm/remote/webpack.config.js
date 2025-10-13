@@ -1,3 +1,4 @@
+const path = require("path");
 const { createExpozrPlugin } = require("@expozr/webpack-adapter");
 
 /**
@@ -12,42 +13,41 @@ module.exports = (env, argv) => {
   return {
     mode: "none", // Use 'none' for minimal webpack overhead
     devtool: false, // No source maps for cleaner output
-    optimization: {
-      minimize: false,
-      concatenateModules: false,
-      usedExports: false,
-      sideEffects: false,
-      runtimeChunk: false,
-      splitChunks: {
-        chunks: "all",
-        cacheGroups: {
-          default: false,
-          vendors: false,
-        },
-      },
-    },
-    resolve: {
-      extensions: [".ts", ".js"],
+    entry: {
+      utils: "./src/index.ts",
+      math: "./src/math-utils.ts",
+      strings: "./src/string-utils.ts",
     },
     module: {
       rules: [
         {
           test: /\.tsx?$/,
-          use: {
-            loader: "ts-loader",
-            options: {
-              compilerOptions: {
-                target: "ES2020",
-                module: "ES2020",
-                moduleResolution: "node",
-                esModuleInterop: true,
-                allowSyntheticDefaultImports: true,
-              },
-            },
-          },
+          use: "ts-loader",
           exclude: /node_modules/,
         },
       ],
+    },
+    resolve: {
+      extensions: [".ts", ".js"],
+    },
+    output: {
+      filename: "[name].js",
+      path: path.resolve(__dirname, "dist"),
+      clean: true,
+      module: true, // Output as ES module
+      library: {
+        type: "module",
+      },
+      environment: {
+        module: true,
+        arrowFunction: true,
+        const: true,
+        destructuring: true,
+        forOf: true,
+      },
+    },
+    experiments: {
+      outputModule: true, // Enable ES module output
     },
     plugins: [
       createExpozrPlugin(), // Will automatically discover expozr.config.ts and apply ESM config
