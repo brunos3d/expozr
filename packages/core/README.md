@@ -34,7 +34,7 @@ npm install @expozr/core
 
 ## ✨ Key Features
 
-### 🎯 **Universal Module System**
+### 🐙 **Universal Module System**
 
 - **Multi-Format Support**: ESM, UMD, CJS, AMD, IIFE, SystemJS
 - **Smart Format Detection**: Automatically detects the best format for your environment

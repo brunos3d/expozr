@@ -42,10 +42,10 @@ Universal runtime system that handles dynamic loading, dependency resolution, an
 
 ## ✨ Key Features
 
-### � **Universal Module System**
+### 🐙 **Universal Module System**
 
 - 🌍 **Bundler Agnostic**: Works with any bundler (Webpack, Vite, Rollup, Rspack, etc.)
-- � **Multi-Format Support**: ESM, UMD, CJS, AMD, IIFE, SystemJS with automatic detection
+- ✨ **Multi-Format Support**: ESM, UMD, CJS, AMD, IIFE, SystemJS with automatic detection
 - 🧠 **Intelligent Fallbacks**: Graceful degradation when preferred formats fail
 - ⚡ **Hybrid Mode**: Load both ESM and UMD versions of the same module
 
@@ -53,7 +53,7 @@ Universal runtime system that handles dynamic loading, dependency resolution, an
 
 - 🚀 **Dynamic Loading**: Load modules at runtime without build-time coupling
 - 🎯 **Smart Format Detection**: Automatically detects and loads the best available format
-- �️ **Error Recovery**: Comprehensive error handling with detailed feedback
+- 🛠️ **Error Recovery**: Comprehensive error handling with detailed feedback
 - 📊 **Format Tracking**: Monitor which formats are successfully loaded
 
 ### 🔧 **Developer Experience**
@@ -86,27 +86,23 @@ Universal runtime system that handles dynamic loading, dependency resolution, an
 
 ## 🚀 Quick Start
 
-### 1. Create a Expozr (Expose Modules)
+Here's a minimal example of setting up an Expozr remote application and a host application using Webpack and React. (see [examples](./examples) for full working examples)
 
-You can either use the CLI (in development) or set up manually:
+**webpack.config.js:**
 
-**Option A: Manual Setup (Recommended)**
+First, add the Expozr Webpack plugin to your Webpack configuration:
 
-```bash
-mkdir my-components && cd my-components
-npm init -y
-npm install @expozr/webpack-adapter webpack webpack-cli typescript ts-loader
-```
+```javascript
+const { createExpozrPlugin } = require("@expozr/webpack-adapter");
 
-**Option B: CLI (Beta)**
-
-```bash
-npx @expozr/cli init expozr my-components
-cd my-components
-npm install
+module.exports = {
+  plugins: [createExpozrPlugin()],
+};
 ```
 
 **expozr.config.ts:**
+
+Everything goes around a simple configuration file the `expozr.config.ts`:
 
 ```typescript
 import { defineExpozrConfig } from "@expozr/core";
@@ -118,18 +114,6 @@ export default defineExpozrConfig({
     "./Button": {
       entry: "./src/components/Button.tsx",
       exports: ["Button", "ButtonProps"],
-    },
-    "./Card": {
-      entry: "./src/components/Card.tsx",
-      exports: ["Card", "CardProps"],
-    },
-    "./utils": {
-      entry: "./src/utils/index.ts",
-      exports: ["add", "multiply"],
-      dependencies: {
-        lodash: "^4.17.21",
-        // ...other dependencies
-      },
     },
   },
   dependencies: {
@@ -144,31 +128,9 @@ export default defineExpozrConfig({
 });
 ```
 
-**webpack.config.js:**
-
-```javascript
-const { createExpozrPlugin } = require("@expozr/webpack-adapter");
-
-module.exports = {
-  plugins: [createExpozrPlugin()],
-};
-```
-
-### 2. Create a Host (Consume Modules)
-
-```bash
-npx @expozr/cli init host my-app
-cd my-app
-npm install
-```
-
-**For React components, install React support:**
-
-```bash
-npm install @expozr/react react react-dom
-```
-
 **React Host app:**
+
+Now you can load and use the exposed components in your React host application:
 
 ```typescript
 import React from "react";
@@ -191,38 +153,6 @@ function App() {
     </div>
   );
 }
-```
-
-**Host Configuration (optional):**
-
-```typescript
-import { defineExpozrConfig } from "@expozr/core";
-
-export default defineExpozrConfig({
-  name: "my-host",
-  version: "1.0.0",
-  expose: {
-    // Currently just a consumer, but ready to expose modules if needed
-  },
-  metadata: {
-    description: "Host application that consumes remote components",
-    author: "Your Name",
-    license: "MIT",
-  },
-});
-```
-
-## 📦 Installation
-
-```bash
-# Core packages
-npm install @expozr/core @expozr/navigator @expozr/webpack-adapter
-
-# React support
-npm install @expozr/react
-
-# CLI tools (beta)
-npm install -g @expozr/cli
 ```
 
 ## 📦 Packages
@@ -256,46 +186,6 @@ npm install -g @expozr/cli
 | Rollup     | 📋 Planned | @expozr/rollup-adapter  |
 | Rspack     | 📋 Planned | @expozr/rspack-adapter  |
 | Parcel     | 📋 Planned | @expozr/parcel-adapter  |
-
-## 🔧 Configuration
-
-### Expozr Configuration
-
-```typescript
-export default defineExpozrConfig({
-  name: "my-expozr",
-  version: "1.0.0",
-  expose: {
-    "./Button": {
-      entry: "./src/Button.tsx",
-      exports: ["Button", "ButtonProps"],
-      dependencies: {
-        react: "^18.0.0",
-      },
-    },
-  },
-  metadata: {
-    description: "My component library",
-    author: "Your Name",
-  },
-});
-```
-
-### Host Configuration
-
-```typescript
-export default defineExpozrConfig({
-  name: "my-host",
-  version: "1.0.0",
-  expose: {
-    // Hosts can also expose modules if needed
-  },
-  metadata: {
-    description: "Host application consuming remote components",
-    author: "Your Name",
-  },
-});
-```
 
 ### Advanced Configuration Examples
 
@@ -357,7 +247,7 @@ try {
 
 ## 🎨 Examples & Quick Start
 
-The fastest way to understand Expozr is to run the examples! We have working examples for different bundlers and frameworks.
+The fastest way to understand Expozr is to run the examples! We have working examples for different bundlers and frameworks. Check out the [examples](./examples) directory for complete working examples and detailed setup instructions.
 
 ### 📂 Examples Directory
 
@@ -402,71 +292,7 @@ npm install && npm run dev
 - ✅ **Hot Reloading**: Changes update instantly in development
 - ✅ **Error Handling**: Clear error messages and troubleshooting
 
-### 🚀 Try More Examples
-
-**For Vite + React components:**
-
-```bash
-# Start Vite React expozr (port 5001)
-cd examples/vite/react/remote && npm install && npm run dev
-
-# Start Vite React host (port 5000) - new terminal
-cd examples/vite/react/host && npm install && npm run dev
-```
-
-**For advanced Webpack examples:**
-
-```bash
-# Try the UMD Calculator example
-cd examples/webpack/umd/remote && npm install && npm run dev
-cd examples/webpack/umd/host && npm install && npm run dev
-```
-
-## 📚 Framework Support
-
-### ⚛️ React
-
-Expozr provides first-class React support with `@expozr/react`:
-
-```typescript
-import { loadReactExpozr, setupReactGlobals } from "@expozr/react";
-
-// Load React expozr
-const expozr = loadReactExpozr("http://localhost:3001");
-
-// Use with React.lazy for automatic code splitting
-const Button = React.lazy(() =>
-  expozr.then((mod) => ({ default: mod.Button }))
-);
-
-// Or load directly
-const { Button, Card } = await expozr;
-```
-
-**Features:**
-
-- ✅ **React.lazy Integration**: Seamless lazy loading with Suspense
-- ✅ **Hot Reloading**: Works with React dev server
-- ✅ **Hook Sharing**: Share custom React hooks between apps
-- ✅ **Automatic Globals**: Sets up React/ReactDOM globals for UMD modules
-
 ---
-
-Check out the [examples](./examples) directory for complete working examples and detailed setup instructions.
-
-## 🌟 Why Expozr?
-
-- **Simpler**: No complex configuration or dependency management
-- **Flexible**: Runtime discovery and loading
-- **Lightweight**: No framework lock-in or routing complexity
-- **Granular**: Share individual components, not entire applications
-- **Efficient**: Smart caching and dependency resolution
-
-### vs Package Registries
-
-- **Dynamic**: Load modules at runtime, not build time
-- **Versioned**: Multiple versions can coexist
-- **Distributed**: No central registry required
 
 ## 🗺️ Roadmap
 
