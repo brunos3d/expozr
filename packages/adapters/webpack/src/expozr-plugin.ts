@@ -12,10 +12,10 @@ import type {
 import type { ExpozrConfig, Inventory, Cargo, CargoConfig } from "@expozr/core";
 
 import {
-  generateChecksum,
+  ChecksumUtils,
   timestamp,
-  validateExpozrConfig,
-  joinUrl,
+  ValidationUtils,
+  UrlUtils,
 } from "@expozr/core";
 
 export interface ExpozrPluginOptions {
@@ -130,7 +130,7 @@ export class ExpozrPlugin {
       throw new Error("No Expozr expozr configuration found");
     }
 
-    if (!validateExpozrConfig(this.config)) {
+    if (!ValidationUtils.validateExpozrConfig(this.config)) {
       throw new Error("Invalid expozr configuration");
     }
   }
@@ -363,7 +363,7 @@ export class ExpozrPlugin {
       cargo,
       dependencies: this.config.dependencies || {},
       timestamp: timestamp(),
-      checksum: await generateChecksum({
+      checksum: await ChecksumUtils.generateAsync({
         cargo,
         dependencies: this.config.dependencies,
       }),

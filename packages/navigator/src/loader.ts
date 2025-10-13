@@ -70,7 +70,11 @@ export class BrowserModuleLoader implements ModuleLoader {
     }
 
     // For JavaScript modules, use dynamic import
-    return import(/* webpackIgnore: true */ /* @vite-ignore */ url);
+    return import(
+      /* webpackIgnore: true */
+      /* @vite-ignore */
+      url
+    );
   }
 
   isModuleLoaded(url: string): boolean {

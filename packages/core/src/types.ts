@@ -362,6 +362,10 @@ export interface LoadOptions {
   cache?: boolean;
   /** Fallback module if loading fails */
   fallback?: () => Promise<any>;
+  /** Specific exports to extract from the module */
+  exports?: string[];
+  /** Whether to add cache busting parameters */
+  cacheBusting?: boolean;
 }
 
 /**

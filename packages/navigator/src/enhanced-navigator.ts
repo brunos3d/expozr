@@ -26,7 +26,8 @@ import {
   ExpozrNotFoundError,
   CargoNotFoundError,
   NetworkError,
-  validateInventory,
+  ValidationUtils,
+  ObjectUtils,
   generateCargoKey,
   joinUrl,
   defaultHostConfig,
@@ -338,7 +339,7 @@ export class Navigator implements INavigator {
       const inventory: Inventory = await response.json();
 
       // Validate inventory
-      validateInventory(inventory);
+      ValidationUtils.validateInventory(inventory);
 
       // Cache the inventory
       this.inventoryCache.set(expozr, inventory);
