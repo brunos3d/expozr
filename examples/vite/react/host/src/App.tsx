@@ -1,5 +1,5 @@
 import React from "react";
-import { Navigator } from "@expozr/navigator";
+import { createNavigator } from "@expozr/navigator";
 
 // Define the Button component type
 interface ButtonProps {
@@ -18,7 +18,7 @@ type CargoModule = {
 
 const REMOTE_WAREHOUSE_URL = "http://localhost:5001"; // URL of the remote expozr
 
-const navigator = new Navigator({
+const navigator = createNavigator({
   expozrs: {
     "vite-react-components": {
       url: REMOTE_WAREHOUSE_URL,

@@ -57,7 +57,12 @@ export class ESMModuleLoader extends BaseModuleLoader {
 
     // Use dynamic import with retry mechanism
     const module = await this.withRetry(
-      () => import(/* webpackIgnore: true */ esmUrl),
+      () =>
+        import(
+          /* webpackIgnore: true */
+          /* @vite-ignore */
+          esmUrl
+        ),
       options?.retry?.attempts,
       options?.retry?.delay,
       options?.retry?.backoff

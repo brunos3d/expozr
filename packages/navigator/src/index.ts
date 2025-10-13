@@ -2,50 +2,76 @@
  * @expozr/navigator - Universal runtime loader for the Expozr ecosystem
  */
 
-// Enhanced navigator with module system support
+// === Main Navigator API ===
+export { createNavigator } from "./navigators";
 export {
-  Navigator,
-  createNavigator,
-  ExpozrNavigator,
-} from "./enhanced-navigator";
+  BaseNavigator,
+  SimpleNavigator,
+  EnhancedNavigator,
+} from "./navigators";
 
-// Legacy navigator (for backward compatibility)
-export { Navigator as LegacyNavigator } from "./navigator";
+// === Legacy Support (backward compatibility) ===
+export { SimpleNavigator as LegacyNavigator } from "./navigators";
+export {
+  EnhancedNavigator as Navigator,
+  EnhancedNavigator as ExpozrNavigator,
+} from "./navigators";
 
-// Cache implementations
+// === Cache System ===
 export {
   MemoryCache,
   LocalStorageCache,
   IndexedDBCache,
   NoCache,
-  createCache,
 } from "./cache";
+export { createCache } from "./cache";
 
-// Module loaders (legacy)
+// === Module Loaders ===
 export {
   BrowserModuleLoader,
   NodeModuleLoader,
   UniversalModuleLoader,
-} from "./loader";
+} from "./loaders";
 
-// UMD module loader utilities
+// === UMD Module Utilities ===
 export {
   loadUMDModule,
   loadExpozrInventory,
   loadCargo as loadCargoUMD,
-  type UMDLoadOptions,
-  type UMDModuleInfo,
-} from "./umd-loader";
+} from "./loaders/umd-loader";
 
-// Convenience function for loading modules
-export { loadCargo } from "./load-cargo";
+// === Utility Functions ===
+export { SimpleEventEmitter } from "./utils";
+export { isValidModule, normalizeUMDModule, extractFunctions } from "./utils";
+export { normalizeUrl } from "./utils";
+export { waitForCondition } from "./utils";
 
-// Auto-loader for simplified UMD module consumption
+// === Auto-Loader System ===
 export {
   createAutoLoader,
   waitForReady,
   callRemoteFunction,
-  type AutoLoaderConfig,
-  type LoadedModule,
-  type LoaderContext,
+  getAvailableFunctions,
+  getAvailableModules,
+  getModule,
+  hasFunction,
+  createFunctionProxy,
 } from "./auto-loader";
+
+// === Type Definitions ===
+export type {
+  // Core types
+  NavigatorConfig,
+  LoaderContext,
+  LoadedModule,
+
+  // Auto-loader types
+  AutoLoaderConfig,
+
+  // UMD types
+  UMDLoadOptions,
+  UMDModuleInfo,
+
+  // Loader types
+  ModuleLoader,
+} from "./types";

@@ -5,96 +5,18 @@
  * and exposing remote UMD modules, providing a seamless developer experience.
  */
 
-import { createNavigator } from "./enhanced-navigator";
-
-export interface AutoLoaderConfig {
-  expozrs: Record<
-    string,
-    {
-      url: string;
-      version?: string;
-      modules: Record<string, string | string[]>; // module name -> cargo name or function names
-    }
-  >;
-  globalNamespace?: string; // Default: 'expozr'
-  autoExpose?: boolean; // Automatically expose functions globally
-  timeout?: number;
-  retries?: number;
-}
-
-export interface LoadedModule {
-  [key: string]: any;
-}
-
-export interface LoaderContext {
-  modules: Record<string, LoadedModule>;
-  functions: Record<string, Function>;
-  status: "loading" | "ready" | "error";
-  error?: Error;
-}
-
-/**
- * Normalize UMD module by extracting functions from various possible structures
- */
-function normalizeUMDModule(cargo: any): LoadedModule {
-  let module = cargo.module || cargo;
-
-  // Try different access patterns for UMD modules
-  if (module && typeof module === "object") {
-    // 1. Direct exports
-    if (hasValidFunctions(module)) {
-      return module;
-    }
-
-    // 2. Default export (webpack library.export: "default")
-    if (module.default && hasValidFunctions(module.default)) {
-      return module.default;
-    }
-
-    // 3. Exports property
-    if (module.exports && hasValidFunctions(module.exports)) {
-      return module.exports;
-    }
-
-    // 4. Nested default.exports
-    if (module.default?.exports && hasValidFunctions(module.default.exports)) {
-      return module.default.exports;
-    }
-  }
-
-  // If no valid structure found, return the module as-is
-  return module || {};
-}
-
-/**
- * Check if an object has valid function exports
- */
-function hasValidFunctions(obj: any): boolean {
-  if (!obj || typeof obj !== "object") return false;
-
-  const functions = Object.keys(obj).filter(
-    (key) => typeof obj[key] === "function"
-  );
-  return functions.length > 0;
-}
-
-/**
- * Extract all functions from a module
- */
-function extractFunctions(module: LoadedModule): Record<string, Function> {
-  const functions: Record<string, Function> = {};
-
-  for (const [key, value] of Object.entries(module)) {
-    if (typeof value === "function") {
-      functions[key] = value;
-    }
-  }
-
-  return functions;
-}
+import { createNavigator } from "./navigators";
+import {
+  normalizeUMDModule,
+  extractFunctions,
+  waitForCondition,
+} from "./utils";
+import type { AutoLoaderConfig, LoaderContext, LoadedModule } from "./types";
 
 /**
  * Create an auto-loader for remote modules with simplified API
+ * @param config - Auto-loader configuration
+ * @returns Promise resolving to loader context
  */
 export async function createAutoLoader(
   config: AutoLoaderConfig
@@ -144,22 +66,22 @@ export async function createAutoLoader(
             `  - Loading module: ${moduleName} (cargo: ${cargoName})`
           );
 
-          const cargo = await navigator.loadCargo(
-            expozrName,
-            cargoName as string
-          );
-          const normalizedModule = normalizeUMDModule(cargo);
+          // Load the cargo
+          const cargoKey = Array.isArray(cargoName) ? cargoName[0] : cargoName;
+          const loadedCargo = await navigator.loadCargo(expozrName, cargoKey);
 
-          // Store the module
+          // Normalize UMD module structure
+          const normalizedModule = normalizeUMDModule(loadedCargo);
           context.modules[moduleName] = normalizedModule;
 
-          // Extract and store functions
+          // Extract functions from the module
           const moduleFunctions = extractFunctions(normalizedModule);
           Object.assign(context.functions, moduleFunctions);
 
           console.log(
-            `  ✅ Module ${moduleName} loaded with functions:`,
-            Object.keys(moduleFunctions)
+            `  ✅ Loaded module: ${moduleName} (${
+              Object.keys(moduleFunctions).length
+            } functions)`
           );
         } catch (error) {
           console.error(`  ❌ Failed to load module ${moduleName}:`, error);
@@ -170,17 +92,7 @@ export async function createAutoLoader(
 
     // Auto-expose functions globally if enabled
     if (config.autoExpose !== false) {
-      const globalNamespace = config.globalNamespace || "expozr";
-
-      // Create global namespace
-      (window as any)[globalNamespace] = {
-        modules: context.modules,
-        ...context.functions, // Expose all functions directly
-      };
-
-      console.log(
-        `🌐 Exposed ${Object.keys(context.functions).length} functions globally under '${globalNamespace}'`
-      );
+      exposeGlobally(context, config.globalNamespace || "expozr");
     }
 
     context.status = "ready";
@@ -196,33 +108,50 @@ export async function createAutoLoader(
 }
 
 /**
+ * Expose functions globally under a namespace
+ * @param context - Loader context
+ * @param namespace - Global namespace to use
+ */
+function exposeGlobally(context: LoaderContext, namespace: string): void {
+  if (typeof window !== "undefined") {
+    // Create global namespace
+    (window as any)[namespace] = {
+      modules: context.modules,
+      ...context.functions, // Expose all functions directly
+    };
+
+    console.log(
+      `🌐 Exposed ${Object.keys(context.functions).length} functions globally under '${namespace}'`
+    );
+  }
+}
+
+/**
  * Helper to wait for loading to be ready
+ * @param context - Loader context
+ * @param maxWait - Maximum time to wait in milliseconds
+ * @returns Promise that resolves when ready
  */
 export function waitForReady(
   context: LoaderContext,
   maxWait: number = 30000
 ): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const startTime = Date.now();
-
-    const checkReady = () => {
-      if (context.status === "ready") {
-        resolve();
-      } else if (context.status === "error") {
-        reject(context.error || new Error("Auto-loader failed"));
-      } else if (Date.now() - startTime > maxWait) {
-        reject(new Error("Auto-loader timeout"));
-      } else {
-        setTimeout(checkReady, 100);
+  return waitForCondition(() => context.status === "ready", maxWait, 100).catch(
+    () => {
+      if (context.status === "error") {
+        throw context.error || new Error("Auto-loader failed");
       }
-    };
-
-    checkReady();
-  });
+      throw new Error("Auto-loader timeout");
+    }
+  );
 }
 
 /**
  * Type-safe function caller with automatic error handling
+ * @param context - Loader context
+ * @param functionName - Name of function to call
+ * @param args - Arguments to pass to function
+ * @returns Function result
  */
 export function callRemoteFunction(
   context: LoaderContext,
@@ -244,4 +173,77 @@ export function callRemoteFunction(
     console.error(`Error calling remote function '${functionName}':`, error);
     throw error;
   }
+}
+
+/**
+ * Get available functions from the loader context
+ * @param context - Loader context
+ * @returns Array of available function names
+ */
+export function getAvailableFunctions(context: LoaderContext): string[] {
+  return Object.keys(context.functions);
+}
+
+/**
+ * Get available modules from the loader context
+ * @param context - Loader context
+ * @returns Array of available module names
+ */
+export function getAvailableModules(context: LoaderContext): string[] {
+  return Object.keys(context.modules);
+}
+
+/**
+ * Get module by name from the loader context
+ * @param context - Loader context
+ * @param moduleName - Name of module to get
+ * @returns Module object or undefined
+ */
+export function getModule(
+  context: LoaderContext,
+  moduleName: string
+): LoadedModule | undefined {
+  return context.modules[moduleName];
+}
+
+/**
+ * Check if a function is available in the loader context
+ * @param context - Loader context
+ * @param functionName - Name of function to check
+ * @returns True if function is available
+ */
+export function hasFunction(
+  context: LoaderContext,
+  functionName: string
+): boolean {
+  return functionName in context.functions;
+}
+
+/**
+ * Create a proxy object that allows calling remote functions directly
+ * @param context - Loader context
+ * @returns Proxy object for calling remote functions
+ */
+export function createFunctionProxy(
+  context: LoaderContext
+): Record<string, Function> {
+  return new Proxy(
+    {},
+    {
+      get(target, prop) {
+        if (typeof prop === "string" && context.functions[prop]) {
+          return (...args: any[]) => callRemoteFunction(context, prop, ...args);
+        }
+        return undefined;
+      },
+
+      has(target, prop) {
+        return typeof prop === "string" && prop in context.functions;
+      },
+
+      ownKeys(target) {
+        return Object.keys(context.functions);
+      },
+    }
+  );
 }

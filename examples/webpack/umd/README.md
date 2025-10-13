@@ -82,8 +82,10 @@ Universal Module Definition provides broad compatibility:
 // - CommonJS/Node.js
 // - ES modules
 
+import { createNavigator } from "@expozr/navigator";
+
 // Load UMD modules using Navigator
-const navigator = new Navigator({
+const navigator = createNavigator({
   expozrs: {
     "math-functions": {
       url: "http://localhost:3001",
@@ -210,7 +212,9 @@ The remote expozr exposes two UMD modules:
 The host application configures the Navigator with:
 
 ```typescript
-const navigator = new Navigator({
+import { createNavigator } from "@expozr/navigator";
+
+const navigator = createNavigator({
   expozrs: {
     "math-utils": {
       url: "http://localhost:3001/",

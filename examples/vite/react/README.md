@@ -92,7 +92,9 @@ export default defineConfig({
 
 ```typescript
 // Load React components at runtime using Navigator
-const navigator = new Navigator({
+import { createNavigator } from "@expozr/navigator";
+
+const navigator = createNavigator({
   expozrs: {
     "vite-react-components": {
       url: "http://localhost:5001",

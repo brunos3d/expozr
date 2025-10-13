@@ -1,22 +1,23 @@
 /**
- * UMD Module Loader for browser environments
- * Handles loading and accessing UMD modules with proper global discovery
+ * UMD module loader specifically for UMD format modules
  */
 
-export interface UMDLoadOptions {
-  timeout?: number;
-  retries?: number;
-  expectedGlobalName?: string;
-}
-
-export interface UMDModuleInfo {
-  module: any;
-  globalName: string;
-  url: string;
-}
+import type { LoadOptions } from "@expozr/core";
+import type { UMDLoadOptions, UMDModuleInfo } from "../types";
+import {
+  isValidReactComponent,
+  isValidModule,
+  isWebpackGlobal,
+  createTimeoutPromise,
+} from "../utils";
 
 /**
  * Load a UMD module from a URL and return the exported module
+ * Handles UMD-specific loading patterns and global variable detection
+ *
+ * @param url - URL of the UMD module to load
+ * @param options - UMD-specific loading options
+ * @returns Promise resolving to UMD module information
  */
 export async function loadUMDModule(
   url: string,
@@ -107,7 +108,7 @@ export async function loadUMDModule(
         if (!foundModule && expectedGlobalName) {
           const windowKeys = Object.keys(window);
           for (const key of windowKeys) {
-            try {
+            if (existingGlobals.has(key)) {
               const obj = (window as any)[key];
               if (obj && typeof obj === "object" && obj[expectedGlobalName]) {
                 const potential = obj[expectedGlobalName];
@@ -116,15 +117,13 @@ export async function loadUMDModule(
                   isValidModule(potential)
                 ) {
                   foundModule = potential;
-                  foundGlobalName = key;
+                  foundGlobalName = `${key}.${expectedGlobalName}`;
                   console.log(
-                    `✅ UMD loader: Found module in window.${key}.${expectedGlobalName}`
+                    `✅ UMD loader: Found module as window.${key}.${expectedGlobalName}`
                   );
                   break;
                 }
               }
-            } catch (e) {
-              // Skip inaccessible globals
             }
           }
         }
@@ -153,52 +152,9 @@ export async function loadUMDModule(
 }
 
 /**
- * Check if a value is a valid React component
- */
-function isValidReactComponent(value: any): boolean {
-  if (typeof value === "function") {
-    // Check if it's a React component by looking for typical React function patterns
-    const funcStr = value.toString();
-    return (
-      funcStr.includes("React.createElement") ||
-      funcStr.includes("jsx") ||
-      funcStr.includes("_jsx") ||
-      value.displayName !== undefined ||
-      value.propTypes !== undefined
-    );
-  }
-  return false;
-}
-
-/**
- * Check if a value is a valid module (object with exports)
- */
-function isValidModule(value: any): boolean {
-  return (
-    value !== null &&
-    typeof value === "object" &&
-    !Array.isArray(value) &&
-    Object.keys(value).length > 0
-  );
-}
-
-/**
- * Check if a global name is from webpack or other development tools
- */
-function isWebpackGlobal(name: string): boolean {
-  const webpackPatterns = [
-    "webpackHotUpdate",
-    "webpackChunk",
-    "__webpack",
-    "webpackJsonp",
-    "__WEBPACK",
-  ];
-
-  return webpackPatterns.some((pattern) => name.includes(pattern));
-}
-
-/**
- * Simple function to load an Expozr expozr inventory
+ * Load an Expozr inventory from a URL
+ * @param expozrUrl - Base URL of the expozr
+ * @returns Promise resolving to the inventory data
  */
 export async function loadExpozrInventory(expozrUrl: string): Promise<any> {
   const inventoryUrl = expozrUrl.endsWith("/")
@@ -214,7 +170,11 @@ export async function loadExpozrInventory(expozrUrl: string): Promise<any> {
 }
 
 /**
- * Simple function to load a cargo from a expozr
+ * Load a specific cargo from an expozr using UMD loading
+ * @param expozrUrl - Base URL of the expozr
+ * @param cargoName - Name of the cargo to load
+ * @param options - UMD loading options
+ * @returns Promise resolving to the loaded cargo module
  */
 export async function loadCargo(
   expozrUrl: string,
