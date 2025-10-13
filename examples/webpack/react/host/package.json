@@ -1,6 +1,6 @@
 {
   "name": "react-host-example",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "private": true,
   "description": "React host example that consumes from React component expozr",
   "scripts": {
@@ -9,7 +9,7 @@
     "start": "webpack serve --mode production --port 3000"
   },
   "dependencies": {
-    "@expozr/react": "^1.1.0",
+    "@expozr/react": "^2.0.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0"
   },

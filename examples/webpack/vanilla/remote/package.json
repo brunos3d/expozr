@@ -1,6 +1,6 @@
 {
   "name": "simple-expozr-example",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "private": true,
   "description": "Simple expozr example without complex dependencies",
   "scripts": {
@@ -9,7 +9,7 @@
     "start": "webpack serve --mode production --port 3001"
   },
   "devDependencies": {
-    "@expozr/webpack-adapter": "^1.1.0",
+    "@expozr/webpack-adapter": "^2.0.0",
     "ts-loader": "^9.5.1",
     "typescript": "^5.0.0",
     "webpack": "^5.90.0",

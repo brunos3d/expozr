@@ -27,7 +27,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@expozr/navigator": "^2.0.0"
+    "@expozr/navigator": "2.0.0"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.0",

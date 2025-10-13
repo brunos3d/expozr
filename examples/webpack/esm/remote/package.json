@@ -1,6 +1,6 @@
 {
   "name": "remote-app-esm",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Remote TypeScript application using Expozr ESM",
   "main": "dist/index.js",
   "scripts": {
@@ -9,15 +9,15 @@
     "dev": "webpack serve --mode development"
   },
   "dependencies": {
-    "@expozr/core": "^1.1.0",
-    "@expozr/webpack-adapter": "^1.1.0"
+    "@expozr/core": "^2.0.0",
+    "@expozr/webpack-adapter": "^2.0.0"
   },
   "devDependencies": {
+    "serve": "^14.0.0",
+    "ts-loader": "^9.0.0",
     "typescript": "^5.0.0",
     "webpack": "^5.0.0",
     "webpack-cli": "^5.0.0",
-    "webpack-dev-server": "^4.0.0",
-    "ts-loader": "^9.0.0",
-    "serve": "^14.0.0"
+    "webpack-dev-server": "^4.0.0"
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@expozr/umd-host-example",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
   "description": "UMD Host example consuming math functions",
   "scripts": {
@@ -17,7 +17,7 @@
   "author": "Expozr Team",
   "license": "MIT",
   "devDependencies": {
-    "@expozr/navigator": "^1.1.0",
+    "@expozr/navigator": "^2.0.0",
     "css-loader": "^6.8.1",
     "html-webpack-plugin": "^5.5.3",
     "style-loader": "^3.3.3",

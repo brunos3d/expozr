@@ -1,6 +1,6 @@
 {
   "name": "vite-react-remote",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -12,8 +12,8 @@
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@expozr/core": "^1.1.0",
-    "@expozr/vite-adapter": "^1.1.0",
+    "@expozr/core": "^2.0.0",
+    "@expozr/vite-adapter": "^2.0.0",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "@vitejs/plugin-react": "^4.0.0",

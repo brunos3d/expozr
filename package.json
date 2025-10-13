@@ -1,6 +1,6 @@
 {
   "name": "expozr",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "description": "Universal plugin ecosystem for web bundler module federation",
   "private": true,
   "workspaces": [
@@ -17,9 +17,11 @@
     "lint": "lerna run lint",
     "clean": "lerna clean && rm -rf node_modules",
     "version": "lerna version",
+    "postversion": "node scripts/update-examples.js",
     "publish": "lerna publish",
     "dev": "lerna run dev --parallel",
-    "typecheck": "lerna run typecheck"
+    "typecheck": "lerna run typecheck",
+    "update-examples": "node scripts/update-examples.js"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
