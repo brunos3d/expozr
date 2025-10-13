@@ -179,13 +179,18 @@ function App() {
 
 ## 🛠️ Bundler Support
 
-| Bundler    | Status     | Package                 |
-| ---------- | ---------- | ----------------------- |
-| Webpack 5+ | ✅ Ready   | @expozr/webpack-adapter |
-| Vite       | ✅ Ready   | @expozr/vite-adapter    |
-| Rollup     | 📋 Planned | @expozr/rollup-adapter  |
-| Rspack     | 📋 Planned | @expozr/rspack-adapter  |
-| Parcel     | 📋 Planned | @expozr/parcel-adapter  |
+| Bundler    | Status     | Package                   |
+| ---------- | ---------- | ------------------------- |
+| Webpack 5+ | ✅ Ready   | @expozr/webpack-adapter   |
+| Vite       | ✅ Ready   | @expozr/vite-adapter      |
+| esbuild    | 📋 Planned | @expozr/esbuild-adapter   |
+| Rollup     | 📋 Planned | @expozr/rollup-adapter    |
+| Rspack     | 📋 Planned | @expozr/rspack-adapter    |
+| Parcel     | 📋 Planned | @expozr/parcel-adapter    |
+| Bun        | 📋 Planned | @expozr/bun-adapter       |
+| Turbopack  | 📋 Planned | @expozr/turbopack-adapter |
+| SWC        | 📋 Planned | @expozr/swc-adapter       |
+| Farm       | 📋 Planned | @expozr/farm-adapter      |
 
 ## ⚛️ Frontend Framework Support
 
@@ -210,25 +215,39 @@ function App() {
 
 ## 🔧 Development Tools & Plugins
 
-| Tool      | Status     | Package           | Features                                   |
-| --------- | ---------- | ----------------- | ------------------------------------------ |
-| Nx        | 📋 Planned | @expozr/nx        | Monorepo integration, workspace management |
-| Turbopack | 📋 Planned | @expozr/turbopack | Fast builds, incremental compilation       |
-| Turborepo | 📋 Planned | @expozr/turborepo | Monorepo builds, remote caching            |
-| Lerna     | 📋 Planned | @expozr/lerna     | Package publishing, version management     |
-| Rush      | 📋 Planned | @expozr/rush      | Scalable monorepo, dependency management   |
-| pnpm      | 📋 Planned | @expozr/pnpm      | Workspace support, efficient installs      |
-| Yarn PnP  | 📋 Planned | @expozr/yarn-pnp  | Zero-installs, workspace optimization      |
-| esbuild   | 📋 Planned | @expozr/esbuild   | Ultra-fast builds, module transformation   |
-| SWC       | 📋 Planned | @expozr/swc       | Fast compilation, TypeScript support       |
-| Biome     | 📋 Planned | @expozr/biome     | Linting integration, code formatting       |
+| Tool       | Status     | Package            | Features                                     |
+| ---------- | ---------- | ------------------ | -------------------------------------------- |
+| Bun        | 📋 Planned | @expozr/bun        | All-in-one runtime, package manager, bundler |
+| Deno       | 📋 Planned | @expozr/deno       | Secure runtime, built-in tooling             |
+| Node.js    | ✅ Ready   | @expozr/core       | Native runtime support                       |
+| Nx         | 📋 Planned | @expozr/nx         | Monorepo integration, workspace management   |
+| Turbopack  | 📋 Planned | @expozr/turbopack  | Fast builds, incremental compilation         |
+| Turborepo  | 📋 Planned | @expozr/turborepo  | Monorepo builds, remote caching              |
+| Lerna      | 📋 Planned | @expozr/lerna      | Package publishing, version management       |
+| Rush       | 📋 Planned | @expozr/rush       | Scalable monorepo, dependency management     |
+| Changesets | 📋 Planned | @expozr/changesets | Version management, changelog generation     |
+| pnpm       | 📋 Planned | @expozr/pnpm       | Workspace support, efficient installs        |
+| Yarn PnP   | 📋 Planned | @expozr/yarn-pnp   | Zero-installs, workspace optimization        |
+| npm        | ✅ Ready   | @expozr/core       | Standard package manager support             |
+| esbuild    | 📋 Planned | @expozr/esbuild    | Ultra-fast builds, module transformation     |
+| SWC        | 📋 Planned | @expozr/swc        | Fast compilation, TypeScript support         |
+| Babel      | 📋 Planned | @expozr/babel      | Code transformation, plugin ecosystem        |
+| TypeScript | ✅ Ready   | @expozr/core       | Full TypeScript support                      |
+| Biome      | 📋 Planned | @expozr/biome      | Linting integration, code formatting         |
+| ESLint     | 📋 Planned | @expozr/eslint     | Code quality, custom rules                   |
+| Prettier   | 📋 Planned | @expozr/prettier   | Code formatting integration                  |
+| Husky      | 📋 Planned | @expozr/husky      | Git hooks, pre-commit validation             |
+| Vitest     | 📋 Planned | @expozr/vitest     | Testing integration, module mocking          |
+| Jest       | 📋 Planned | @expozr/jest       | Testing framework integration                |
+| Playwright | 📋 Planned | @expozr/playwright | E2E testing, module loading tests            |
+| Storybook  | 📋 Planned | @expozr/storybook  | Component documentation, isolated testing    |
 
 ### Advanced Configuration Examples
 
 #### Multi-Format Module Support
 
 ```typescript
-import { defineExpozrConfig, createHybridExpozrConfig } from "@expozr/core";
+import { createHybridExpozrConfig } from "@expozr/core";
 
 // Hybrid configuration supporting both ESM and UMD
 export default createHybridExpozrConfig({
