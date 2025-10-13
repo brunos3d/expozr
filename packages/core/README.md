@@ -92,6 +92,8 @@ export default defineExpozrConfig({
   build: {
     outDir: "dist",
     publicPath: "http://localhost:3001/",
+    format: ["esm", "umd"],
+    target: "universal",
   },
 });
 ```
@@ -102,8 +104,6 @@ export default defineExpozrConfig({
 import { defineHostConfig } from "@expozr/core";
 
 export default defineHostConfig({
-  name: "my-host-app",
-  version: "1.0.0",
   expozrs: {
     components: {
       url: "http://localhost:3001",
@@ -133,29 +133,36 @@ import {
 // ESM-only configuration
 const esmConfig = createESMExpozrConfig({
   name: "modern-components",
-  entries: {
-    "./Button": "./src/Button.tsx",
-    "./Card": "./src/Card.tsx",
+  version: "1.0.0",
+  expose: {
+    "./Button": {
+      entry: "./src/Button.tsx",
+    },
+    "./Card": {
+      entry: "./src/Card.tsx",
+    },
   },
 });
 
 // UMD configuration for legacy support
 const umdConfig = createUMDExpozrConfig({
   name: "legacy-components",
-  entries: {
-    "./Button": "./src/Button.tsx",
-  },
-  globals: {
-    react: "React",
-    "react-dom": "ReactDOM",
+  version: "1.0.0",
+  expose: {
+    "./Button": {
+      entry: "./src/Button.tsx",
+    },
   },
 });
 
 // Hybrid configuration (both ESM and UMD)
 const hybridConfig = createHybridExpozrConfig({
   name: "universal-components",
-  entries: {
-    "./Button": "./src/Button.tsx",
+  version: "1.0.0",
+  expose: {
+    "./Button": {
+      entry: "./src/Button.tsx",
+    },
   },
 });
 ```
@@ -182,54 +189,46 @@ const moduleConfig: ModuleSystemConfig = {
 };
 ```
 
-### Environment Detection
-
-```typescript
-import { detectEnvironment, isNode, isBrowser } from "@expozr/core";
-
-// Automatic environment detection
-const env = detectEnvironment();
-console.log(env); // "browser" | "node" | "worker"
-
-// Manual checks
-if (isBrowser()) {
-  // Browser-specific code
-  console.log("Running in browser");
-}
-
-if (isNode()) {
-  // Node.js-specific code
-  console.log("Running in Node.js");
-}
-```
-
 ## 🔌 Bundler Adapters
 
 ### Creating a Custom Adapter
 
 ```typescript
-import { BaseBundlerAdapter, BundlerAdapterConfig } from "@expozr/core";
+import { AbstractBundlerAdapter } from "@expozr/core";
+import type { ExpozrConfig, HostConfig } from "@expozr/core";
 
-class CustomBundlerAdapter extends BaseBundlerAdapter {
-  constructor(config: BundlerAdapterConfig) {
-    super(config);
+class CustomBundlerAdapter extends AbstractBundlerAdapter {
+  readonly name = "custom-bundler";
+
+  configureExpozr(config: ExpozrConfig, bundlerConfig: any): any {
+    // Configure bundler for expozr build
+    return {
+      ...bundlerConfig,
+      // Add your custom configuration here
+    };
   }
 
-  async generateInventory(): Promise<void> {
-    // Generate inventory for your bundler
+  configureHost(config: HostConfig, bundlerConfig: any): any {
+    // Configure bundler for host application
+    return {
+      ...bundlerConfig,
+      // Add your custom configuration here
+    };
   }
 
-  async buildExpozr(): Promise<void> {
-    // Build logic for your bundler
+  getDefaultConfig(): any {
+    // Return default configuration for your bundler
+    return {};
   }
 
-  getWebpackConfig() {
-    // Return bundler-specific configuration
+  isAvailable(): boolean {
+    // Check if bundler is available
+    return true;
   }
 }
 
-export function createCustomAdapter(config?: BundlerAdapterConfig) {
-  return new CustomBundlerAdapter(config);
+export function createCustomAdapter() {
+  return new CustomBundlerAdapter();
 }
 ```
 
@@ -239,34 +238,22 @@ export function createCustomAdapter(config?: BundlerAdapterConfig) {
 
 ```typescript
 import {
-  ESMLoader,
-  UMDLoader,
-  HybridLoader,
-  createUniversalLoader,
+  ESMModuleLoader,
+  UMDModuleLoader,
+  HybridModuleLoader,
 } from "@expozr/core";
 
 // ESM-specific loader
-const esmLoader = new ESMLoader({
-  baseUrl: "http://localhost:3001",
-});
+const esmLoader = new ESMModuleLoader();
 
 // UMD-specific loader
-const umdLoader = new UMDLoader({
-  baseUrl: "http://localhost:3001",
-  globals: {
-    react: "React",
-    "react-dom": "ReactDOM",
-  },
-});
+const umdLoader = new UMDModuleLoader();
 
-// Universal loader (auto-detects format)
-const universalLoader = createUniversalLoader({
-  primary: "esm",
-  fallbacks: ["umd", "cjs"],
-});
+// Hybrid loader (tries multiple formats)
+const hybridLoader = new HybridModuleLoader();
 
 // Load a module
-const module = await universalLoader.load("./Button");
+const module = await hybridLoader.loadModule("http://localhost:3001/button.js");
 ```
 
 ## 🛠️ Utilities
@@ -274,50 +261,40 @@ const module = await universalLoader.load("./Button");
 ### Version Management
 
 ```typescript
-import {
-  parseVersion,
-  satisfiesVersion,
-  resolveVersion,
-  VersionRange,
-} from "@expozr/core";
+import { VersionUtils } from "@expozr/core";
 
 // Parse semantic version
-const version = parseVersion("1.2.3-beta.1");
+const version = VersionUtils.parse("1.2.3-beta.1");
 console.log(version); // { major: 1, minor: 2, patch: 3, prerelease: "beta.1" }
 
-// Check version compatibility
-const isCompatible = satisfiesVersion("1.2.5", "^1.2.0"); // true
+// Check version validity
+const isValid = VersionUtils.isValid("1.2.5"); // true
 
-// Resolve best version from range
-const bestVersion = resolveVersion(["1.1.0", "1.2.0", "1.3.0"], "^1.2.0"); // "1.3.0"
+// Compare versions
+const comparison = VersionUtils.compare("1.2.5", "1.2.0"); // 1 (v1 > v2)
 ```
 
 ### URL Utilities
 
 ```typescript
-import { normalizeUrl, joinUrls, parseUrl, isAbsoluteUrl } from "@expozr/core";
+import { UrlUtils } from "@expozr/core";
 
 // Normalize URLs
-const normalized = normalizeUrl("http://localhost:3001//dist/");
+const normalized = UrlUtils.normalize("http://localhost:3001//dist/");
 console.log(normalized); // "http://localhost:3001/dist/"
 
 // Join URL segments
-const fullUrl = joinUrls("http://localhost:3001", "dist", "button.js");
+const fullUrl = UrlUtils.join("http://localhost:3001", "dist", "button.js");
 console.log(fullUrl); // "http://localhost:3001/dist/button.js"
 
 // Check if URL is absolute
-const isAbsolute = isAbsoluteUrl("./relative/path"); // false
+const isAbsolute = UrlUtils.isAbsolute("./relative/path"); // false
 ```
 
 ### Validation
 
 ```typescript
-import {
-  validateExpozrConfig,
-  validateHostConfig,
-  validateCargo,
-  ValidationError,
-} from "@expozr/core";
+import { ValidationUtils } from "@expozr/core";
 
 try {
   const config = {
@@ -331,12 +308,10 @@ try {
     },
   };
 
-  const validatedConfig = validateExpozrConfig(config);
-  console.log("Configuration is valid:", validatedConfig);
+  const isValid = ValidationUtils.validateExpozrConfig(config);
+  console.log("Configuration is valid:", isValid);
 } catch (error) {
-  if (error instanceof ValidationError) {
-    console.error("Validation failed:", error.details);
-  }
+  console.error("Validation failed:", error.message);
 }
 ```
 
@@ -349,9 +324,9 @@ try {
 interface ExpozrConfig {
   name: string;
   version: string;
-  expose: Record<string, CargoConfig>;
+  expose: Record<string, string | CargoConfig>;
   dependencies?: Record<string, string>;
-  build?: BuildConfig;
+  build?: ExpozrBuildConfig;
   metadata?: ExpozrMetadata;
 }
 
@@ -360,17 +335,23 @@ interface CargoConfig {
   entry: string;
   exports?: string[];
   dependencies?: Record<string, string>;
-  format?: ModuleFormat;
   metadata?: CargoMetadata;
 }
 
 // Host configuration
 interface HostConfig {
-  name: string;
-  version: string;
   expozrs: Record<string, ExpozrReference>;
+  catalog?: string | CatalogConfig;
   cache?: CacheConfig;
   loading?: LoadingConfig;
+}
+
+// Expozr reference from host
+interface ExpozrReference {
+  url: string;
+  version?: string;
+  alias?: string;
+  fallback?: string;
 }
 ```
 
@@ -381,11 +362,27 @@ interface HostConfig {
 function defineExpozrConfig(config: ExpozrConfig): ExpozrConfig;
 function defineHostConfig(config: HostConfig): HostConfig;
 function defineCargoConfig(config: CargoConfig): CargoConfig;
+function defineModuleSystemConfig(
+  config: Partial<ModuleSystemConfig>
+): ModuleSystemConfig;
 
 // Create presets
-function createESMExpozrConfig(options: PresetOptions): ExpozrConfig;
-function createUMDExpozrConfig(options: PresetOptions): ExpozrConfig;
-function createHybridExpozrConfig(options: PresetOptions): ExpozrConfig;
+function createESMExpozrConfig(
+  config: Omit<ExpozrConfig, "build"> & {
+    build?: Partial<ExpozrConfig["build"]>;
+  }
+): ExpozrConfig;
+function createUMDExpozrConfig(
+  config: Omit<ExpozrConfig, "build"> & {
+    build?: Partial<ExpozrConfig["build"]>;
+  }
+): ExpozrConfig;
+function createHybridExpozrConfig(
+  config: Omit<ExpozrConfig, "build"> & {
+    build?: Partial<ExpozrConfig["build"]>;
+  }
+): ExpozrConfig;
+function createModernHostConfig(config?: Partial<HostConfig>): HostConfig;
 ```
 
 ## 💡 Examples
@@ -412,13 +409,11 @@ export default defineExpozrConfig({
     "./utils": {
       entry: "./src/utils/index.ts",
       exports: ["formatCurrency", "debounce", "throttle"],
-      format: "esm", // Force ESM format
     },
-    // Legacy UMD module
+    // Legacy component
     "./legacy": {
       entry: "./src/legacy/index.js",
       exports: ["LegacyComponent"],
-      format: "umd",
     },
   },
   dependencies: {
@@ -428,7 +423,14 @@ export default defineExpozrConfig({
   build: {
     outDir: "dist",
     publicPath: "https://cdn.example.com/ui-library/",
-    formats: ["esm", "umd"], // Build both formats
+    format: ["esm", "umd"], // Build both formats
+    target: "universal",
+    moduleSystem: {
+      primary: "esm",
+      fallbacks: ["umd"],
+      strategy: "dynamic",
+      hybrid: true,
+    },
   },
 });
 ```
@@ -440,17 +442,20 @@ import { defineHostConfig, createModernHostConfig } from "@expozr/core";
 
 // Using preset
 const config = createModernHostConfig({
-  name: "my-app",
   expozrs: {
-    "ui-components": "https://cdn.example.com/ui/",
-    "business-logic": "https://api.example.com/modules/",
+    "ui-components": {
+      url: "https://cdn.example.com/ui/",
+      version: "^2.0.0",
+    },
+    "business-logic": {
+      url: "https://api.example.com/modules/",
+      version: "latest",
+    },
   },
 });
 
 // Or manual configuration
 export default defineHostConfig({
-  name: "enterprise-app",
-  version: "3.2.1",
   expozrs: {
     "design-system": {
       url: "https://design.company.com/expozr/",
@@ -472,8 +477,11 @@ export default defineHostConfig({
   },
   loading: {
     timeout: 10000, // 10 seconds
-    retries: 3,
-    retryDelay: 1000,
+    retry: {
+      attempts: 3,
+      delay: 1000,
+      backoff: 2,
+    },
   },
 });
 ```
