@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 1.2.1 (2025-10-13)
+
+### Bug Fixes
+
+* **compatibility:** update imports to work with refactored @expozr/core package
+  - Fixed function imports to use new utility classes (ValidationUtils, ChecksumUtils, etc.)
+  - Resolved MODULE_NOT_FOUND errors after core package restructure
+  - Updated expozr-plugin.ts, host-plugin.ts to use proper utility class methods
+  - Ensured webpack remote applications work correctly with new core structure
+
 # 1.2.0 (2025-10-11)
 
 

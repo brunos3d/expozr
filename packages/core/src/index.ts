@@ -22,10 +22,7 @@ export * from "./loaders";
 export * from "./adapters";
 
 // Configuration utilities
-export * from "./config-utils";
+export * from "./config";
 
 // Utilities
 export * from "./utils";
-
-// Configuration helpers
-export * from "./config";

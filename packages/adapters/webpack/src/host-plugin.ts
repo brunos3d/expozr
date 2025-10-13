@@ -8,11 +8,7 @@ declare const require: any;
 
 import type { HostConfig, ExpozrReference } from "@expozr/core";
 
-import {
-  validateExpozrConfig,
-  defaultHostConfig,
-  deepMerge,
-} from "@expozr/core";
+import { ValidationUtils, defaultHostConfig, ObjectUtils } from "@expozr/core";
 
 export interface HostPluginOptions {
   configFile?: string;
@@ -112,7 +108,10 @@ export class ExpozrHostPlugin {
     }
 
     // Merge with defaults
-    this.config = deepMerge(defaultHostConfig, this.config) as HostConfig;
+    this.config = ObjectUtils.deepMerge(
+      defaultHostConfig,
+      this.config
+    ) as HostConfig;
   }
 
   private configureWebpack(compiler: any): void {

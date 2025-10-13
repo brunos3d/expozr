@@ -3,6 +3,29 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 1.3.0 (2025-10-13)
+
+### Features
+
+* **refactor:** comprehensive package restructure for better organization ([#major](https://github.com/brunos3d/expozr/commit/refactor))
+  - Organized code into modular directories: `/adapters`, `/loaders`, `/config`, `/utils`
+  - Created utility classes: `ValidationUtils`, `ChecksumUtils`, `UrlUtils`, `VersionUtils`, `ObjectUtils`
+  - Enhanced documentation with comprehensive JSDoc comments
+  - Improved type safety and error handling
+  - Maintained 100% backward compatibility through re-exports
+
+### Bug Fixes
+
+* **webpack-adapter:** fix import paths after core package refactoring
+  - Updated function imports to use new utility classes
+  - Fixed MODULE_NOT_FOUND errors in webpack remote applications
+  - Ensured proper dependency linking in monorepo setup
+
+### Documentation
+
+* add comprehensive REFACTORING.md with migration guide and technical details
+* enhanced inline documentation across all modules
+
 # 1.2.0 (2025-10-11)
 
 
