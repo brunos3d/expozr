@@ -117,9 +117,9 @@ export interface ExpozrDiscovery {
 }
 
 /**
- * Interface for the main Navigator (runtime loader)
+ * Interface for the main ExpozrNavigator (runtime loader)
  */
-export interface INavigator {
+export interface IExpozrNavigator {
   /**
    * Load a cargo from a expozr
    */

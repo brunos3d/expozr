@@ -3,7 +3,7 @@ import { Button } from "./components/Button";
 function App() {
   return (
     <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
-      <h1>Vite React Remote - Button Component Warehouse</h1>
+      <h1>Vite React Remote - Button Component</h1>
       <p>
         This is a remote application that exposes a Button component via Expozr.
       </p>

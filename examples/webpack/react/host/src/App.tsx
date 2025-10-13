@@ -1,9 +1,9 @@
 import React from "react";
 import { loadReactExpozr } from "@expozr/react";
 
-const REMOTE_WAREHOUSE_URL = "http://localhost:3001"; // URL of the remote expozr
+const EXPOZR_REMOTE_URL = "http://localhost:3001"; // URL of the remote expozr
 
-const expozr = loadReactExpozr(REMOTE_WAREHOUSE_URL);
+const expozr = loadReactExpozr(EXPOZR_REMOTE_URL);
 
 const Button = React.lazy(() =>
   expozr.then((mod) => ({
@@ -66,7 +66,7 @@ export default function App() {
           >
             <strong>Component Info:</strong>
             <ul style={{ margin: "5px 0", paddingLeft: "20px" }}>
-              <li>Source: Remote expozr at {REMOTE_WAREHOUSE_URL}</li>
+              <li>Source: Remote expozr at {EXPOZR_REMOTE_URL}</li>
               <li>Type: {typeof Button}</li>
               <li>
                 Props: Supports variant, size, disabled, onClick, style, and

@@ -86,7 +86,9 @@ const { add, subtract } = await import("./mathUtils");
 
 ```typescript
 // Use async/await, destructuring, and modern syntax
-const navigator = new Navigator({
+import { createNavigator } from "@expozr/navigator";
+
+const navigator = createNavigator({
   expozrs: {
     "esm-utils": {
       url: "http://localhost:3001",

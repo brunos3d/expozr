@@ -75,7 +75,9 @@ React application that:
 
 ```typescript
 // Load React components at runtime using Navigator
-const navigator = new Navigator({
+import { createNavigator } from "@expozr/navigator";
+
+const navigator = createNavigator({
   expozrs: {
     "react-components": {
       url: "http://localhost:3001",

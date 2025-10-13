@@ -106,7 +106,11 @@ export class UMDModuleLoader extends BaseModuleLoader {
   ): Promise<T> {
     try {
       // Try dynamic import first
-      const module = await import(url);
+      const module = await import(
+        /* webpackIgnore: true */
+        /* @vite-ignore */
+        url
+      );
       return this.extractModuleExports<T>(module, options?.exports);
     } catch (error) {
       // Fallback to require if available

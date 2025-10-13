@@ -78,7 +78,9 @@ module.exports = {
 
 ```javascript
 // Remote modules are loaded using Navigator:
-const navigator = new Navigator({
+import { createNavigator } from "@expozr/navigator";
+
+const navigator = createNavigator({
   expozrs: {
     "simple-expozr": {
       url: "http://localhost:3001",

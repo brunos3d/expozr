@@ -24,7 +24,7 @@ export class ExpozrError extends Error {
  */
 export class ExpozrNotFoundError extends ExpozrError {
   constructor(expozrName: string, context?: any) {
-    super(`Expozr "${expozrName}" not found`, "WAREHOUSE_NOT_FOUND", context);
+    super(`Expozr "${expozrName}" not found`, "EXPOZR_NOT_FOUND", context);
     this.name = "ExpozrNotFoundError";
   }
 }
@@ -141,7 +141,7 @@ export class SecurityError extends ExpozrError {
  * Error codes enum for easier reference
  */
 export enum ErrorCodes {
-  WAREHOUSE_NOT_FOUND = "WAREHOUSE_NOT_FOUND",
+  EXPOZR_NOT_FOUND = "EXPOZR_NOT_FOUND",
   CARGO_NOT_FOUND = "CARGO_NOT_FOUND",
   DEPENDENCY_RESOLUTION_ERROR = "DEPENDENCY_RESOLUTION_ERROR",
   LOAD_TIMEOUT = "LOAD_TIMEOUT",

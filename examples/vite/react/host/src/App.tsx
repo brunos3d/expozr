@@ -1,5 +1,5 @@
 import React from "react";
-import { Navigator } from "@expozr/navigator";
+import { createNavigator } from "@expozr/navigator";
 
 // Define the Button component type
 interface ButtonProps {
@@ -16,12 +16,12 @@ type CargoModule = {
   Button: ButtonComponent;
 };
 
-const REMOTE_WAREHOUSE_URL = "http://localhost:5001"; // URL of the remote expozr
+const EXPOZR_REMOTE_URL = "http://localhost:5001"; // URL of the remote expozr
 
-const navigator = new Navigator({
+const navigator = createNavigator({
   expozrs: {
     "vite-react-components": {
-      url: REMOTE_WAREHOUSE_URL,
+      url: EXPOZR_REMOTE_URL,
     },
   },
 });
@@ -40,7 +40,7 @@ function App() {
       <h1>Vite React Host Application</h1>
       <p>
         Successfully loaded and using the remote Button component from the
-        warehouse!
+        remote application!
       </p>
 
       <div
@@ -93,13 +93,13 @@ function App() {
       >
         <h3>🎉 Success!</h3>
         <p>
-          These buttons are loaded dynamically from the remote warehouse running
-          on port 5001. The Button component is defined in the remote
-          application and consumed here seamlessly!
+          These buttons are loaded dynamically from the remote app running on
+          port 5001. The Button component is defined in the remote application
+          and consumed here seamlessly!
         </p>
         <p>
-          <strong>Architecture:</strong> Host (port 5000) → Remote Warehouse
-          (port 5001) → Button Component
+          <strong>Architecture:</strong> Host (port 5000) → Remote App (port
+          5001) → Button Component
         </p>
       </div>
     </div>

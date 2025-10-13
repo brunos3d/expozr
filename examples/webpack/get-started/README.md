@@ -80,7 +80,9 @@ module.exports = {
 
 ```typescript
 // Load remote modules using Navigator
-const navigator = new Navigator({
+import { createNavigator } from "@expozr/navigator";
+
+const navigator = createNavigator({
   expozrs: {
     "get-started-remote": {
       url: "http://localhost:3001",

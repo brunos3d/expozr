@@ -266,10 +266,10 @@ module.exports = {
 `;
 
   const appExample = `
-import { Navigator } from '@expozr/navigator';
+import { createNavigator } from '@expozr/navigator';
 
 async function main() {
-  const navigator = new Navigator({
+  const navigator = createNavigator({
     expozrs: {
       // Add expozr configurations here
     }

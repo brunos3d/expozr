@@ -1,5 +1,5 @@
 // ESM Host application using Expozr Navigator
-import { Navigator } from "@expozr/navigator";
+import { createNavigator } from "@expozr/navigator";
 
 console.log("🏠 ESM Host application loaded!");
 
@@ -18,7 +18,7 @@ async function init(): Promise<void> {
   console.log(greetUser("Developer"));
 
   // Initialize Expozr Navigator
-  const navigator = new Navigator();
+  const navigator = createNavigator();
 
   try {
     // Load the remote ESM expozr

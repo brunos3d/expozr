@@ -79,7 +79,7 @@ Fast development with Vite's lightning-fast HMR:
 export default defineConfig({
   plugins: [
     react(),
-    createWarehousePlugin(), // Automatically discovers expozr.config.ts
+    createExpozrPlugin(), // Automatically discovers expozr.config.ts
   ],
   server: {
     port: 5001,
@@ -92,7 +92,9 @@ export default defineConfig({
 
 ```typescript
 // Load React components at runtime using Navigator
-const navigator = new Navigator({
+import { createNavigator } from "@expozr/navigator";
+
+const navigator = createNavigator({
   expozrs: {
     "vite-react-components": {
       url: "http://localhost:5001",
