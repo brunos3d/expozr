@@ -187,6 +187,42 @@ function App() {
 | Rspack     | 📋 Planned | @expozr/rspack-adapter  |
 | Parcel     | 📋 Planned | @expozr/parcel-adapter  |
 
+## ⚛️ Frontend Framework Support
+
+| Framework  | Status     | Package            | Features                                  |
+| ---------- | ---------- | ------------------ | ----------------------------------------- |
+| Vanilla JS | ✅ Ready   | @expozr/core       | Universal module loading                  |
+| React      | ✅ Ready   | @expozr/react      | Component loading, Suspense integration   |
+| Next.js    | 📋 Planned | @expozr/nextjs     | SSR/SSG support, App Router integration   |
+| Modern.js  | 📋 Planned | @expozr/modernjs   | Module federation, SSR support            |
+| Remix      | 📋 Planned | @expozr/remix      | Route-based loading, loader integration   |
+| Gatsby     | 📋 Planned | @expozr/gatsby     | Static generation, build-time integration |
+| Vue        | 📋 Planned | @expozr/vue        | Component loading, async components       |
+| Nuxt       | 📋 Planned | @expozr/nuxt       | SSR/SSG support, auto-imports             |
+| Angular    | 📋 Planned | @expozr/angular    | Module loading, lazy loading integration  |
+| Svelte     | 📋 Planned | @expozr/svelte     | Component loading, reactive updates       |
+| SvelteKit  | 📋 Planned | @expozr/sveltekit  | SSR support, route-based loading          |
+| Solid      | 📋 Planned | @expozr/solid      | Component loading, lazy components        |
+| SolidStart | 📋 Planned | @expozr/solidstart | SSR support, file-based routing           |
+| Astro      | 📋 Planned | @expozr/astro      | Multi-framework support, island loading   |
+| Qwik       | 📋 Planned | @expozr/qwik       | Resumable components, edge optimization   |
+| Lit        | 📋 Planned | @expozr/lit        | Web component loading                     |
+
+## 🔧 Development Tools & Plugins
+
+| Tool      | Status     | Package           | Features                                   |
+| --------- | ---------- | ----------------- | ------------------------------------------ |
+| Nx        | 📋 Planned | @expozr/nx        | Monorepo integration, workspace management |
+| Turbopack | 📋 Planned | @expozr/turbopack | Fast builds, incremental compilation       |
+| Turborepo | 📋 Planned | @expozr/turborepo | Monorepo builds, remote caching            |
+| Lerna     | 📋 Planned | @expozr/lerna     | Package publishing, version management     |
+| Rush      | 📋 Planned | @expozr/rush      | Scalable monorepo, dependency management   |
+| pnpm      | 📋 Planned | @expozr/pnpm      | Workspace support, efficient installs      |
+| Yarn PnP  | 📋 Planned | @expozr/yarn-pnp  | Zero-installs, workspace optimization      |
+| esbuild   | 📋 Planned | @expozr/esbuild   | Ultra-fast builds, module transformation   |
+| SWC       | 📋 Planned | @expozr/swc       | Fast compilation, TypeScript support       |
+| Biome     | 📋 Planned | @expozr/biome     | Linting integration, code formatting       |
+
 ### Advanced Configuration Examples
 
 #### Multi-Format Module Support
