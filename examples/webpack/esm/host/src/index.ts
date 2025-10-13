@@ -1,6 +1,8 @@
 // ESM Host application using Expozr Navigator
 import { createNavigator } from "@expozr/navigator";
 
+const EXPOZR_REMOTE_URL = "http://localhost:3001"; // URL of the remote expozr
+
 console.log("🏠 ESM Host application loaded!");
 
 // Export some functions to demonstrate ES module functionality
@@ -17,11 +19,26 @@ async function init(): Promise<void> {
   console.log(`⏰ Application started at: ${getCurrentTime()}`);
   console.log(greetUser("Developer"));
 
+  // Update the status in the HTML
+  const statusElement = document.querySelector(".status");
+  if (statusElement) {
+    statusElement.innerHTML = `
+      ✅ ESM Host application is running!<br />
+      📦 Using Expozr webpack adapter with ESM modules<br />
+      🔄 Webpack is watching for changes with hot reload<br />
+      ⏰ Last reload: ${getCurrentTime()}
+    `;
+  }
+
+  console.log("🎉 ESM Host application initialization complete!");
+}
+
+async function initRemote() {
   // Initialize Expozr Navigator
   const navigator = createNavigator({
     expozrs: {
       "remote-esm-functions": {
-        url: "http://localhost:3001",
+        url: EXPOZR_REMOTE_URL,
         version: "^1.0.0",
       },
     },
@@ -46,10 +63,10 @@ async function init(): Promise<void> {
         console.log("📞 Calling remote greet:", module.greet("ESM Host"));
       }
       if (module.add) {
-        console.log("🧮 Calling remote add:", module.add(15, 25));
+        console.log("🧮 Calling remote add:", module.add(100, 25));
       }
       if (module.multiply) {
-        console.log("✖️ Calling remote multiply:", module.multiply(6, 7));
+        console.log("✖️ Calling remote multiply:", module.multiply(5, 100));
       }
       if (module.getCurrentTime) {
         console.log("⏰ Remote time:", module.getCurrentTime());
@@ -59,23 +76,8 @@ async function init(): Promise<void> {
     console.error("❌ Failed to load remote ESM functions:", error);
   }
 
-  // Update the status in the HTML
-  const statusElement = document.querySelector(".status");
-  if (statusElement) {
-    statusElement.innerHTML = `
-      ✅ ESM Host application is running!<br />
-      📦 Using Expozr webpack adapter with ESM modules<br />
-      🔄 Webpack is watching for changes with hot reload<br />
-      ⏰ Last reload: ${getCurrentTime()}
-    `;
-  }
-
-  console.log("🎉 ESM Host application initialization complete!");
-}
-
-async function initRemote() {
   try {
-    const remoteUrl = "http://localhost:3001/utils.js";
+    const remoteUrl = `${EXPOZR_REMOTE_URL}/utils.js`;
     const remoteModule = await import(/* webpackIgnore: true */ remoteUrl);
     console.log("🌐 Remote module loaded successfully!");
 
