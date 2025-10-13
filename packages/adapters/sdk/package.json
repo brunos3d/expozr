@@ -1,7 +1,7 @@
 {
-  "name": "@expozr/webpack-adapter",
+  "name": "@expozr/adapter-sdk",
   "version": "2.0.0",
-  "description": "Webpack adapter for the Expozr ecosystem",
+  "description": "Shared SDK and utilities for Expozr bundler adapters",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
@@ -17,8 +17,9 @@
   },
   "keywords": [
     "expozr",
-    "webpack",
-    "adapter"
+    "adapter",
+    "sdk",
+    "bundler"
   ],
   "author": "Bruno Silva",
   "license": "MIT",
@@ -26,21 +27,17 @@
     "access": "public"
   },
   "dependencies": {
-    "@expozr/core": "2.0.0",
-    "@expozr/adapter-sdk": "2.0.0"
+    "@expozr/core": "2.0.0"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.0",
     "@rollup/plugin-node-resolve": "^15.0.0",
     "@rollup/plugin-typescript": "^11.0.0",
     "@types/node": "^20.0.0",
-    "@types/webpack": "^5.0.0",
     "rollup": "^4.0.0",
     "tslib": "^2.0.0"
   },
   "peerDependencies": {
-    "typescript": "^5.0.0",
-    "webpack": "^5.0.0"
-  },
-  "gitHead": "1958b8d8259681f3f7365c7a3c782655f7bba324"
+    "typescript": "^5.0.0"
+  }
 }
