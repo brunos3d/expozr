@@ -271,14 +271,14 @@ The fastest way to understand Expozr is to run the examples! We have working exa
 
 **➡️ [View all examples](./examples/)**
 
-| Example                                                      | Description             | Stack                   | Demo                      |
-| ------------------------------------------------------------ | ----------------------- | ----------------------- | ------------------------- |
-| [**Webpack + Get Started**](./examples/webpack/get-started/) | Simplest possible setup | TypeScript              | [▶️ Try it](#quick-start) |
-| [**Webpack + Vanilla**](./examples/webpack/vanilla/)         | Basic module sharing    | Vanilla JS + TypeScript | [▶️ Try it](#quick-start) |
-| [**Webpack + React**](./examples/webpack/react/)             | React component sharing | React + TypeScript      | [▶️ Try it](#quick-start) |
-| [**Webpack + ESM**](./examples/webpack/esm/)                 | Modern ES modules       | ESM + TypeScript        | [▶️ Try it](#quick-start) |
-| [**Webpack + UMD**](./examples/webpack/umd/)                 | Universal module format | UMD + TypeScript        | [▶️ Try it](#quick-start) |
-| [**Vite + React**](./examples/vite/react/)                   | Vite React components   | Vite + React + TS       | [▶️ Try it](#quick-start) |
+| Example                                                      | Description             | Stack                   |
+| ------------------------------------------------------------ | ----------------------- | ----------------------- |
+| [**Webpack + Get Started**](./examples/webpack/get-started/) | Simplest possible setup | TypeScript              |
+| [**Webpack + Vanilla**](./examples/webpack/vanilla/)         | Basic module sharing    | Vanilla JS + TypeScript |
+| [**Webpack + React**](./examples/webpack/react/)             | React component sharing | React + TypeScript      |
+| [**Webpack + ESM**](./examples/webpack/esm/)                 | Modern ES modules       | ESM + TypeScript        |
+| [**Webpack + UMD**](./examples/webpack/umd/)                 | Universal module format | UMD + TypeScript        |
+| [**Vite + React**](./examples/vite/react/)                   | Vite React components   | Vite + React + TS       |
 
 ### ⚡ Quick Start (2 minutes)
 
