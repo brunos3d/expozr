@@ -42,13 +42,47 @@ Universal runtime system that handles dynamic loading, dependency resolution, an
 
 ## ✨ Key Features
 
-- 🌍 **Universal**: Works with any bundler (Webpack, Vite, Rollup, Rspack, etc.)
-- 🚀 **Runtime Loading**: Dynamic module loading without build-time coupling
-- 🔄 **Version Management**: Semantic versioning support with automatic resolution
-- 🏗️ **Dependency Resolution**: Smart dependency handling and conflict resolution
-- 💾 **Intelligent Caching**: Multiple caching strategies (memory, localStorage, IndexedDB)
-- 📱 **Cross-Platform**: Works in both Browser and Node.js environments
+### � **Universal Module System**
+
+- 🌍 **Bundler Agnostic**: Works with any bundler (Webpack, Vite, Rollup, Rspack, etc.)
+- � **Multi-Format Support**: ESM, UMD, CJS, AMD, IIFE, SystemJS with automatic detection
+- 🧠 **Intelligent Fallbacks**: Graceful degradation when preferred formats fail
+- ⚡ **Hybrid Mode**: Load both ESM and UMD versions of the same module
+
+### 🚀 **Runtime Excellence**
+
+- 🚀 **Dynamic Loading**: Load modules at runtime without build-time coupling
+- 🎯 **Smart Format Detection**: Automatically detects and loads the best available format
+- �️ **Error Recovery**: Comprehensive error handling with detailed feedback
+- 📊 **Format Tracking**: Monitor which formats are successfully loaded
+
+### 🔧 **Developer Experience**
+
 - 🔧 **Great DX**: Simple APIs, CLI tools, and comprehensive documentation
+- 🏗️ **TypeScript First**: Full type safety with intelligent autocompletion
+- 📱 **Cross-Platform**: Works seamlessly in Browser and Node.js environments
+- 🔥 **Hot Reloading**: Development-time module reloading support
+
+### ⚙️ **Advanced Configuration**
+
+- 🔄 **Version Management**: Semantic versioning with automatic resolution
+- 🏗️ **Dependency Resolution**: Smart dependency handling and conflict resolution
+- ⚙️ **Configuration Presets**: Pre-built configurations for common scenarios
+- 🛠️ **Plugin Architecture**: Extensible system for custom functionality
+
+### 💾 **Intelligent Caching**
+
+- 💾 **Multiple Strategies**: Memory, localStorage, IndexedDB, or no caching
+- ⏱️ **TTL Support**: Time-based cache invalidation
+- � **Cache Analytics**: Monitor cache performance and hit rates
+- 🔄 **Smart Invalidation**: Automatic cache updates when modules change
+
+### 🔒 **Production Ready**
+
+- 🛡️ **Error Boundaries**: Graceful error handling and recovery
+- 📊 **Performance Monitoring**: Track loading times and cache efficiency
+- � **Debug Mode**: Detailed logging for development and troubleshooting
+- 🚀 **Optimized Loading**: Preloading and lazy loading strategies
 
 ## 🚀 Quick Start
 
@@ -195,13 +229,13 @@ npm install -g @expozr/cli
 
 ### Core Packages
 
-- **[@expozr/core](./packages/core)** - Core abstractions and types
-- **[@expozr/navigator](./packages/navigator)** - Runtime loader for Browser & Node.js
+- **[@expozr/core](./packages/core)** - Core abstractions, types, and configuration system with multi-format module support (ESM, UMD, CJS)
+- **[@expozr/navigator](./packages/navigator)** - Universal runtime loader with smart format detection, caching strategies, and cross-platform support
 
 ### Bundler Adapters
 
-- **[@expozr/webpack-adapter](./packages/adapters/webpack)** - Webpack 5+ support
-- **[@expozr/vite-adapter](./packages/adapters/vite)** - Vite support
+- **[@expozr/webpack-adapter](./packages/adapters/webpack)** - Webpack 5+ support with inventory generation and hot reloading
+- **[@expozr/vite-adapter](./packages/adapters/vite)** - Vite support with ESM-first approach and development server integration
 - **[@expozr/rollup-adapter](./packages/adapters/rollup)** - Rollup support _(coming soon)_
 - **[@expozr/rspack-adapter](./packages/adapters/rspack)** - Rspack support _(coming soon)_
 
@@ -261,6 +295,64 @@ export default defineExpozrConfig({
     author: "Your Name",
   },
 });
+```
+
+### Advanced Configuration Examples
+
+#### Multi-Format Module Support
+
+```typescript
+import { defineExpozrConfig, createHybridExpozrConfig } from "@expozr/core";
+
+// Hybrid configuration supporting both ESM and UMD
+export default createHybridExpozrConfig({
+  name: "universal-components",
+  entries: {
+    "./Button": "./src/components/Button.tsx",
+    "./Card": "./src/components/Card.tsx",
+    "./utils": "./src/utils/index.ts",
+  },
+  build: {
+    formats: ["esm", "umd"], // Build both formats
+    globals: {
+      react: "React",
+      "react-dom": "ReactDOM",
+    },
+  },
+});
+```
+
+#### Smart Caching Configuration
+
+```typescript
+import { createNavigator } from "@expozr/navigator";
+
+const navigator = createNavigator({
+  expozrs: {
+    "ui-components": {
+      url: "https://cdn.example.com/ui/",
+      version: "^2.0.0",
+    },
+  },
+  cache: {
+    strategy: "indexedDB", // Persistent storage
+    ttl: 86400000, // 24 hours
+    maxSize: 100, // 100 modules max
+  },
+  loading: {
+    timeout: 10000, // 10 seconds
+    retries: 3, // Retry failed loads
+    retryDelay: 1000, // 1 second between retries
+  },
+});
+
+// Load with error handling
+try {
+  const cargo = await navigator.loadCargo("ui-components", "Button");
+  console.log(`Loaded ${cargo.format} format using ${cargo.strategy} strategy`);
+} catch (error) {
+  console.error("Failed to load component:", error.message);
+}
 ```
 
 ## 🎨 Examples & Quick Start

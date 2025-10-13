@@ -1,6 +1,6 @@
 # @expozr/navigator
 
-Universal runtime loader for the Expozr ecosystem, providing seamless module federation and dynamic loading capabilities.
+Universal runtime loader for the Expozr ecosystem, providing seamless dynamic module loading and runtime sharing capabilities.
 
 ## 📋 Table of Contents
 
