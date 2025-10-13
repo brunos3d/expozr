@@ -3,6 +3,85 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 2.0.0 (2025-10-13)
+
+
+### Bug Fixes
+
+* update gitHead fields in package.json for version tracking ([1ddc2ff](https://github.com/brunos3d/expozr/commit/1ddc2ffc6794437333543647f5d6866233c01a56))
+* update gitHead references across all package.json files ([90e508d](https://github.com/brunos3d/expozr/commit/90e508d7d66060afd36d394187f8c876a4a76e8e))
+
+
+### Features
+
+* add ESM host and remote application examples with Webpack configuration ([5e80484](https://github.com/brunos3d/expozr/commit/5e80484f3b3f276e236206b3ba6430cadcd891ba))
+* add publishConfig for public access to all packages ([572f332](https://github.com/brunos3d/expozr/commit/572f332aaaef874ba8820338c11cf5e80c47a3ee))
+* add UMD example with auto-loader and enhance core module system ([fd852f4](https://github.com/brunos3d/expozr/commit/fd852f40574924e2b75c069d475687f59e4c70dc))
+* add Vite adapter for Expozr ecosystem ([9d4ebf2](https://github.com/brunos3d/expozr/commit/9d4ebf2803f5f056cde4edd7ee558a02bf6a8ef6))
+* major refactoring of @expozr/core package and webpack adapter compatibility fixes ([81ea9e5](https://github.com/brunos3d/expozr/commit/81ea9e5f8d98358704434213d097bdcb4209d5bc))
+* **react:** add react utility package ([3286c1a](https://github.com/brunos3d/expozr/commit/3286c1a917dd66acdd4a361e3c4180f000b4b4cc))
+* **react:** restructure example app with new entry point and improved component loading ([ae41c75](https://github.com/brunos3d/expozr/commit/ae41c75c554a5112b26239f7f8c5ba4083285dab))
+
+
+### BREAKING CHANGES
+
+* Complete restructure of @expozr/core package for better organization
+
+## 🚀 Core Package Refactoring (@expozr/core v1.3.0)
+
+### New Modular Structure:
+- `/adapters/` - Bundler adapters (AbstractBundlerAdapter, InventoryGenerator, etc.)
+- `/loaders/` - Module loaders (ESMModuleLoader, UMDModuleLoader, etc.)
+- `/config/` - Configuration utilities (presets, schemas, validation)
+- `/utils/` - Utility classes (ValidationUtils, ChecksumUtils, UrlUtils, etc.)
+
+### Key Improvements:
+- **Utility Classes**: Organized functions into logical classes for better maintainability
+- **Enhanced Documentation**: Comprehensive JSDoc comments throughout
+- **Better Type Safety**: Improved TypeScript types and error handling
+- **Tree-shaking Friendly**: Modular exports for optimal bundle sizes
+- **100% Backward Compatibility**: All existing imports continue to work
+
+### Technical Changes:
+- Moved validation functions to `ValidationUtils` class
+- Created `ChecksumUtils` for checksum generation
+- Added `UrlUtils`, `VersionUtils`, `ObjectUtils` classes
+- Refactored bundler adapters into dedicated modules
+- Enhanced configuration management with presets
+
+## 🔧 Webpack Adapter Fixes (@expozr/webpack-adapter v1.2.1)
+
+### Bug Fixes:
+- Fixed import paths after core package refactoring
+- Updated function calls to use new utility classes:
+  - `validateExpozrConfig` → `ValidationUtils.validateExpozrConfig`
+  - `generateChecksum` → `ChecksumUtils.generateAsync`
+  - `deepMerge` → `ObjectUtils.deepMerge`
+- Resolved MODULE_NOT_FOUND errors in webpack remote applications
+- Ensured proper dependency linking in monorepo setup
+
+### Files Modified:
+- `packages/adapters/webpack/src/expozr-plugin.ts`
+- `packages/adapters/webpack/src/host-plugin.ts`
+- `packages/adapters/webpack/src/adapter.ts`
+
+## 📚 Documentation:
+- Added comprehensive `REFACTORING.md` with migration guide
+- Updated CHANGELOG.md files for both packages
+- Enhanced inline documentation across all modules
+
+## ✅ Testing:
+- All packages build successfully
+- Webpack remote applications working correctly
+- Backward compatibility maintained
+- Examples tested and functional
+
+This refactoring significantly improves code organization, maintainability, and developer experience while ensuring all existing functionality continues to work seamlessly.
+
+
+
+
+
 # 1.2.1 (2025-10-13)
 
 ### Bug Fixes
