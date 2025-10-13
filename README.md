@@ -1,8 +1,8 @@
 # 🚀 Expozr
 
-**Universal plugin ecosystem for web bundler module federation**
+**Universal plugin ecosystem for dynamic module sharing**
 
-Expozr enables any web bundler to expose and consume modules at runtime, creating a truly decentralized application architecture that's simpler and more flexible than traditional module federation solutions.
+Expozr enables any web bundler to expose and consume modules at runtime, creating a truly decentralized application architecture that's simpler and more flexible than traditional approaches.
 
 > **🚧 Current Status**: Expozr is in active development. The core functionality and Webpack adapter are working with examples available. See [examples](./examples) for working demos.
 
@@ -274,7 +274,7 @@ The fastest way to understand Expozr is to run the examples! We have working exa
 | Example                                                      | Description             | Stack                   | Demo                      |
 | ------------------------------------------------------------ | ----------------------- | ----------------------- | ------------------------- |
 | [**Webpack + Get Started**](./examples/webpack/get-started/) | Simplest possible setup | TypeScript              | [▶️ Try it](#quick-start) |
-| [**Webpack + Vanilla**](./examples/webpack/vanilla/)         | Basic module federation | Vanilla JS + TypeScript | [▶️ Try it](#quick-start) |
+| [**Webpack + Vanilla**](./examples/webpack/vanilla/)         | Basic module sharing    | Vanilla JS + TypeScript | [▶️ Try it](#quick-start) |
 | [**Webpack + React**](./examples/webpack/react/)             | React component sharing | React + TypeScript      | [▶️ Try it](#quick-start) |
 | [**Webpack + ESM**](./examples/webpack/esm/)                 | Modern ES modules       | ESM + TypeScript        | [▶️ Try it](#quick-start) |
 | [**Webpack + UMD**](./examples/webpack/umd/)                 | Universal module format | UMD + TypeScript        | [▶️ Try it](#quick-start) |
