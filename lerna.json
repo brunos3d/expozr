@@ -5,24 +5,13 @@
     "publish": {
       "conventionalCommits": true,
       "registry": "https://registry.npmjs.org/",
-      "ignoreChanges": [
-        "**/*.md",
-        "**/test/**",
-        "**/examples/**"
-      ],
-      "ignore": [
-        "expozr"
-      ]
+      "ignoreChanges": ["**/*.md", "**/test/**", "**/examples/**"],
+      "ignore": ["expozr"]
     },
     "bootstrap": {
       "ignore": "component-*",
-      "npmClientArgs": [
-        "--no-package-lock"
-      ]
+      "npmClientArgs": ["--no-package-lock"]
     }
   },
-  "packages": [
-    "packages/*",
-    "packages/adapters/*"
-  ]
+  "packages": ["packages/*", "packages/adapters/*"]
 }
