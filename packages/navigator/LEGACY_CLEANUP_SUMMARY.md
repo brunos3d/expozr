@@ -1,8 +1,18 @@
 # Breaking Changes and Class Restructuring Summary
 
-## � **Breaking Changes Applied**
+## � **Breaking Cha```typescript
+// NEW - Single navigator type, cleaner API
+import { 
+  createNavigator,
+  ExpozrNavigator,
+  BaseExpozrNavigator 
+} from "@expozr/navigator";
 
-The Navigator package has undergone a major restructuring with breaking changes to simplify the API and remove legacy support. This version implements a cleaner, more focused architecture.
+// Only one navigator type - ExpozrNavigator
+const navigator = createNavigator(config);
+// OR  
+const navigator = new ExpozrNavigator(config);
+```The Navigator package has undergone a major restructuring with breaking changes to simplify the API and remove legacy support. This version implements a cleaner, more focused architecture.
 
 ### ✅ **Class Renames and Restructuring**
 
@@ -10,7 +20,7 @@ The Navigator package has undergone a major restructuring with breaking changes 
    - **Reason**: More descriptive naming that aligns with the Expozr ecosystem
    - **Impact**: Breaking change - any code extending BaseNavigator must update imports
 
-2. **`EnhancedNavigator` → `ExpozrNavigator`** - ✅ RENAMED  
+2. **`EnhancedNavigator` → `ExpozrNavigator`** - ✅ RENAMED
    - **Reason**: This is now the primary and only navigator implementation
    - **Impact**: Breaking change - imports must be updated
 
@@ -24,7 +34,7 @@ The Navigator package has undergone a major restructuring with breaking changes 
 
 5. **Legacy Aliases Removed** - ✅ REMOVED
    - **`Navigator`** (alias for EnhancedNavigator) - REMOVED
-   - **`LegacyNavigator`** (alias for SimpleNavigator) - REMOVED  
+   - **`LegacyNavigator`** (alias for SimpleNavigator) - REMOVED
    - **`ExpozrNavigator`** (alias for EnhancedNavigator) - Now the main class name
    - **Impact**: Breaking change - all alias imports must be updated
 
@@ -35,8 +45,8 @@ The Navigator package has undergone a major restructuring with breaking changes 
    - **Impact**: Breaking change - remove enhanced: true/false from configs
 
 2. **Factory Functions Updated**:
-   - `createNavigator()` - Still available, now returns ExpozrNavigator
-   - `createExpozrNavigator()` - New primary factory function
+   - `createNavigator()` - Primary factory function, returns ExpozrNavigator
+   - `createExpozrNavigator()` - REMOVED (redundant)
    - `createSimpleNavigator()` - REMOVED
    - `createEnhancedNavigator()` - REMOVED
 
@@ -52,12 +62,12 @@ The Navigator package has undergone a major restructuring with breaking changes 
 
 ```typescript
 // OLD - Multiple navigator types with configuration
-import { 
-  createNavigator, 
-  SimpleNavigator, 
+import {
+  createNavigator,
+  SimpleNavigator,
   EnhancedNavigator,
   Navigator,
-  LegacyNavigator 
+  LegacyNavigator,
 } from "@expozr/navigator";
 
 // Creating different types of navigators
@@ -71,18 +81,18 @@ const nav = new Navigator(config);
 
 ```typescript
 // NEW - Single navigator type, cleaner API
-import { 
-  createNavigator, 
+import {
+  createNavigator,
   createExpozrNavigator,
   ExpozrNavigator,
-  BaseExpozrNavigator 
+  BaseExpozrNavigator,
 } from "@expozr/navigator";
 
 // Only one navigator type - ExpozrNavigator
 const navigator = createNavigator(config);
 // OR
 const navigator = createExpozrNavigator(config);
-// OR  
+// OR
 const navigator = new ExpozrNavigator(config);
 ```
 
@@ -108,12 +118,16 @@ class MyCustomNavigator implements IExpozrNavigator {
 // OLD - enhanced option removed
 const config = {
   enhanced: true, // ❌ Remove this
-  expozrs: { /* ... */ }
+  expozrs: {
+    /* ... */
+  },
 };
 
 // NEW - simplified configuration
 const config = {
-  expozrs: { /* ... */ }
+  expozrs: {
+    /* ... */
+  },
 };
 ```
 
@@ -121,7 +135,7 @@ const config = {
 
 1. **🎯 Simplified API**
    - Single navigator class eliminates confusion
-   - No more configuration decisions between enhanced/simple
+   - Single factory function: `createNavigator()`
    - Cleaner imports and exports
 
 2. **🧹 Reduced Bundle Size**
@@ -175,11 +189,9 @@ src/
 ### 🎯 **Main Exports After Breaking Changes**
 
 ```typescript
+```typescript
 // index.ts - Clean, focused exports
-export { 
-  createNavigator, 
-  createExpozrNavigator 
-} from "./navigators";
+export { createNavigator } from "./navigators";
 
 export {
   BaseExpozrNavigator,
@@ -187,6 +199,7 @@ export {
 } from "./navigators";
 
 // No more legacy exports, aliases, or multiple navigator types
+```
 ```
 
 The Navigator package is now dramatically simplified with a single, powerful ExpozrNavigator that provides all the features needed for modern module federation! 🎉

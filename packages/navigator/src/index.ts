@@ -3,11 +3,8 @@
  */
 
 // === Main Navigator API ===
-export { createNavigator, createExpozrNavigator } from "./navigators";
-export {
-  BaseExpozrNavigator,
-  ExpozrNavigator,
-} from "./navigators";
+export { createNavigator } from "./navigators";
+export { BaseExpozrNavigator, ExpozrNavigator } from "./navigators";
 
 // === Cache System ===
 export {

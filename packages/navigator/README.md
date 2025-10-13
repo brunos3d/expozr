@@ -94,14 +94,6 @@ function createNavigator(config?: NavigatorConfig): ExpozrNavigator;
 - `config.cache?: CacheConfig` - Cache configuration
 - `config.loading?: LoadingConfig` - Loading timeout and retry settings
 
-#### `createExpozrNavigator(config?)`
-
-Creates an ExpozrNavigator instance directly (alias for createNavigator).
-
-```typescript
-function createExpozrNavigator(config?: any): ExpozrNavigator;
-```
-
 ### Navigator Methods
 
 #### `loadCargo<T>(expozr, cargo, options?)`
