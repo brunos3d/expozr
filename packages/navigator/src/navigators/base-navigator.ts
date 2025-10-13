@@ -10,7 +10,7 @@ import type {
   Cargo,
   LoadedCargo,
   ExpozrReference,
-  INavigator,
+  IExpozrNavigator,
   LoadOptions,
   ExpozrEvents,
 } from "../types";
@@ -30,7 +30,7 @@ import { getInventoryUrl, getModuleUrl } from "../utils";
  * Base navigator class with common functionality
  * Provides shared implementation for inventory management, caching, and events
  */
-export abstract class BaseNavigator implements INavigator {
+export abstract class BaseExpozrNavigator implements IExpozrNavigator {
   protected config: HostConfig;
   protected cache: CacheManager;
   protected inventoryCache = new Map<string, Inventory>();

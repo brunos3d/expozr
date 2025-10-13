@@ -16,13 +16,6 @@ export {
   loadCargo as loadCargoUMD,
 } from "./umd-loader";
 
-// Legacy exports for backward compatibility
-export {
-  BrowserModuleLoader as BrowserLoader,
-  NodeModuleLoader as NodeLoader,
-  UniversalModuleLoader as UniversalLoader,
-};
-
 /**
  * Create a module loader based on environment detection
  * @returns Universal module loader instance

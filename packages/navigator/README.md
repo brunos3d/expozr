@@ -5,7 +5,6 @@ Universal runtime loader for the Expozr ecosystem, providing seamless module fed
 ## 📋 Table of Contents
 
 - [Overview](#overview)
-- [Navigator Types](#navigator-types)
 - [Installation](#installation)
 - [Quick Start](#quick-start)
 - [API Reference](#api-reference)
@@ -18,20 +17,11 @@ Universal runtime loader for the Expozr ecosystem, providing seamless module fed
 
 ## 🌟 Overview
 
-The Navigator package provides two main implementations for loading remote modules:
+The Navigator package provides the **ExpozrNavigator** - a full-featured runtime loader for the Expozr ecosystem with advanced module system support.
 
-- **🚀 EnhancedNavigator** - Full-featured navigator with advanced module system support
-- **⚡ SimpleNavigator** - Lightweight navigator for basic use cases
+The **ExpozrNavigator** extends the `BaseExpozrNavigator` class that provides core functionality like caching, event handling, and inventory management.
 
-Both navigators extend a common `BaseNavigator` class that provides shared functionality like caching, event handling, and inventory management.
-
-## 🔀 Navigator Types
-
-### 🚀 EnhancedNavigator (Default)
-
-The **EnhancedNavigator** is the recommended choice for most applications. It provides advanced features and robust module loading capabilities.
-
-#### ✨ Features
+## ✨ ExpozrNavigator Features
 
 - **🎯 Smart Format Detection**: Automatically detects and loads the best available module format (ESM, UMD, CJS)
 - **🔄 Multi-Format Support**: Tries multiple formats in order of preference (ESM → UMD → CJS → Auto)
@@ -41,117 +31,6 @@ The **EnhancedNavigator** is the recommended choice for most applications. It pr
 - **📊 Format Tracking**: Tracks which format was successfully loaded
 - **🎪 Strategy Awareness**: Reports loading strategy used (enhanced/fallback)
 
-#### 🔧 How it Works
-
-```typescript
-import { createNavigator } from "@expozr/navigator";
-
-// Creates an EnhancedNavigator by default
-const navigator = createNavigator({
-  expozrs: {
-    "my-remote": {
-      url: "http://localhost:3001",
-      version: "^1.0.0",
-    },
-  },
-});
-
-// Automatically tries multiple formats:
-// 1. http://localhost:3001/my-module.mjs (ESM)
-// 2. http://localhost:3001/my-module.esm.js (ESM)
-// 3. http://localhost:3001/my-module.umd.js (UMD)
-// 4. http://localhost:3001/my-module.js (UMD fallback)
-// 5. http://localhost:3001/my-module.cjs (CommonJS)
-// 6. Original entry path (Auto-detect)
-const module = await navigator.loadCargo("my-remote", "my-module");
-```
-
-#### 📈 Benefits
-
-- **🎯 Maximum Compatibility**: Works with all module formats
-- **🚀 Optimal Performance**: Loads the most efficient format available
-- **🛡️ Robust Error Handling**: Graceful degradation when formats fail
-- **🔮 Future-Proof**: Supports emerging module standards
-- **📊 Detailed Feedback**: Provides information about what was loaded and how
-
-#### 🎨 Best For
-
-- Production applications
-- Complex module federation scenarios
-- When you need maximum compatibility
-- Applications that consume various module formats
-- When detailed loading information is required
-
----
-
-### ⚡ SimpleNavigator
-
-The **SimpleNavigator** is a lightweight alternative focused on simplicity and minimal overhead.
-
-#### ✨ Features
-
-- **🪶 Lightweight**: Minimal dependencies and smaller bundle size
-- **⚡ Fast**: Direct loading without format detection overhead
-- **🎯 Single Format**: Uses UniversalModuleLoader for straightforward loading
-- **🧩 Simple API**: Easy to understand and debug
-- **💾 Basic Caching**: Standard inventory and module caching
-- **📊 Essential Stats**: Basic cache statistics
-
-#### 🔧 How it Works
-
-```typescript
-import { createNavigator } from "@expozr/navigator";
-
-// Explicitly create a SimpleNavigator
-const navigator = createNavigator({
-  enhanced: false, // Use SimpleNavigator
-  expozrs: {
-    "my-remote": {
-      url: "http://localhost:3001",
-      version: "^1.0.0",
-    },
-  },
-});
-
-// Loads modules using UniversalModuleLoader
-// Attempts to load the exact URL specified in the inventory
-const module = await navigator.loadCargo("my-remote", "my-module");
-```
-
-#### 📈 Benefits
-
-- **🪶 Smaller Bundle**: Reduced JavaScript payload
-- **⚡ Faster Startup**: No module system initialization overhead
-- **🎯 Predictable**: Direct loading behavior
-- **🧩 Simple Debugging**: Easier to trace and understand
-- **💡 Clear Errors**: Straightforward error messages
-
-#### 🎨 Best For
-
-- Simple applications with known module formats
-- Performance-critical scenarios where bundle size matters
-- Development and testing environments
-- When you need predictable, direct loading behavior
-- Applications with homogeneous module formats
-
----
-
-## 🔍 Key Differences Comparison
-
-| Feature                       | EnhancedNavigator               | SimpleNavigator              |
-| ----------------------------- | ------------------------------- | ---------------------------- |
-| **Bundle Size**               | Larger (full features)          | Smaller (lightweight)        |
-| **Format Detection**          | ✅ Smart auto-detection         | ❌ Uses provided URL         |
-| **Multi-Format Support**      | ✅ ESM, UMD, CJS + fallbacks    | ❌ Single format attempt     |
-| **Error Recovery**            | ✅ Multiple fallback strategies | ❌ Fails on first error      |
-| **Loading Strategy**          | Enhanced module system          | Universal loader             |
-| **Format Tracking**           | ✅ Reports format used          | ❌ Generic "auto" format     |
-| **Module System Integration** | ✅ Full integration             | ❌ Basic loading             |
-| **Startup Time**              | Slower (initialization)         | Faster (direct)              |
-| **Use Case**                  | Production, complex scenarios   | Simple, performance-critical |
-
----
-
 ## 📦 Installation
 
 ```bash
@@ -159,8 +38,6 @@ npm install @expozr/navigator
 ```
 
 ## 🚀 Quick Start
-
-### Using Enhanced Navigator (Recommended)
 
 ```typescript
 import { createNavigator } from "@expozr/navigator";
@@ -183,24 +60,21 @@ const buttonModule = await navigator.loadCargo("components", "Button");
 const { Button } = buttonModule.module;
 ```
 
-### Using Simple Navigator
+## 🔀 Navigator Types
 
-```typescript
-import { createNavigator } from "@expozr/navigator";
+### 🚀 EnhancedNavigator (Default)
 
-const navigator = createNavigator({
-  enhanced: false, // Use SimpleNavigator
-  expozrs: {
-    utils: {
-      url: "http://localhost:3001",
-    },
-  },
-});
+The **EnhancedNavigator** is the recommended choice for most applications. It provides advanced features and robust module loading capabilities.
 
-// Direct module loading
-const mathModule = await navigator.loadCargo("utils", "math");
-const { add, multiply } = mathModule.module;
-```
+#### ✨ Features
+
+- **🎯 Smart Format Detection**: Automatically detects and loads the best available module format (ESM, UMD, CJS)
+- **🔄 Multi-Format Support**: Tries multiple formats in order of preference (ESM → UMD → CJS → Auto)
+- **🧠 Intelligent Fallbacks**: If one format fails, automatically tries alternatives
+- **⚡ Advanced Module System**: Integration with Expozr's global module system
+- **🛡️ Error Recovery**: Comprehensive error handling with detailed feedback
+- **📊 Format Tracking**: Tracks which format was successfully loaded
+- **🎪 Strategy Awareness**: Reports loading strategy used (enhanced/fallback)
 
 ## 📚 API Reference
 
@@ -208,33 +82,24 @@ const { add, multiply } = mathModule.module;
 
 #### `createNavigator(config?)`
 
-Creates a navigator instance (EnhancedNavigator by default).
+Creates an ExpozrNavigator instance.
 
 ```typescript
-function createNavigator(config?: NavigatorConfig): INavigator;
+function createNavigator(config?: NavigatorConfig): ExpozrNavigator;
 ```
 
 **Parameters:**
 
-- `config.enhanced?: boolean` - Use EnhancedNavigator (default: `true`)
 - `config.expozrs: Record<string, ExpozrReference>` - Expozr configurations
 - `config.cache?: CacheConfig` - Cache configuration
 - `config.loading?: LoadingConfig` - Loading timeout and retry settings
 
-#### `createSimpleNavigator(config?)`
+#### `createExpozrNavigator(config?)`
 
-Creates a SimpleNavigator instance directly.
-
-```typescript
-function createSimpleNavigator(config?: any): SimpleNavigator;
-```
-
-#### `createEnhancedNavigator(config?)`
-
-Creates an EnhancedNavigator instance directly.
+Creates an ExpozrNavigator instance directly (alias for createNavigator).
 
 ```typescript
-function createEnhancedNavigator(config?: any): EnhancedNavigator;
+function createExpozrNavigator(config?: any): ExpozrNavigator;
 ```
 
 ### Navigator Methods
@@ -258,8 +123,8 @@ async loadCargo<T = any>(
 - `expozr: ExpozrInfo` - Expozr information
 - `loadedAt: number` - Timestamp of loading
 - `fromCache: boolean` - Whether loaded from cache
-- `format: ModuleFormat` - Format used (EnhancedNavigator only)
-- `strategy: ModuleLoadingStrategy` - Strategy used (EnhancedNavigator only)
+- `format: ModuleFormat` - Format used
+- `strategy: ModuleLoadingStrategy` - Strategy used
 
 #### Other Methods
 
@@ -274,7 +139,6 @@ async loadCargo<T = any>(
 
 ```typescript
 interface NavigatorConfig {
-  enhanced?: boolean; // Use EnhancedNavigator (default: true)
   expozrs: Record<string, ExpozrReference>;
   cache?: CacheConfig;
   loading?: LoadingConfig;

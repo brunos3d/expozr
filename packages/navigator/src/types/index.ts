@@ -16,7 +16,7 @@ export type {
   ExpozrReference,
   EventEmitter,
   ExpozrEvents,
-  INavigator,
+  IExpozrNavigator,
 } from "@expozr/core";
 
 /**
@@ -94,6 +94,5 @@ export interface UMDModuleInfo {
  * Navigator factory configuration
  */
 export interface NavigatorConfig extends Partial<HostConfig> {
-  /** Whether to use enhanced navigator with module system support */
-  enhanced?: boolean;
+  // No additional configuration needed - ExpozrNavigator is the only option
 }

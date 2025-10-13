@@ -3,18 +3,10 @@
  */
 
 // === Main Navigator API ===
-export { createNavigator } from "./navigators";
+export { createNavigator, createExpozrNavigator } from "./navigators";
 export {
-  BaseNavigator,
-  SimpleNavigator,
-  EnhancedNavigator,
-} from "./navigators";
-
-// === Legacy Support (backward compatibility) ===
-export { SimpleNavigator as LegacyNavigator } from "./navigators";
-export {
-  EnhancedNavigator as Navigator,
-  EnhancedNavigator as ExpozrNavigator,
+  BaseExpozrNavigator,
+  ExpozrNavigator,
 } from "./navigators";
 
 // === Cache System ===

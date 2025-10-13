@@ -1,5 +1,5 @@
 /**
- * Enhanced Navigator with advanced module system support
+ * ExpozrNavigator with advanced module system support
  */
 
 import type { LoadedCargo, LoadOptions } from "../types";
@@ -17,16 +17,16 @@ import {
   generateCargoKey,
 } from "@expozr/core";
 
-import { BaseNavigator } from "./base-navigator";
+import { BaseExpozrNavigator } from "./base-navigator";
 import { generateFormatUrls } from "../utils";
 
 /**
- * Enhanced Navigator with universal module system support
+ * ExpozrNavigator with universal module system support
  * Provides advanced features like format detection, hybrid loading, and module system integration
  */
-export class EnhancedNavigator extends BaseNavigator {
+export class ExpozrNavigator extends BaseExpozrNavigator {
   /**
-   * Create an enhanced navigator instance
+   * Create an ExpozrNavigator instance
    * @param config - Navigator configuration
    */
   constructor(config: any = {}) {

@@ -3,47 +3,26 @@
  */
 
 import type { NavigatorConfig } from "../types";
-import { SimpleNavigator } from "./simple-navigator";
-import { EnhancedNavigator } from "./enhanced-navigator";
+import { ExpozrNavigator } from "./enhanced-navigator";
 
 // Navigator implementations
-export { BaseNavigator } from "./base-navigator";
-export { SimpleNavigator } from "./simple-navigator";
-export { EnhancedNavigator } from "./enhanced-navigator";
+export { BaseExpozrNavigator } from "./base-navigator";
+export { ExpozrNavigator } from "./enhanced-navigator";
 
 /**
- * Create a navigator instance based on configuration
+ * Create an ExpozrNavigator instance
  * @param config - Navigator configuration
- * @returns Navigator instance
+ * @returns ExpozrNavigator instance
+ */
+export function createExpozrNavigator(config: any = {}) {
+  return new ExpozrNavigator(config);
+}
+
+/**
+ * Create a navigator instance (alias for createExpozrNavigator)
+ * @param config - Navigator configuration
+ * @returns ExpozrNavigator instance
  */
 export function createNavigator(config: NavigatorConfig = {}) {
-  const { enhanced = true, ...navigatorConfig } = config;
-
-  if (enhanced) {
-    return new EnhancedNavigator(navigatorConfig);
-  } else {
-    return new SimpleNavigator(navigatorConfig);
-  }
+  return new ExpozrNavigator(config);
 }
-
-/**
- * Create a simple navigator instance
- * @param config - Navigator configuration
- * @returns Simple navigator instance
- */
-export function createSimpleNavigator(config: any = {}) {
-  return new SimpleNavigator(config);
-}
-
-/**
- * Create an enhanced navigator instance
- * @param config - Navigator configuration
- * @returns Enhanced navigator instance
- */
-export function createEnhancedNavigator(config: any = {}) {
-  return new EnhancedNavigator(config);
-}
-
-// Legacy exports for backward compatibility
-export { SimpleNavigator as LegacyNavigator };
-export { EnhancedNavigator as ExpozrNavigator };
