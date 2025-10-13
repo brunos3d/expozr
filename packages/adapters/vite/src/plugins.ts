@@ -3,7 +3,7 @@
  */
 
 import {
-  validateExpozrConfig,
+  ValidationUtils,
   type ExpozrConfig,
   type HostConfig,
 } from "@expozr/core";
@@ -37,7 +37,7 @@ export function expozrWarehouse(
         }
       }
 
-      if (!config || !validateExpozrConfig(config)) {
+      if (!config || !ValidationUtils.validateExpozrConfig(config)) {
         console.warn("Invalid expozr configuration");
         return;
       }

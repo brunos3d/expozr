@@ -20,7 +20,7 @@ import {
   ExpozrNotFoundError,
   CargoNotFoundError,
   NetworkError,
-  validateInventory,
+  ValidationUtils,
   generateCargoKey,
   joinUrl,
   defaultHostConfig,
@@ -175,7 +175,7 @@ export class Navigator implements INavigator {
       const inventoryUrl = joinUrl(expozrRef.url, "expozr.inventory.json");
       const inventoryData = await this.fetchInventory(inventoryUrl);
 
-      if (!validateInventory(inventoryData)) {
+      if (!ValidationUtils.validateInventory(inventoryData)) {
         throw new Error("Invalid inventory format");
       }
 
