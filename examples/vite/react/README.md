@@ -79,7 +79,7 @@ Fast development with Vite's lightning-fast HMR:
 export default defineConfig({
   plugins: [
     react(),
-    createWarehousePlugin(), // Automatically discovers expozr.config.ts
+    createExpozrPlugin(), // Automatically discovers expozr.config.ts
   ],
   server: {
     port: 5001,

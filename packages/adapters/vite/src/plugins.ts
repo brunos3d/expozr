@@ -202,7 +202,7 @@ function loadConfig(configFile?: string): ExpozrConfig | undefined {
 /**
  * Convenience function to create warehouse plugin with automatic config discovery
  */
-export function createWarehousePlugin(
+export function createExpozrPlugin(
   options: {
     configFile?: string;
     config?: ExpozrConfig;

@@ -9,4 +9,4 @@ export { ViteAdapter, viteAdapter } from "./adapter";
 export { expozrWarehouse, expozrHost } from "./plugins";
 
 // Convenience functions
-export { createWarehousePlugin, createHostPlugin } from "./plugins";
+export { createExpozrPlugin, createHostPlugin } from "./plugins";
