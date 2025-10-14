@@ -16,8 +16,10 @@
   ],
   "author": "Expozr Team",
   "license": "MIT",
+  "dependencies": {
+    "@expozr/navigator": "^2.0.0"
+  },
   "devDependencies": {
-    "@expozr/navigator": "^2.0.0",
     "css-loader": "^6.8.1",
     "html-webpack-plugin": "^5.5.3",
     "style-loader": "^3.3.3",

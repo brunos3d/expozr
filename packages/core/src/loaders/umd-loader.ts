@@ -78,7 +78,10 @@ export class UMDModuleLoader extends BaseModuleLoader {
         try {
           const module = this.extractGlobalModule<T>(
             beforeGlobals,
-            options?.exports
+            options?.exports,
+            options?.expectedGlobalName,
+            options?.expozrName,
+            options?.cargoName
           );
           script.remove();
           resolve(module);
@@ -133,36 +136,70 @@ export class UMDModuleLoader extends BaseModuleLoader {
    */
   private extractGlobalModule<T = any>(
     beforeGlobals: Set<string>,
-    requestedExports?: string[]
+    requestedExports?: string[],
+    expectedGlobalName?: string,
+    expozrName?: string,
+    cargoName?: string
   ): T {
     // Find newly added globals
     const afterGlobals = Object.keys(globalThis as any);
     const newGlobals = afterGlobals.filter((key) => !beforeGlobals.has(key));
 
-    console.log("🔍 UMD Loader Debug:", {
-      newGlobals,
-      requestedExports,
-      globalButton: (globalThis as any).Button,
-    });
+    let moduleToReturn: any = null;
 
-    if (newGlobals.length === 0) {
-      throw new Error("No new globals found after loading UMD module");
+    // Strategy 1: If expectedGlobalName is provided, check if it exists (even if not "new")
+    if (expectedGlobalName && (globalThis as any)[expectedGlobalName]) {
+      moduleToReturn = (globalThis as any)[expectedGlobalName];
+    }
+    // Strategy 2: Fall back to checking new globals
+    else if (newGlobals.length > 0) {
+      // Return the first new global (most likely the module)
+      const mainGlobal = newGlobals[0];
+      moduleToReturn = (globalThis as any)[mainGlobal];
+    } else {
+      throw new Error(
+        "No new globals found after loading UMD module and no expectedGlobalName provided"
+      );
     }
 
-    // If specific exports requested, extract them
+    // Implement the standardized global binding system
+    if (expozrName && cargoName && moduleToReturn) {
+      // Initialize the global __EXPOZR__ structure if it doesn't exist
+      if (!(globalThis as any).__EXPOZR__) {
+        (globalThis as any).__EXPOZR__ = {};
+      }
+
+      if (!(globalThis as any).__EXPOZR__[expozrName]) {
+        (globalThis as any).__EXPOZR__[expozrName] = { CARGOS: {} };
+      }
+
+      if (!(globalThis as any).__EXPOZR__[expozrName].CARGOS) {
+        (globalThis as any).__EXPOZR__[expozrName].CARGOS = {};
+      }
+
+      // Bind the module to the standardized location
+      (globalThis as any).__EXPOZR__[expozrName].CARGOS[cargoName] =
+        moduleToReturn;
+
+      // Also bind to expectedGlobalName if provided (for backward compatibility)
+      if (expectedGlobalName && !(globalThis as any)[expectedGlobalName]) {
+        (globalThis as any)[expectedGlobalName] = moduleToReturn;
+      }
+    }
+
+    // Extract specific exports if requested
     if (requestedExports && requestedExports.length > 0) {
       const result: any = {};
       for (const exportName of requestedExports) {
-        if (newGlobals.includes(exportName)) {
-          result[exportName] = (globalThis as any)[exportName];
+        if (moduleToReturn[exportName]) {
+          result[exportName] = moduleToReturn[exportName];
         }
       }
       return result as T;
     }
 
-    // Return the first new global (most likely the module)
-    const mainGlobal = newGlobals[0];
-    return (globalThis as any)[mainGlobal] as T;
+    // Return the entire module
+    return moduleToReturn as T;
   }
 
   /**

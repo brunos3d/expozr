@@ -69,7 +69,12 @@ export class ESMModuleLoader extends BaseModuleLoader {
     );
 
     // Return the module (handle both default and named exports)
-    return this.extractModuleExports(module, options?.exports);
+    return this.extractModuleExports(
+      module,
+      options?.exports,
+      options?.expozrName,
+      options?.cargoName
+    );
   }
 
   /**
@@ -96,25 +101,53 @@ export class ESMModuleLoader extends BaseModuleLoader {
    */
   private extractModuleExports<T = any>(
     module: any,
-    requestedExports?: string[]
+    requestedExports?: string[],
+    expozrName?: string,
+    cargoName?: string
   ): T {
+    let moduleToReturn: any;
+
     if (!requestedExports || requestedExports.length === 0) {
       // Return default export if available, otherwise the entire module
-      return (module.default || module) as T;
-    }
-
-    if (requestedExports.length === 1) {
+      moduleToReturn = (module.default || module) as T;
+    } else if (requestedExports.length === 1) {
       // Return single export
       const exportName = requestedExports[0];
-      return module[exportName] as T;
+      moduleToReturn = module[exportName] as T;
+    } else {
+      // Return object with requested exports
+      const result: any = {};
+      for (const exportName of requestedExports) {
+        result[exportName] = module[exportName];
+      }
+      moduleToReturn = result as T;
     }
 
-    // Return object with requested exports
-    const result: any = {};
-    for (const exportName of requestedExports) {
-      result[exportName] = module[exportName];
+    // Implement the standardized global binding system (same as UMD)
+    if (expozrName && cargoName && moduleToReturn) {
+      // Initialize the global __EXPOZR__ structure if it doesn't exist
+      if (!(globalThis as any).__EXPOZR__) {
+        (globalThis as any).__EXPOZR__ = {};
+      }
+
+      if (!(globalThis as any).__EXPOZR__[expozrName]) {
+        (globalThis as any).__EXPOZR__[expozrName] = { CARGOS: {} };
+      }
+
+      if (!(globalThis as any).__EXPOZR__[expozrName].CARGOS) {
+        (globalThis as any).__EXPOZR__[expozrName].CARGOS = {};
+      }
+
+      // Bind the module to the standardized location
+      (globalThis as any).__EXPOZR__[expozrName].CARGOS[cargoName] =
+        moduleToReturn;
+
+      console.log(
+        `📦 ESM Module bound to globalThis.__EXPOZR__.${expozrName}.CARGOS.${cargoName}`
+      );
     }
-    return result as T;
+
+    return moduleToReturn;
   }
 
   /**

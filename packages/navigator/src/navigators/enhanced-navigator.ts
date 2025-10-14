@@ -142,12 +142,16 @@ export class ExpozrNavigator extends BaseExpozrNavigator {
         result = await this.loadModuleWithBestFormat<T>(cargoUrls, {
           ...options,
           moduleFormat,
+          expozrName: expozr,
+          cargoName: cargoInfo.name,
         });
       } else {
         // Use single URL approach - faster and simpler
         result = await this.loadModuleDirectly<T>(expozrRef, cargoInfo, {
           ...options,
           moduleFormat,
+          expozrName: expozr,
+          cargoName: cargoInfo.name,
         });
       }
 
@@ -229,12 +233,16 @@ export class ExpozrNavigator extends BaseExpozrNavigator {
         module = await umdLoader.loadModule<T>(url, {
           ...options,
           exports: cargoInfo.exports,
+          expozrName: options?.expozrName,
+          cargoName: options?.cargoName,
         });
       } else if (format === "esm") {
         const esmLoader = new ESMModuleLoader();
         module = await esmLoader.loadModule<T>(url, {
           ...options,
           exports: cargoInfo.exports,
+          expozrName: options?.expozrName,
+          cargoName: options?.cargoName,
         });
       } else {
         // Fallback to generic module system
@@ -305,7 +313,27 @@ export class ExpozrNavigator extends BaseExpozrNavigator {
 
     for (const { format, url } of orderedUrls) {
       try {
-        const module = await moduleSystem.loadModule<T>(url, options);
+        let module: T;
+
+        // Use the appropriate loader based on the format
+        if (format === "umd") {
+          const umdLoader = new UMDModuleLoader();
+          module = await umdLoader.loadModule<T>(url, {
+            ...options,
+            expozrName: options?.expozrName,
+            cargoName: options?.cargoName,
+          });
+        } else if (format === "esm") {
+          const esmLoader = new ESMModuleLoader();
+          module = await esmLoader.loadModule<T>(url, {
+            ...options,
+            expozrName: options?.expozrName,
+            cargoName: options?.cargoName,
+          });
+        } else {
+          // Fallback to generic module system
+          module = await moduleSystem.loadModule<T>(url, options);
+        }
 
         return {
           module,
