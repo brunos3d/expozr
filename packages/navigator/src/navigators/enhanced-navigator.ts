@@ -2,7 +2,7 @@
  * ExpozrNavigator with advanced module system support
  */
 
-import type { LoadedCargo, LoadOptions } from "../types";
+import type { LoadedCargo, LoadOptions, NavigatorConfig } from "../types";
 
 import type { ModuleFormat, ModuleLoadingStrategy } from "@expozr/core";
 
@@ -25,22 +25,40 @@ import { generateFormatUrls } from "../utils";
  * Provides advanced features like format detection, hybrid loading, and module system integration
  */
 export class ExpozrNavigator extends BaseExpozrNavigator {
+  private moduleSystemConfig: NavigatorConfig["moduleSystem"];
+
   /**
    * Create an ExpozrNavigator instance
    * @param config - Navigator configuration
    */
-  constructor(config: any = {}) {
+  constructor(config: NavigatorConfig = {}) {
     super(config);
 
-    // Initialize the module system
-    this.initializeModuleSystem();
+    // Store module system config for later use
+    this.moduleSystemConfig = config.moduleSystem;
+
+    // Initialize the module system with user configuration
+    this.initializeModuleSystem(config.moduleSystem);
   }
 
   /**
    * Initialize the global module system with loaders
    */
-  private initializeModuleSystem(): void {
-    const moduleSystem = getGlobalModuleSystem();
+  private initializeModuleSystem(
+    config?: NavigatorConfig["moduleSystem"]
+  ): void {
+    // Create module system config with user preferences
+    const systemConfig = {
+      primary: config?.primary || ("esm" as const),
+      fallbacks: config?.fallbacks || (["umd", "cjs"] as const),
+      strategy: config?.strategy || ("dynamic" as const),
+      hybrid: config?.hybrid !== false,
+      // Add smart fallback configuration
+      automaticModuleDiscover: config?.automaticModuleDiscover !== false, // Enable by default
+      suppressErrors: config?.suppressErrors !== false, // Suppress errors by default
+    };
+
+    const moduleSystem = getGlobalModuleSystem(systemConfig);
     const registry = moduleSystem.getLoaderRegistry();
 
     // Register module loaders
@@ -89,11 +107,49 @@ export class ExpozrNavigator extends BaseExpozrNavigator {
         throw new CargoNotFoundError(cargo, expozr);
       }
 
-      // Resolve potential URLs for different formats
-      const cargoUrls = await this.resolveCargoUrls(expozrRef, cargoInfo);
+      // Use cargo's module system if available, otherwise use options
+      const detectedModuleSystem = cargoInfo.moduleSystem;
+      const requestedModuleFormat = options?.moduleFormat;
 
-      // Load module with the best available format
-      const result = await this.loadModuleWithBestFormat<T>(cargoUrls, options);
+      // Log warning if user overrides detected module system
+      if (
+        requestedModuleFormat &&
+        detectedModuleSystem &&
+        requestedModuleFormat !== detectedModuleSystem
+      ) {
+        console.warn(
+          `⚠️  Module system override detected for ${expozr}/${cargo}:\n` +
+            `   Detected: ${detectedModuleSystem}\n` +
+            `   Requested: ${requestedModuleFormat}\n` +
+            `   Using requested format, but this may cause loading issues.`
+        );
+      }
+
+      // Determine which format to use (requested overrides detected)
+      const moduleFormat = requestedModuleFormat || detectedModuleSystem;
+
+      // Check if smart fallback is enabled (global config or per-load option)
+      const shouldUseSmartFallback =
+        options?.automaticModuleDiscover !== false &&
+        (options?.automaticModuleDiscover === true ||
+          this.moduleSystemConfig?.automaticModuleDiscover !== false);
+
+      let result: { module: T; format: string; strategy: string };
+
+      if (shouldUseSmartFallback) {
+        // Use smart fallback - probe multiple URLs
+        const cargoUrls = await this.resolveCargoUrls(expozrRef, cargoInfo);
+        result = await this.loadModuleWithBestFormat<T>(cargoUrls, {
+          ...options,
+          moduleFormat,
+        });
+      } else {
+        // Use single URL approach - faster and simpler
+        result = await this.loadModuleDirectly<T>(expozrRef, cargoInfo, {
+          ...options,
+          moduleFormat,
+        });
+      }
 
       const loadedCargo: LoadedCargo<T> = {
         module: result.module,
@@ -101,8 +157,8 @@ export class ExpozrNavigator extends BaseExpozrNavigator {
         expozr: inventory.expozr,
         loadedAt: Date.now(),
         fromCache: false,
-        format: result.format,
-        strategy: result.strategy,
+        format: result.format as ModuleFormat,
+        strategy: result.strategy as ModuleLoadingStrategy,
       };
 
       // Cache the loaded cargo
@@ -126,6 +182,80 @@ export class ExpozrNavigator extends BaseExpozrNavigator {
   }
 
   /**
+   * Load module directly using the single URL from inventory (no fallback probing)
+   * @param expozrRef - Expozr reference configuration
+   * @param cargoInfo - Cargo metadata
+   * @param options - Loading options
+   * @returns Promise resolving to module with format and strategy info
+   */
+  private async loadModuleDirectly<T = any>(
+    expozrRef: any,
+    cargoInfo: any,
+    options?: LoadOptions
+  ): Promise<{
+    module: T;
+    format: ModuleFormat;
+    strategy: ModuleLoadingStrategy;
+  }> {
+    const moduleSystem = getGlobalModuleSystem();
+
+    // Build the direct URL from inventory entry
+    const baseUrl = expozrRef.url.endsWith("/")
+      ? expozrRef.url
+      : `${expozrRef.url}/`;
+    const url = `${baseUrl}${cargoInfo.entry}`;
+
+    // Determine format - use provided moduleFormat or detect from entry
+    const format =
+      options?.moduleFormat || this.detectFormatFromEntry(cargoInfo.entry);
+    const strategy = (options?.strategy ||
+      this.moduleSystemConfig?.strategy ||
+      "dynamic") as ModuleLoadingStrategy;
+
+    try {
+      // Check if error suppression is enabled
+      const shouldSuppressErrors =
+        options?.suppressErrors !== false &&
+        (options?.suppressErrors === true ||
+          this.moduleSystemConfig?.suppressErrors !== false);
+
+      const module = await moduleSystem.loadModule<T>(url, options);
+
+      return {
+        module,
+        format,
+        strategy,
+      };
+    } catch (error) {
+      // Check if errors should be suppressed
+      const shouldSuppressErrors =
+        options?.suppressErrors !== false &&
+        (options?.suppressErrors === true ||
+          this.moduleSystemConfig?.suppressErrors !== false);
+
+      if (shouldSuppressErrors) {
+        // Log error to console instead of showing on screen
+        console.warn(`Failed to load cargo directly from ${url}:`, error);
+      }
+
+      throw error;
+    }
+  }
+
+  /**
+   * Detect module format from entry file extension
+   * @param entry - Entry file name
+   * @returns Detected module format
+   */
+  private detectFormatFromEntry(entry: string): ModuleFormat {
+    if (entry.endsWith(".mjs")) return "esm";
+    if (entry.endsWith(".umd.js")) return "umd";
+    if (entry.endsWith(".cjs")) return "cjs";
+    if (entry.endsWith(".js")) return "umd"; // Default for .js files
+    return "esm"; // Fallback
+  }
+
+  /**
    * Load module with the best available format using the module system
    * @param urls - Array of URLs with format information
    * @param options - Loading options
@@ -141,21 +271,35 @@ export class ExpozrNavigator extends BaseExpozrNavigator {
   }> {
     const moduleSystem = getGlobalModuleSystem();
 
+    // Reorder URLs based on user preferences
+    const orderedUrls = this.orderUrlsByPreference(urls, options);
+
     // Try each format in order of preference
     let lastError: Error | null = null;
 
-    for (const { format, url } of urls) {
+    // Check if error suppression is enabled
+    const shouldSuppressErrors =
+      options?.suppressErrors !== false &&
+      (options?.suppressErrors === true ||
+        this.moduleSystemConfig?.suppressErrors !== false);
+
+    for (const { format, url } of orderedUrls) {
       try {
         const module = await moduleSystem.loadModule<T>(url, options);
 
         return {
           module,
           format,
-          strategy: "enhanced" as ModuleLoadingStrategy,
+          strategy: (options?.strategy || "dynamic") as ModuleLoadingStrategy,
         };
       } catch (error) {
         lastError = error as Error;
-        console.warn(`Failed to load ${format} format from ${url}:`, error);
+
+        if (shouldSuppressErrors) {
+          console.warn(`Failed to load ${format} format from ${url}:`, error);
+        } else {
+          console.error(`Failed to load ${format} format from ${url}:`, error);
+        }
       }
     }
 
@@ -174,6 +318,47 @@ export class ExpozrNavigator extends BaseExpozrNavigator {
     }
 
     throw lastError || new Error("All module loading strategies failed");
+  }
+
+  /**
+   * Order URLs by user preference (module format preference)
+   * @param urls - Available URLs with formats
+   * @param options - Load options with format preferences
+   * @returns Reordered URLs
+   */
+  private orderUrlsByPreference(
+    urls: { format: ModuleFormat; url: string }[],
+    options?: LoadOptions
+  ): { format: ModuleFormat; url: string }[] {
+    if (!options?.moduleFormat && !options?.fallbackFormats) {
+      return urls; // Return original order if no preferences
+    }
+
+    const preferred: { format: ModuleFormat; url: string }[] = [];
+    const fallbacks: { format: ModuleFormat; url: string }[] = [];
+    const others: { format: ModuleFormat; url: string }[] = [];
+
+    // Group URLs by preference
+    for (const urlInfo of urls) {
+      if (options.moduleFormat === urlInfo.format) {
+        preferred.push(urlInfo);
+      } else if (options.fallbackFormats?.includes(urlInfo.format as any)) {
+        fallbacks.push(urlInfo);
+      } else {
+        others.push(urlInfo);
+      }
+    }
+
+    // Order fallbacks by user preference
+    if (options.fallbackFormats) {
+      fallbacks.sort((a, b) => {
+        const aIndex = options.fallbackFormats!.indexOf(a.format as any);
+        const bIndex = options.fallbackFormats!.indexOf(b.format as any);
+        return aIndex - bIndex;
+      });
+    }
+
+    return [...preferred, ...fallbacks, ...others];
   }
 
   /**

@@ -1,17 +1,13 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const CopyWebpackPlugin = require("copy-webpack-plugin");
-const {
-  createExpozrPlugin,
-  suppressExpozrWarnings,
-} = require("@expozr/webpack-adapter");
+const { suppressExpozrWarnings } = require("@expozr/webpack-adapter");
 
 module.exports = (env, argv) => {
   const isProduction = argv.mode === "production";
 
   return {
     mode: argv.mode || "development",
-    entry: "./src/bootstrap.tsx", // Use bootstrap.tsx as entry point
+    entry: "./src/main.tsx", // Use bootstrap.tsx as entry point
     devtool: isProduction ? "source-map" : "inline-source-map",
     ignoreWarnings: suppressExpozrWarnings(),
     module: {
@@ -25,6 +21,12 @@ module.exports = (env, argv) => {
     },
     resolve: {
       extensions: [".tsx", ".ts", ".js"],
+      fallback: {
+        crypto: require.resolve("crypto-browserify"),
+        stream: require.resolve("stream-browserify"),
+        buffer: require.resolve("buffer"),
+        vm: false,
+      },
     },
     output: {
       path: path.resolve(__dirname, "dist"),
@@ -37,21 +39,8 @@ module.exports = (env, argv) => {
       globalObject: "this",
     },
     plugins: [
-      // Automatically discovers expozr.config.ts
-      createExpozrPlugin(),
       new HtmlWebpackPlugin({
         template: "./public/index.html", // Use public/index.html as template
-      }),
-      new CopyWebpackPlugin({
-        patterns: [
-          {
-            from: "public",
-            to: "", // Copy to the root of the output directory (dist/)
-            globOptions: {
-              ignore: ["**/index.html"], // Don't copy index.html as it's handled by HtmlWebpackPlugin
-            },
-          },
-        ],
       }),
     ],
     devServer: {

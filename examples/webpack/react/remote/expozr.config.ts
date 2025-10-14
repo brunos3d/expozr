@@ -5,20 +5,12 @@
 import { defineExpozrConfig } from "@expozr/core";
 
 export default defineExpozrConfig({
-  name: "react-components",
+  name: "webpack-react-components",
   version: "1.0.0",
   expose: {
     "./Button": {
       entry: "./src/components/Button.tsx",
       exports: ["Button", "ButtonProps"],
-    },
-    "./Card": {
-      entry: "./src/components/Card.tsx",
-      exports: ["Card", "CardProps"],
-    },
-    "./hooks": {
-      entry: "./src/hooks/index.ts",
-      exports: ["useCounter", "useToggle"],
     },
   },
   dependencies: {
@@ -30,7 +22,7 @@ export default defineExpozrConfig({
     publicPath: "http://localhost:3001/",
   },
   metadata: {
-    description: "Example React components expozr",
+    description: "Webpack React components example from Expozr Team",
     author: "Expozr Team",
     license: "MIT",
     tags: ["react", "components", "ui"],

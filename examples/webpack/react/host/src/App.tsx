@@ -1,81 +1,189 @@
 import React from "react";
-import { loadReactExpozr } from "@expozr/react";
+import { createNavigator } from "@expozr/navigator";
 
 const EXPOZR_REMOTE_URL = "http://localhost:3001"; // URL of the remote expozr
 
-const expozr = loadReactExpozr(EXPOZR_REMOTE_URL);
+// Define the Button component type
+interface ButtonProps {
+  children: React.ReactNode;
+  onClick?: () => void;
+  variant?: "primary" | "secondary" | "danger";
+  size?: "small" | "medium" | "large";
+  disabled?: boolean;
+}
 
-const Button = React.lazy(() =>
-  expozr.then((mod) => ({
-    default: mod.Button,
-  }))
+type ButtonComponent = React.ComponentType<ButtonProps>;
+
+type CargoModule = {
+  Button: ButtonComponent;
+};
+
+const navigator = createNavigator({
+  expozrs: {
+    "webpack-react-components": {
+      url: EXPOZR_REMOTE_URL,
+    },
+  },
+});
+
+// Component loaded with ESM preference
+const RemoteButton = React.lazy(() =>
+  navigator
+    .loadCargo<CargoModule>("webpack-react-components", "./Button")
+    .then((cargo) => ({
+      default: cargo.module.Button,
+    }))
 );
 
-/**
- * Main App component that renders with loaded remote components
- */
-export default function App() {
-  function handleClick() {
-    alert("App button clicked!");
-    console.log("🔘 Remote button was clicked!");
-  }
+// Component loaded with UMD preference (for demonstration)
+const RemoteButtonUMD = React.lazy(() =>
+  navigator
+    .loadCargo<CargoModule>("webpack-react-components", "./Button", {
+      moduleFormat: "umd", // Prefer UMD for this component
+      fallbackFormats: ["esm", "cjs"], // Fall back to ESM, then CJS
+      strategy: "eager", // Load eagerly
+    })
+    .then((cargo) => ({
+      default: cargo.module.Button,
+    }))
+);
 
+function App() {
   return (
-    <div className="container">
-      <div id="app">
-        <h1>
-          <span className="emoji">🚀</span>Vite React Host Application
-        </h1>
+    <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
+      <h1>Webpack React Host Application</h1>
+      <p>
+        Successfully loaded and using the remote Button component from the
+        remote application!
+      </p>
 
-        <div style={{ marginBottom: "20px" }}>
-          <h2>📡 Testing Remote Button Component</h2>
-          <div
-            style={{
-              display: "flex",
-              gap: "10px",
-              flexWrap: "wrap",
-              marginBottom: "15px",
-            }}
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "16px",
+          maxWidth: "300px",
+        }}
+      >
+        <h2>Remote Button Component Examples:</h2>
+
+        <React.Suspense fallback={<div>Loading ESM buttons...</div>}>
+          <RemoteButton onClick={() => alert("Remote primary button clicked!")}>
+            Remote Primary Button
+          </RemoteButton>
+
+          <RemoteButton
+            variant="secondary"
+            onClick={() => alert("Remote secondary button clicked!")}
           >
-            <Button onClick={handleClick}>Default Button</Button>
-            <Button onClick={handleClick} variant="primary">
-              Primary Button
-            </Button>
-            <Button onClick={handleClick} variant="secondary">
-              Secondary Button
-            </Button>
-            <Button onClick={handleClick} size="small">
-              Small Button
-            </Button>
-            <Button onClick={handleClick} size="large">
-              Large Button
-            </Button>
-            <Button onClick={handleClick} disabled>
-              Disabled Button
-            </Button>
-            <Button
-              onClick={handleClick}
-              style={{ backgroundColor: "#ff6b6b", color: "white" }}
+            Remote Secondary Button
+          </RemoteButton>
+
+          <RemoteButton
+            variant="danger"
+            size="large"
+            onClick={() => alert("Remote danger button clicked!")}
+          >
+            Remote Danger Button
+          </RemoteButton>
+
+          <RemoteButton
+            variant="primary"
+            size="small"
+            onClick={() => alert("Remote small button clicked!")}
+          >
+            Remote Small Button
+          </RemoteButton>
+
+          <RemoteButton disabled>Remote Disabled Button</RemoteButton>
+        </React.Suspense>
+
+        <div
+          style={{
+            margin: "20px 0",
+            padding: "10px",
+            backgroundColor: "#f9f9f9",
+            borderRadius: "4px",
+          }}
+        >
+          <p style={{ fontSize: "14px", margin: "0 0 10px 0" }}>
+            <strong>UMD-Preferred Button:</strong> (Same component, different
+            loading strategy)
+          </p>
+          <React.Suspense fallback={<div>Loading UMD button...</div>}>
+            <RemoteButtonUMD
+              variant="secondary"
+              onClick={() => alert("UMD-loaded button clicked!")}
             >
-              Custom Styled Button
-            </Button>
-          </div>
+              UMD-Loaded Button
+            </RemoteButtonUMD>
+          </React.Suspense>
+        </div>
+      </div>
 
-          <div
-            style={{ fontSize: "16px", color: "white", marginBottom: "10px" }}
-          >
-            <strong>Component Info:</strong>
-            <ul style={{ margin: "5px 0", paddingLeft: "20px" }}>
-              <li>Source: Remote expozr at {EXPOZR_REMOTE_URL}</li>
-              <li>Type: {typeof Button}</li>
-              <li>
-                Props: Supports variant, size, disabled, onClick, style, and
-                children
-              </li>
-            </ul>
-          </div>
+      <div
+        style={{
+          marginTop: "40px",
+          padding: "20px",
+          backgroundColor: "#f5f5f5",
+          borderRadius: "8px",
+        }}
+      >
+        <h3>🎉 Success!</h3>
+        <p>
+          These buttons are loaded dynamically from the remote app running on
+          port 5001. The Button component is defined in the remote application
+          and consumed here seamlessly!
+        </p>
+        <p>
+          <strong>Architecture:</strong> Host (port 5000) → Remote App (port
+          5001) → Button Component
+        </p>
+
+        <div
+          style={{
+            marginTop: "20px",
+            padding: "15px",
+            backgroundColor: "#e8f4fd",
+            borderRadius: "6px",
+          }}
+        >
+          <h4>📘 Module System Configuration</h4>
+          <p>
+            <strong>Global Configuration:</strong>
+          </p>
+          <ul style={{ fontSize: "14px", margin: "8px 0" }}>
+            <li>
+              <strong>Primary:</strong> ESM (Preferred module format)
+            </li>
+            <li>
+              <strong>Fallbacks:</strong> UMD → CJS (Fallback order)
+            </li>
+            <li>
+              <strong>Strategy:</strong> Dynamic loading
+            </li>
+            <li>
+              <strong>Hybrid:</strong> Enabled
+            </li>
+          </ul>
+          <p>
+            <strong>Per-Load Options:</strong>
+          </p>
+          <ul style={{ fontSize: "14px", margin: "8px 0" }}>
+            <li>
+              <strong>Module Format:</strong> ESM (Override for this component)
+            </li>
+            <li>
+              <strong>Fallback Formats:</strong> UMD only
+            </li>
+            <li>
+              <strong>Strategy:</strong> Dynamic (Per-load override)
+            </li>
+          </ul>
         </div>
       </div>
     </div>
   );
 }
+
+export default App;

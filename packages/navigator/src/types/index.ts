@@ -6,7 +6,6 @@ import type { HostConfig } from "@expozr/core";
 
 // Re-export core types that we extend
 export type {
-  LoadOptions,
   ModuleLoader,
   CacheManager,
   HostConfig,
@@ -18,6 +17,25 @@ export type {
   ExpozrEvents,
   IExpozrNavigator,
 } from "@expozr/core";
+
+// Import LoadOptions from core to extend it
+import type { LoadOptions as CoreLoadOptions } from "@expozr/core";
+
+/**
+ * Enhanced load options with module system preferences
+ */
+export interface LoadOptions extends CoreLoadOptions {
+  /** Module format preference for this specific load */
+  moduleFormat?: "esm" | "umd" | "cjs";
+  /** Fallback formats if preferred format fails */
+  fallbackFormats?: ("esm" | "umd" | "cjs")[];
+  /** Loading strategy override for this load */
+  strategy?: "dynamic" | "static" | "lazy" | "eager";
+  /** Enable smart fallback for this specific load (overrides global config) */
+  automaticModuleDiscover?: boolean;
+  /** Suppress errors for this specific load (overrides global config) */
+  suppressErrors?: boolean;
+}
 
 /**
  * Configuration for auto-loader functionality
@@ -94,5 +112,19 @@ export interface UMDModuleInfo {
  * Navigator factory configuration
  */
 export interface NavigatorConfig extends Partial<HostConfig> {
-  // No additional configuration needed - ExpozrNavigator is the only option
+  /** Module system configuration for loading modules */
+  moduleSystem?: {
+    /** Primary module format to prefer */
+    primary?: "esm" | "umd" | "cjs";
+    /** Fallback formats if primary fails */
+    fallbacks?: ("esm" | "umd" | "cjs")[];
+    /** Loading strategy */
+    strategy?: "dynamic" | "static" | "lazy" | "eager";
+    /** Whether to enable hybrid loading */
+    hybrid?: boolean;
+    /** Enable smart fallback system (probe multiple URLs) */
+    automaticModuleDiscover?: boolean;
+    /** Suppress webpack/loading errors from showing on screen */
+    suppressErrors?: boolean;
+  };
 }

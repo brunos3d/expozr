@@ -1,15 +1,23 @@
 /**
- * @expozr/webpack-adapter - Webpack adapter for the Expozr ecosystem
+ * Webpack Adapter for Expozr
+ *
+ * Provides webpack integration for building and serving Expozr remotes and hosts
+ * with optimized UMD output format for maximum Navigator compatibility.
  */
 
-// Main adapter
-export { WebpackAdapter, webpackAdapter } from "./adapter";
+export {
+  WebpackAdapter,
+  webpackAdapter,
+  createExpozrPlugin,
+  createHostPlugin,
+  createHostWebpackConfig,
+} from "./adapter";
 
-// Plugins
-export { ExpozrPlugin, ExpozrHostPlugin } from "./adapter";
+// Export plugins
+export { ExpozrPlugin } from "./plugins/expozr";
+export { ExpozrHostPlugin } from "./plugins/host";
 
-// Convenience functions
-export { createExpozrPlugin, createHostPlugin } from "./adapter";
+// Export plugin types
+export type { ExpozrPluginOptions, HostPluginOptions } from "./plugins";
 
-// Utilities for cleaner webpack configs
 export { suppressExpozrWarnings } from "./utils";

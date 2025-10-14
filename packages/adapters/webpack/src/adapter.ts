@@ -1,23 +1,33 @@
 /**
  * Webpack adapter for Expozr ecosystem
+ *
+ * This adapter provides comprehensive webpack integration for Expozr remotes and hosts,
+ * supporting UMD output format for maximum compatibility with the Navigator system.
  */
 
+import type {
+  ExpozrConfig,
+  HostConfig,
+  ModuleFormat,
+  ModuleSystemConfig,
+} from "@expozr/core";
 import {
   AbstractBundlerAdapter,
-  BundlerUtils,
-  type ExpozrConfig,
-  type HostConfig,
-  type Inventory,
-  type ModuleFormat,
-  type ModuleSystemConfig,
+  ValidationUtils,
+  InventoryGenerator,
 } from "@expozr/core";
-
-import { ExpozrPlugin } from "./expozr-plugin";
-import { ExpozrHostPlugin } from "./host-plugin";
-import { suppressExpozrWarnings } from "./utils";
+import { ExpozrPlugin } from "./plugins/expozr";
+import { ExpozrHostPlugin } from "./plugins/host";
 
 /**
  * Webpack adapter implementation
+ *
+ * Features:
+ * - UMD module format for Navigator compatibility
+ * - TypeScript configuration optimization
+ * - Development server CORS setup
+ * - Inventory generation
+ * - Warning suppression for better DX
  */
 export class WebpackAdapter extends AbstractBundlerAdapter {
   readonly name = "webpack";
@@ -39,94 +49,101 @@ export class WebpackAdapter extends AbstractBundlerAdapter {
     }
   }
 
+  /**
+   * Configure webpack for Expozr remote builds
+   */
   configureExpozr(config: ExpozrConfig, bundlerConfig: any): any {
     this.validateExpozrConfig(config);
 
     const { build = {} } = config;
     const {
-      format = ["esm", "umd"],
-      moduleSystem,
-      target = "universal",
+      format = ["umd"], // Default to UMD for Navigator compatibility
       outDir = "dist",
       publicPath = "/",
       sourcemap = true,
-      minify = true,
+      minify = false,
     } = build;
 
-    // Ensure moduleSystem has required properties
-    const defaultModuleSystem = {
-      primary: "esm" as const,
-      fallbacks: ["umd" as const],
-      strategy: "dynamic" as const,
-      hybrid: true,
-      ...moduleSystem,
-    };
-
-    // Base webpack configuration
+    // Base webpack configuration optimized for Expozr
     const webpackConfig = {
       ...bundlerConfig,
       mode: minify ? "production" : "development",
       devtool: sourcemap ? "source-map" : false,
+      target: "web",
+
       output: {
         ...bundlerConfig.output,
         path: outDir,
         publicPath,
+        filename: "[name].js",
+        library: {
+          name: "[name]",
+          type: "umd",
+          export: "default",
+        },
+        globalObject: "typeof self !== 'undefined' ? self : this",
         clean: true,
       },
-      externals: this.configureExternals(defaultModuleSystem, target),
-      ignoreWarnings: [
-        ...suppressExpozrWarnings(),
-        ...(bundlerConfig.ignoreWarnings || []),
-      ],
+
+      plugins: [...(bundlerConfig.plugins || []), new ExpozrPlugin({ config })],
+
       experiments: {
         ...bundlerConfig.experiments,
-        outputModule: this.shouldEnableOutputModule(format),
+        outputModule: false, // Disable for UMD compatibility
       },
-      ...this.getTargetConfig(target),
+
+      optimization: {
+        ...bundlerConfig.optimization,
+        minimize: minify,
+        // Disable optimizations that break UMD
+        concatenateModules: false,
+        usedExports: false,
+        sideEffects: false,
+        splitChunks: false,
+        runtimeChunk: false,
+      },
+
+      devServer: {
+        ...bundlerConfig.devServer,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "*",
+          "Access-Control-Allow-Headers": "*",
+          ...bundlerConfig.devServer?.headers,
+        },
+      },
     };
 
-    // Configure module output formats
-    const outputConfig = this.configureModuleOutput(
-      format,
-      webpackConfig,
-      defaultModuleSystem
-    );
-
-    if (Array.isArray(outputConfig)) {
-      // Multiple outputs for hybrid mode
-      return outputConfig.map((output) => ({
-        ...webpackConfig,
-        output: { ...webpackConfig.output, ...output },
-      }));
-    } else {
-      // Single output
-      webpackConfig.output = { ...webpackConfig.output, ...outputConfig };
-      return webpackConfig;
-    }
+    return webpackConfig;
   }
 
+  /**
+   * Configure webpack for Expozr host applications
+   */
   configureHost(config: HostConfig, bundlerConfig: any): any {
     this.validateHostConfig(config);
 
-    // Host configuration is simpler - mainly about module federation
     return {
       ...bundlerConfig,
-      externals: this.createHostExternals(config),
-      ignoreWarnings: [
-        ...(bundlerConfig.ignoreWarnings || []),
-        ...suppressExpozrWarnings(),
-      ],
       plugins: [
         ...(bundlerConfig.plugins || []),
-        this.createHostPlugin(config),
+        new ExpozrHostPlugin({ config }),
       ],
+      experiments: {
+        ...bundlerConfig.experiments,
+        dynamicImport: true,
+      },
     };
   }
 
+  /**
+   * Get default webpack configuration for Expozr projects
+   */
   getDefaultConfig(): any {
     return {
       mode: "development",
       entry: "./src/index.ts",
+      target: "web",
       module: {
         rules: [
           {
@@ -139,116 +156,106 @@ export class WebpackAdapter extends AbstractBundlerAdapter {
       resolve: {
         extensions: [".tsx", ".ts", ".js"],
       },
-      experiments: {
-        outputModule: true,
+      devServer: {
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+        },
       },
     };
   }
 
+  /**
+   * Create format-specific configuration (UMD focus)
+   */
   protected createFormatConfig(
     format: ModuleFormat,
     bundlerConfig: any,
     moduleSystem: ModuleSystemConfig
   ): any {
-    const baseConfig = {
-      filename: this.getFilenameForFormat(format),
-      chunkFilename: this.getChunkFilenameForFormat(format),
-    };
+    // Webpack adapter focuses on UMD for Navigator compatibility
+    if (format === "umd") {
+      return {
+        output: {
+          filename: "[name].js",
+          library: {
+            name: "[name]",
+            type: "umd",
+            export: "default",
+          },
+          globalObject: "typeof self !== 'undefined' ? self : this",
+        },
+      };
+    }
 
-    switch (format) {
-      case "esm":
-        return {
-          ...baseConfig,
+    // ESM support (experimental)
+    if (format === "esm") {
+      return {
+        output: {
+          filename: "[name].mjs",
           library: {
             type: "module",
           },
-          environment: {
-            module: true,
-            dynamicImport: true,
-            arrowFunction: true,
-          },
-        };
-
-      case "umd":
-        return {
-          ...baseConfig,
-          library: {
-            type: "umd",
-            umdNamedDefine: true,
-          },
-          globalObject: 'typeof self !== "undefined" ? self : this',
-        };
-
-      case "cjs":
-        return {
-          ...baseConfig,
-          library: {
-            type: "commonjs2",
-          },
-        };
-
-      default:
-        throw new Error(`Unsupported format: ${format}`);
+        },
+        experiments: {
+          outputModule: true,
+        },
+      };
     }
+
+    // Default to UMD
+    return this.createFormatConfig("umd", bundlerConfig, moduleSystem);
   }
 
-  private getFilenameForFormat(format: ModuleFormat): string {
-    switch (format) {
-      case "esm":
-        return "[name].mjs";
-      case "umd":
-        return "[name].umd.js";
-      case "cjs":
-        return "[name].cjs";
-      default:
-        return "[name].js";
-    }
-  }
-
-  private getChunkFilenameForFormat(format: ModuleFormat): string {
-    switch (format) {
-      case "esm":
-        return "[name].[contenthash].mjs";
-      case "umd":
-        return "[name].[contenthash].umd.js";
-      case "cjs":
-        return "[name].[contenthash].cjs";
-      default:
-        return "[name].[contenthash].js";
-    }
-  }
-
-  private shouldEnableOutputModule(
-    format: ModuleFormat | ModuleFormat[]
-  ): boolean {
-    const formats = Array.isArray(format) ? format : [format];
-    return formats.includes("esm");
-  }
-
-  private createHostExternals(config: HostConfig): any {
-    // Host applications typically don't need externals
-    // but might need to exclude expozr modules
-    return {};
-  }
-
+  /**
+   * Create Expozr plugin instance
+   */
   createExpozrPlugin(config: ExpozrConfig): ExpozrPlugin {
     return new ExpozrPlugin({ config });
   }
 
+  /**
+   * Create Host plugin instance
+   */
   createHostPlugin(config: HostConfig): ExpozrHostPlugin {
     return new ExpozrHostPlugin({ config });
   }
 
-  async generateInventory(config: ExpozrConfig): Promise<Inventory> {
-    return super.generateInventory(config);
+  /**
+   * Generate inventory using core generator
+   */
+  async generateInventory(config: ExpozrConfig): Promise<any> {
+    return InventoryGenerator.generate(config);
+  }
+
+  /**
+   * Get warning suppressions for better DX
+   */
+  getIgnoreWarnings(): Array<(warning: Error) => boolean> {
+    return [
+      // Suppress Navigator dynamic import warnings
+      (warning: any) => {
+        return (
+          warning.message &&
+          warning.message.includes(
+            "Critical dependency: the request of a dependency is an expression"
+          )
+        );
+      },
+      // Suppress module not found warnings for externals
+      (warning: any) => {
+        return (
+          warning.message &&
+          warning.message.includes("Module not found") &&
+          (warning.message.includes("@expozr/") ||
+            warning.message.includes("expozr-"))
+        );
+      },
+    ];
   }
 }
 
-// Create default instance
+// Create singleton instance
 export const webpackAdapter = new WebpackAdapter();
-
-// Export plugins for direct use
-export { ExpozrPlugin, ExpozrHostPlugin };
 
 // Export convenience functions
 export function createExpozrPlugin(options?: any) {
@@ -260,8 +267,7 @@ export function createHostPlugin(options?: any) {
 }
 
 /**
- * Creates a basic webpack configuration optimized for Expozr host applications
- * This replaces the old createHostConfig utility with a simpler approach
+ * Creates a webpack configuration optimized for Expozr host applications
  */
 export function createHostWebpackConfig(customConfig: any = {}) {
   return {
@@ -271,8 +277,18 @@ export function createHostWebpackConfig(customConfig: any = {}) {
     },
     ignoreWarnings: [
       ...(customConfig.ignoreWarnings || []),
-      ...suppressExpozrWarnings(),
+      ...webpackAdapter.getIgnoreWarnings(),
     ],
+    experiments: {
+      dynamicImport: true,
+      ...customConfig.experiments,
+    },
+    devServer: {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+      },
+      ...customConfig.devServer,
+    },
     ...customConfig,
   };
 }
