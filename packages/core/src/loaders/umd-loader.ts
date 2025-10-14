@@ -139,6 +139,12 @@ export class UMDModuleLoader extends BaseModuleLoader {
     const afterGlobals = Object.keys(globalThis as any);
     const newGlobals = afterGlobals.filter((key) => !beforeGlobals.has(key));
 
+    console.log("🔍 UMD Loader Debug:", {
+      newGlobals,
+      requestedExports,
+      globalButton: (globalThis as any).Button,
+    });
+
     if (newGlobals.length === 0) {
       throw new Error("No new globals found after loading UMD module");
     }

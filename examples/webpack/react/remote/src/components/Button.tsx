@@ -1,44 +1,81 @@
-/**
- * Example React Button component
- */
-
 import React from "react";
 
 export interface ButtonProps {
   children: React.ReactNode;
   onClick?: () => void;
-  variant?: "primary" | "secondary";
+  variant?: "primary" | "secondary" | "danger";
+  size?: "small" | "medium" | "large";
   disabled?: boolean;
-  style?: React.CSSProperties;
 }
 
-export const Button: React.FC<ButtonProps> = ({
+export function Button({
   children,
   onClick,
   variant = "primary",
-  style = {},
+  size = "medium",
   disabled = false,
-}) => {
-  const buttonDefaultStyle: React.CSSProperties = {
-    padding: "8px 16px",
+}: ButtonProps) {
+  const baseStyles = {
+    padding:
+      size === "small"
+        ? "8px 16px"
+        : size === "large"
+          ? "16px 32px"
+          : "12px 24px",
+    fontSize: size === "small" ? "14px" : size === "large" ? "18px" : "16px",
     border: "none",
-    borderRadius: "4px",
+    borderRadius: "6px",
     cursor: disabled ? "not-allowed" : "pointer",
-    backgroundColor: variant === "primary" ? "#007bff" : "#6c757d",
-    color: "white",
-    opacity: disabled ? 0.5 : 1,
+    fontWeight: "500",
+    transition: "all 0.2s ease",
+    opacity: disabled ? 0.6 : 1,
   };
+
+  const variantStyles = {
+    primary: {
+      backgroundColor: "#007bff",
+      color: "white",
+    },
+    secondary: {
+      backgroundColor: "#6c757d",
+      color: "white",
+    },
+    danger: {
+      backgroundColor: "#dc3545",
+      color: "white",
+    },
+  };
+
+  const hoverStyles = !disabled
+    ? {
+        transform: "translateY(-1px)",
+        boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+      }
+    : {};
 
   return (
     <button
-      style={{ ...buttonDefaultStyle, ...style }}
-      onClick={onClick}
+      style={{
+        ...baseStyles,
+        ...variantStyles[variant],
+      }}
+      onClick={disabled ? undefined : onClick}
       disabled={disabled}
+      onMouseEnter={(e) => {
+        if (!disabled) {
+          Object.assign(e.currentTarget.style, hoverStyles);
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!disabled) {
+          e.currentTarget.style.transform = "translateY(0)";
+          e.currentTarget.style.boxShadow = "none";
+        }
+      }}
     >
       {children}
     </button>
   );
-};
+}
 
-// Export both named and default for UMD compatibility
 export default Button;

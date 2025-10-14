@@ -54,7 +54,7 @@ export class ExpozrNavigator extends BaseExpozrNavigator {
       strategy: config?.strategy || ("dynamic" as const),
       hybrid: config?.hybrid !== false,
       // Add smart fallback configuration
-      automaticModuleDiscover: config?.automaticModuleDiscover !== false, // Enable by default
+      automaticModuleDiscovery: config?.automaticModuleDiscovery === true, // Disabled by default
       suppressErrors: config?.suppressErrors !== false, // Suppress errors by default
     };
 
@@ -130,9 +130,9 @@ export class ExpozrNavigator extends BaseExpozrNavigator {
 
       // Check if smart fallback is enabled (global config or per-load option)
       const shouldUseSmartFallback =
-        options?.automaticModuleDiscover !== false &&
-        (options?.automaticModuleDiscover === true ||
-          this.moduleSystemConfig?.automaticModuleDiscover !== false);
+        options?.automaticModuleDiscovery === true ||
+        (options?.automaticModuleDiscovery !== false &&
+          this.moduleSystemConfig?.automaticModuleDiscovery === true);
 
       let result: { module: T; format: string; strategy: string };
 
@@ -205,9 +205,11 @@ export class ExpozrNavigator extends BaseExpozrNavigator {
       : `${expozrRef.url}/`;
     const url = `${baseUrl}${cargoInfo.entry}`;
 
-    // Determine format - use provided moduleFormat or detect from entry
+    // Determine format - use provided moduleFormat, then inventory moduleSystem, then detect from entry
     const format =
-      options?.moduleFormat || this.detectFormatFromEntry(cargoInfo.entry);
+      options?.moduleFormat ||
+      cargoInfo.moduleSystem ||
+      this.detectFormatFromEntry(cargoInfo.entry);
     const strategy = (options?.strategy ||
       this.moduleSystemConfig?.strategy ||
       "dynamic") as ModuleLoadingStrategy;
@@ -215,11 +217,29 @@ export class ExpozrNavigator extends BaseExpozrNavigator {
     try {
       // Check if error suppression is enabled
       const shouldSuppressErrors =
-        options?.suppressErrors !== false &&
-        (options?.suppressErrors === true ||
-          this.moduleSystemConfig?.suppressErrors !== false);
+        options?.suppressErrors === true ||
+        (options?.suppressErrors !== false &&
+          this.moduleSystemConfig?.suppressErrors === true);
 
-      const module = await moduleSystem.loadModule<T>(url, options);
+      let module: T;
+
+      // Use the appropriate loader based on the format
+      if (format === "umd") {
+        const umdLoader = new UMDModuleLoader();
+        module = await umdLoader.loadModule<T>(url, {
+          ...options,
+          exports: cargoInfo.exports,
+        });
+      } else if (format === "esm") {
+        const esmLoader = new ESMModuleLoader();
+        module = await esmLoader.loadModule<T>(url, {
+          ...options,
+          exports: cargoInfo.exports,
+        });
+      } else {
+        // Fallback to generic module system
+        module = await moduleSystem.loadModule<T>(url, options);
+      }
 
       return {
         module,
@@ -229,9 +249,9 @@ export class ExpozrNavigator extends BaseExpozrNavigator {
     } catch (error) {
       // Check if errors should be suppressed
       const shouldSuppressErrors =
-        options?.suppressErrors !== false &&
-        (options?.suppressErrors === true ||
-          this.moduleSystemConfig?.suppressErrors !== false);
+        options?.suppressErrors === true ||
+        (options?.suppressErrors !== false &&
+          this.moduleSystemConfig?.suppressErrors === true);
 
       if (shouldSuppressErrors) {
         // Log error to console instead of showing on screen
@@ -279,9 +299,9 @@ export class ExpozrNavigator extends BaseExpozrNavigator {
 
     // Check if error suppression is enabled
     const shouldSuppressErrors =
-      options?.suppressErrors !== false &&
-      (options?.suppressErrors === true ||
-        this.moduleSystemConfig?.suppressErrors !== false);
+      options?.suppressErrors === true ||
+      (options?.suppressErrors !== false &&
+        this.moduleSystemConfig?.suppressErrors === true);
 
     for (const { format, url } of orderedUrls) {
       try {

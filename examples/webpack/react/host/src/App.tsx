@@ -26,26 +26,11 @@ const navigator = createNavigator({
   },
 });
 
-// Component loaded with ESM preference
+// Component loaded with UMD preference
 const RemoteButton = React.lazy(() =>
   navigator
     .loadCargo<CargoModule>("webpack-react-components", "./Button")
-    .then((cargo) => ({
-      default: cargo.module.Button,
-    }))
-);
-
-// Component loaded with UMD preference (for demonstration)
-const RemoteButtonUMD = React.lazy(() =>
-  navigator
-    .loadCargo<CargoModule>("webpack-react-components", "./Button", {
-      moduleFormat: "umd", // Prefer UMD for this component
-      fallbackFormats: ["esm", "cjs"], // Fall back to ESM, then CJS
-      strategy: "eager", // Load eagerly
-    })
-    .then((cargo) => ({
-      default: cargo.module.Button,
-    }))
+    .then((cargo) => ({ default: cargo.module.Button }))
 );
 
 function App() {
@@ -67,7 +52,7 @@ function App() {
       >
         <h2>Remote Button Component Examples:</h2>
 
-        <React.Suspense fallback={<div>Loading ESM buttons...</div>}>
+        <React.Suspense fallback={<div>Loading UMD buttons...</div>}>
           <RemoteButton onClick={() => alert("Remote primary button clicked!")}>
             Remote Primary Button
           </RemoteButton>
@@ -97,28 +82,6 @@ function App() {
 
           <RemoteButton disabled>Remote Disabled Button</RemoteButton>
         </React.Suspense>
-
-        <div
-          style={{
-            margin: "20px 0",
-            padding: "10px",
-            backgroundColor: "#f9f9f9",
-            borderRadius: "4px",
-          }}
-        >
-          <p style={{ fontSize: "14px", margin: "0 0 10px 0" }}>
-            <strong>UMD-Preferred Button:</strong> (Same component, different
-            loading strategy)
-          </p>
-          <React.Suspense fallback={<div>Loading UMD button...</div>}>
-            <RemoteButtonUMD
-              variant="secondary"
-              onClick={() => alert("UMD-loaded button clicked!")}
-            >
-              UMD-Loaded Button
-            </RemoteButtonUMD>
-          </React.Suspense>
-        </div>
       </div>
 
       <div
@@ -132,55 +95,13 @@ function App() {
         <h3>🎉 Success!</h3>
         <p>
           These buttons are loaded dynamically from the remote app running on
-          port 5001. The Button component is defined in the remote application
+          port 3001. The Button component is defined in the remote application
           and consumed here seamlessly!
         </p>
         <p>
-          <strong>Architecture:</strong> Host (port 5000) → Remote App (port
-          5001) → Button Component
+          <strong>Architecture:</strong> Host (port 3000) → Remote App (port
+          3001) → Button Component
         </p>
-
-        <div
-          style={{
-            marginTop: "20px",
-            padding: "15px",
-            backgroundColor: "#e8f4fd",
-            borderRadius: "6px",
-          }}
-        >
-          <h4>📘 Module System Configuration</h4>
-          <p>
-            <strong>Global Configuration:</strong>
-          </p>
-          <ul style={{ fontSize: "14px", margin: "8px 0" }}>
-            <li>
-              <strong>Primary:</strong> ESM (Preferred module format)
-            </li>
-            <li>
-              <strong>Fallbacks:</strong> UMD → CJS (Fallback order)
-            </li>
-            <li>
-              <strong>Strategy:</strong> Dynamic loading
-            </li>
-            <li>
-              <strong>Hybrid:</strong> Enabled
-            </li>
-          </ul>
-          <p>
-            <strong>Per-Load Options:</strong>
-          </p>
-          <ul style={{ fontSize: "14px", margin: "8px 0" }}>
-            <li>
-              <strong>Module Format:</strong> ESM (Override for this component)
-            </li>
-            <li>
-              <strong>Fallback Formats:</strong> UMD only
-            </li>
-            <li>
-              <strong>Strategy:</strong> Dynamic (Per-load override)
-            </li>
-          </ul>
-        </div>
       </div>
     </div>
   );
