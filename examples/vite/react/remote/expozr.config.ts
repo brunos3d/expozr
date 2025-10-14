@@ -20,10 +20,9 @@ export default defineExpozrConfig({
   build: {
     outDir: "dist",
     publicPath: "http://localhost:5001/",
-    format: "esm",
   },
   metadata: {
-    description: "Vite React components warehouse",
+    description: "Vite React components example from Expozr Team",
     author: "Expozr Team",
     license: "MIT",
     tags: ["react", "vite", "components"],

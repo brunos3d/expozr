@@ -77,10 +77,12 @@ export class InventoryGenerator {
     version: string,
     build: any
   ): Cargo {
+    const entryPath = this.getCargoEntryPath(cargoName, entry, build);
     return {
-      name: cargoName,
+      name: this.extractPureModuleName(cargoName),
       version,
-      entry: this.getCargoEntryPath(cargoName, entry, build),
+      entry: entryPath,
+      moduleSystem: this.detectModuleSystem(entryPath),
       dependencies: {},
       metadata: {},
     };
@@ -95,10 +97,16 @@ export class InventoryGenerator {
     version: string,
     build: any
   ): Cargo {
+    const entryPath = this.getCargoEntryPath(
+      cargoName,
+      cargoConfig.entry,
+      build
+    );
     return {
-      name: cargoName,
+      name: this.extractPureModuleName(cargoName),
       version,
-      entry: this.getCargoEntryPath(cargoName, cargoConfig.entry, build),
+      entry: entryPath,
+      moduleSystem: this.detectModuleSystem(entryPath),
       exports: cargoConfig.exports,
       dependencies: cargoConfig.dependencies || {},
       metadata: cargoConfig.metadata || {},
@@ -120,12 +128,58 @@ export class InventoryGenerator {
     const preferredFormat = formats.includes("esm") ? "esm" : formats[0];
 
     const extension = this.getExtensionForFormat(preferredFormat);
-    const fileName = `${cargoName}${extension}`;
+
+    // Extract pure module name for file naming
+    const pureModuleName = this.extractPureModuleName(cargoName);
+    const fileName = `${pureModuleName}${extension}`;
 
     return fileName;
   }
 
   /**
+   * Extract pure module name from cargo name
+   * Example: "./Button" -> "Button", "@scope/module" -> "module"
+   */
+  private static extractPureModuleName(cargoName: string): string {
+    // Remove leading "./" if present
+    let pureName = cargoName.replace(/^\.\//, "");
+
+    // Handle scoped packages (@scope/module -> module)
+    if (pureName.startsWith("@")) {
+      const parts = pureName.split("/");
+      pureName = parts[parts.length - 1];
+    }
+
+    // Remove any remaining path separators
+    pureName = pureName.split("/").pop() || pureName;
+
+    return pureName;
+  }
+
+  /**
+   * Detect module system from entry file extension
+   * @param entry - Entry file name or path
+   * @returns Detected module system
+   */
+  private static detectModuleSystem(entry: string): "esm" | "umd" | "cjs" {
+    // Detect based on file extension
+    if (entry.endsWith(".mjs") || entry.endsWith(".esm.js")) {
+      return "esm";
+    }
+    if (entry.endsWith(".umd.js")) {
+      return "umd";
+    }
+    if (entry.endsWith(".cjs") || entry.endsWith(".commonjs.js")) {
+      return "cjs";
+    }
+
+    // Default based on common patterns
+    if (entry.endsWith(".js")) {
+      return "umd"; // Most webpack builds default to UMD
+    }
+
+    return "esm"; // Default for modern builds
+  } /**
    * Get file extension for module format
    */
   private static getExtensionForFormat(format: string): string {

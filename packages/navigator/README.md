@@ -53,11 +53,29 @@ const navigator = createNavigator({
     strategy: "memory",
     ttl: 300000, // 5 minutes
   },
+  // Module system configuration
+  moduleSystem: {
+    primary: "esm", // Prefer ESM modules
+    fallbacks: ["umd", "cjs"], // Fall back to UMD, then CJS
+    strategy: "dynamic", // Use dynamic loading strategy
+    hybrid: true, // Enable hybrid mode
+  },
 });
 
-// Load a remote module
+// Load a remote module with default settings
 const buttonModule = await navigator.loadCargo("components", "Button");
 const { Button } = buttonModule.module;
+
+// Load with per-component module preferences
+const advancedModule = await navigator.loadCargo(
+  "components",
+  "AdvancedButton",
+  {
+    moduleFormat: "umd", // Prefer UMD for this specific load
+    fallbackFormats: ["esm"], // Fall back to ESM if UMD fails
+    strategy: "eager", // Load eagerly
+  }
+);
 ```
 
 ## 🔀 Navigator Types
@@ -71,10 +89,12 @@ The **EnhancedNavigator** is the recommended choice for most applications. It pr
 - **🎯 Smart Format Detection**: Automatically detects and loads the best available module format (ESM, UMD, CJS)
 - **🔄 Multi-Format Support**: Tries multiple formats in order of preference (ESM → UMD → CJS → Auto)
 - **🧠 Intelligent Fallbacks**: If one format fails, automatically tries alternatives
-- **⚡ Advanced Module System**: Integration with Expozr's global module system
+- **⚡ Advanced Module System**: Integration with Expozr's global module system with configurable preferences
 - **🛡️ Error Recovery**: Comprehensive error handling with detailed feedback
 - **📊 Format Tracking**: Tracks which format was successfully loaded
-- **🎪 Strategy Awareness**: Reports loading strategy used (enhanced/fallback)
+- **🎪 Strategy Awareness**: Reports loading strategy used (dynamic/static/lazy/eager)
+- **⚙️ Flexible Configuration**: Global and per-load module system configuration
+- **🎛️ Loading Strategy Control**: Choose between dynamic, static, lazy, or eager loading strategies
 
 ## 📚 API Reference
 
@@ -93,6 +113,7 @@ function createNavigator(config?: NavigatorConfig): ExpozrNavigator;
 - `config.expozrs: Record<string, ExpozrReference>` - Expozr configurations
 - `config.cache?: CacheConfig` - Cache configuration
 - `config.loading?: LoadingConfig` - Loading timeout and retry settings
+- `config.moduleSystem?: ModuleSystemConfig` - Module system configuration
 
 ### Navigator Methods
 
@@ -134,6 +155,7 @@ interface NavigatorConfig {
   expozrs: Record<string, ExpozrReference>;
   cache?: CacheConfig;
   loading?: LoadingConfig;
+  moduleSystem?: ModuleSystemConfig;
 }
 ```
 
@@ -156,12 +178,105 @@ interface CacheConfig {
 }
 ```
 
+### Module System Configuration
+
+```typescript
+interface ModuleSystemConfig {
+  primary?: "esm" | "umd" | "cjs"; // Primary module format to prefer
+  fallbacks?: ("esm" | "umd" | "cjs")[]; // Fallback formats if primary fails
+  strategy?: "dynamic" | "static" | "lazy" | "eager"; // Loading strategy
+  hybrid?: boolean; // Whether to enable hybrid loading
+}
+```
+
+### Load Options
+
+```typescript
+interface LoadOptions {
+  timeout?: number; // Override default timeout
+  retry?: RetryConfig; // Override default retry config
+  cache?: boolean; // Whether to use cache
+  fallback?: () => Promise<any>; // Fallback module if loading fails
+  exports?: string[]; // Specific exports to extract
+  cacheBusting?: boolean; // Whether to add cache busting parameters
+
+  // Module system preferences (per-load overrides)
+  moduleFormat?: "esm" | "umd" | "cjs"; // Module format preference
+  fallbackFormats?: ("esm" | "umd" | "cjs")[]; // Fallback formats
+  strategy?: "dynamic" | "static" | "lazy" | "eager"; // Loading strategy override
+}
+```
+
 ## 💾 Cache Strategies
 
 - **`memory`** - In-memory cache (default, fastest)
 - **`localStorage`** - Browser localStorage (persistent)
 - **`indexedDB`** - Browser IndexedDB (persistent, large data)
 - **`none`** - No caching (always fetch)
+
+## ⚙️ Module System Configuration
+
+The Navigator provides flexible module loading with support for different formats and strategies.
+
+### Global Configuration
+
+Set default preferences when creating the navigator:
+
+```typescript
+const navigator = createNavigator({
+  expozrs: {
+    /* ... */
+  },
+  moduleSystem: {
+    primary: "esm", // Prefer ES modules
+    fallbacks: ["umd", "cjs"], // Try UMD, then CJS if ESM fails
+    strategy: "dynamic", // Use dynamic loading
+    hybrid: true, // Enable hybrid mode for best compatibility
+  },
+});
+```
+
+### Per-Load Configuration
+
+Override settings for specific loads:
+
+```typescript
+// Load with ESM preference
+const esmModule = await navigator.loadCargo("remote", "Button", {
+  moduleFormat: "esm",
+  fallbackFormats: ["umd"],
+  strategy: "dynamic",
+});
+
+// Load with UMD preference
+const umdModule = await navigator.loadCargo("remote", "Button", {
+  moduleFormat: "umd",
+  fallbackFormats: ["esm", "cjs"],
+  strategy: "eager",
+});
+```
+
+### Module Formats
+
+- **ESM** (`esm`) - ES Modules (modern, tree-shakeable, best performance)
+- **UMD** (`umd`) - Universal Module Definition (browser + Node.js compatibility)
+- **CJS** (`cjs`) - CommonJS (Node.js compatibility)
+
+### Loading Strategies
+
+- **Dynamic** (`dynamic`) - Load when needed (default, balances performance and memory)
+- **Static** (`static`) - Load at build time (fastest runtime, larger bundles)
+- **Lazy** (`lazy`) - Lazy loading with code splitting (smallest initial bundle)
+- **Eager** (`eager`) - Load immediately when referenced (fastest subsequent access)
+
+### Smart Defaults
+
+The Navigator uses intelligent defaults:
+
+1. **Format Preference**: ESM → UMD → CJS → Auto-detect
+2. **Strategy**: Dynamic loading for best balance
+3. **Fallbacks**: Automatic format fallback on failure
+4. **Error Recovery**: Graceful degradation with detailed error reporting
 
 ## 🔄 Module Loaders
 
@@ -210,20 +325,47 @@ const navigator = createNavigator({
     "ui-components": {
       url: "http://localhost:3001"
     }
-  }
+  },
+  // Global module system preferences
+  moduleSystem: {
+    primary: "esm",
+    fallbacks: ["umd", "cjs"],
+    strategy: "dynamic",
+    hybrid: true,
+  },
 });
 
-// Create lazy-loaded component
+// Component with ESM preference
 const RemoteButton = React.lazy(() =>
-  navigator.loadCargo("ui-components", "Button")
+  navigator.loadCargo("ui-components", "Button", {
+    moduleFormat: "esm",
+    fallbackFormats: ["umd"],
+    strategy: "dynamic",
+  })
     .then(cargo => ({ default: cargo.module.Button }))
+);
+
+// Component with UMD preference (for legacy compatibility)
+const LegacyComponent = React.lazy(() =>
+  navigator.loadCargo("ui-components", "LegacyWidget", {
+    moduleFormat: "umd",
+    fallbackFormats: ["esm"],
+    strategy: "eager",
+  })
+    .then(cargo => ({ default: cargo.module.LegacyWidget }))
 );
 
 function App() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <RemoteButton variant="primary">Click me!</RemoteButton>
-    </Suspense>
+    <div>
+      <React.Suspense fallback={<div>Loading ESM button...</div>}>
+        <RemoteButton variant="primary">ESM Button</RemoteButton>
+      </React.Suspense>
+
+      <React.Suspense fallback={<div>Loading legacy component...</div>}>
+        <LegacyComponent />
+      </React.Suspense>
+    </div>
   );
 }
 ```
@@ -302,8 +444,47 @@ const freshModule = await navigator.loadCargo("remote", "module");
 **Solution:**
 
 - Use appropriate cache strategy (`memory` for speed, `localStorage` for persistence)
-- Consider SimpleNavigator for performance-critical scenarios
+- Choose optimal loading strategy (`eager` for critical components, `lazy` for optional ones)
 - Implement module preloading for critical paths
+- Prefer ESM format for better tree-shaking and performance
+
+#### 5. Module Format Issues
+
+**Problem:** Module loads but functions/components are undefined.
+
+**Solution:**
+
+```typescript
+// Check what format was actually loaded
+const cargo = await navigator.loadCargo("remote", "Button");
+console.log(
+  `Loaded using ${cargo.format} format with ${cargo.strategy} strategy`
+);
+
+// Try different format preferences
+const cargo = await navigator.loadCargo("remote", "Button", {
+  moduleFormat: "umd", // Try UMD if ESM fails
+  fallbackFormats: ["esm", "cjs"],
+});
+```
+
+#### 6. Loading Strategy Problems
+
+**Problem:** Components loading too slowly or causing bundle bloat.
+
+**Solution:**
+
+```typescript
+// For critical components - use eager loading
+const criticalCargo = await navigator.loadCargo("remote", "Header", {
+  strategy: "eager",
+});
+
+// For optional components - use lazy loading
+const optionalCargo = await navigator.loadCargo("remote", "Sidebar", {
+  strategy: "lazy",
+});
+```
 
 ### Debug Mode
 
@@ -323,9 +504,29 @@ if (process.env.NODE_ENV === "development") {
 const stats = navigator.getCacheStats();
 console.log("Cache performance:", stats);
 
-// EnhancedNavigator provides detailed format information
+// Navigator provides detailed format and strategy information
 const cargo = await navigator.loadCargo("remote", "module");
 console.log(`Loaded ${cargo.format} format using ${cargo.strategy} strategy`);
+
+// Monitor loading performance by format
+const startTime = Date.now();
+const esmCargo = await navigator.loadCargo("remote", "Button", {
+  moduleFormat: "esm",
+});
+console.log(`ESM loading took: ${Date.now() - startTime}ms`);
+
+// Compare different strategies
+const dynamicStart = Date.now();
+const dynamicCargo = await navigator.loadCargo("remote", "Component", {
+  strategy: "dynamic",
+});
+console.log(`Dynamic loading: ${Date.now() - dynamicStart}ms`);
+
+const eagerStart = Date.now();
+const eagerCargo = await navigator.loadCargo("remote", "Component", {
+  strategy: "eager",
+});
+console.log(`Eager loading: ${Date.now() - eagerStart}ms`);
 ```
 
 ## 🤝 Contributing

@@ -8,8 +8,7 @@ module.exports = (env, argv) => {
     // NOTE: Entries from expozr.config.ts are auto-populated. You can add custom entries here if needed.
     // Custom entries will take precedence over auto-generated ones with the same name.
     entry: {
-      // Example: Override the Button entry with a custom one, or add additional entries
-      // Button: './src/custom-button.tsx', // This would override the expozr.config.ts Button entry
+      Button: "./src/components/Button.tsx",
     },
     mode: argv.mode || "development",
     devtool: isProduction ? "source-map" : "inline-source-map",

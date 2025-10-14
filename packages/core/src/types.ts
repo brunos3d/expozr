@@ -110,6 +110,8 @@ export interface Cargo {
   version: string;
   /** Entry point file path or URL */
   entry: string;
+  /** Module system format for this cargo */
+  moduleSystem?: "esm" | "umd" | "cjs";
   /** Specific exports from the module (optional, defaults to default export) */
   exports?: string[];
   /** Runtime dependencies required by this cargo */
