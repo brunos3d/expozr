@@ -44,6 +44,7 @@ const navigator = createNavigator({
   },
   // Global module system configuration
   moduleSystem: {
+    automaticModuleDiscovery: true, // Enable automatic module discovery (esm, umd, cjs)
     primary: "esm", // Prefer ESM modules
     fallbacks: ["umd", "cjs"], // Fall back to UMD, then CJS
     strategy: "dynamic", // Use dynamic loading strategy

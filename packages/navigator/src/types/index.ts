@@ -32,7 +32,7 @@ export interface LoadOptions extends CoreLoadOptions {
   /** Loading strategy override for this load */
   strategy?: "dynamic" | "static" | "lazy" | "eager";
   /** Enable smart fallback for this specific load (overrides global config) */
-  automaticModuleDiscover?: boolean;
+  automaticModuleDiscovery?: boolean;
   /** Suppress errors for this specific load (overrides global config) */
   suppressErrors?: boolean;
 }
@@ -123,7 +123,7 @@ export interface NavigatorConfig extends Partial<HostConfig> {
     /** Whether to enable hybrid loading */
     hybrid?: boolean;
     /** Enable smart fallback system (probe multiple URLs) */
-    automaticModuleDiscover?: boolean;
+    automaticModuleDiscovery?: boolean;
     /** Suppress webpack/loading errors from showing on screen */
     suppressErrors?: boolean;
   };
