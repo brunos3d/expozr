@@ -81,7 +81,7 @@ export class ExpozrNavigator extends BaseExpozrNavigator {
     cargo: string,
     options?: LoadOptions
   ): Promise<LoadedCargo<T>> {
-    const cacheKey = generateCargoKey(expozr, cargo);
+    // const cacheKey = generateCargoKey(expozr, cargo);
 
     // Check if already loaded
     if (this.isCargoLoaded(expozr, cargo)) {
