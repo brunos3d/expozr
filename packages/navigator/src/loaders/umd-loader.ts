@@ -23,7 +23,7 @@ export async function loadUMDModule(
   url: string,
   options: UMDLoadOptions = {}
 ): Promise<UMDModuleInfo> {
-  const { timeout = 30000, retries = 3, expectedGlobalName } = options;
+  const { timeout = 30000, retries = 3, globalNamespace } = options;
 
   return new Promise((resolve, reject) => {
     // Remember what globals existed before loading
@@ -67,20 +67,15 @@ export async function loadUMDModule(
           (key) => !existingGlobals.has(key)
         );
 
-        console.log(`🔍 UMD loader: New globals after loading:`, newGlobals);
-
         let foundModule = null;
         let foundGlobalName = "";
 
         // Strategy 1: Check if expected global name exists
-        if (expectedGlobalName && (window as any)[expectedGlobalName]) {
-          const potential = (window as any)[expectedGlobalName];
+        if (globalNamespace && (window as any)[globalNamespace]) {
+          const potential = (window as any)[globalNamespace];
           if (isValidReactComponent(potential) || isValidModule(potential)) {
             foundModule = potential;
-            foundGlobalName = expectedGlobalName;
-            console.log(
-              `✅ UMD loader: Found expected module as window.${expectedGlobalName}`
-            );
+            foundGlobalName = globalNamespace;
           }
         }
 
@@ -96,31 +91,25 @@ export async function loadUMDModule(
             if (isValidReactComponent(potential) || isValidModule(potential)) {
               foundModule = potential;
               foundGlobalName = globalName;
-              console.log(
-                `✅ UMD loader: Found module as window.${globalName}`
-              );
               break;
             }
           }
         }
 
         // Strategy 3: Check if any existing globals got new properties
-        if (!foundModule && expectedGlobalName) {
+        if (!foundModule && globalNamespace) {
           const windowKeys = Object.keys(window);
           for (const key of windowKeys) {
             if (existingGlobals.has(key)) {
               const obj = (window as any)[key];
-              if (obj && typeof obj === "object" && obj[expectedGlobalName]) {
-                const potential = obj[expectedGlobalName];
+              if (obj && typeof obj === "object" && obj[globalNamespace]) {
+                const potential = obj[globalNamespace];
                 if (
                   isValidReactComponent(potential) ||
                   isValidModule(potential)
                 ) {
                   foundModule = potential;
-                  foundGlobalName = `${key}.${expectedGlobalName}`;
-                  console.log(
-                    `✅ UMD loader: Found module as window.${key}.${expectedGlobalName}`
-                  );
+                  foundGlobalName = `${key}.${globalNamespace}`;
                   break;
                 }
               }
@@ -131,10 +120,6 @@ export async function loadUMDModule(
         if (foundModule) {
           handleSuccess(foundModule, foundGlobalName);
         } else {
-          console.error(
-            `❌ UMD loader: No valid module found. New globals:`,
-            newGlobals
-          );
           handleError(new Error(`UMD module not found after loading: ${url}`));
         }
       } catch (error) {
@@ -198,7 +183,7 @@ export async function loadCargo(
   // Load the UMD module
   const moduleInfo = await loadUMDModule(moduleUrl, {
     ...options,
-    expectedGlobalName: cargoName,
+    globalNamespace: cargoName,
   });
 
   // Return the module content

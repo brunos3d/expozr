@@ -89,7 +89,6 @@ export class ExpozrPlugin {
     // Use provided config directly
     if (this.options.config) {
       this.config = this.options.config;
-      console.log(`📦 Using provided Expozr config: ${this.config.name}`);
       return;
     }
 
@@ -99,9 +98,6 @@ export class ExpozrPlugin {
         configFile: this.options.configFile,
       });
       this.config = result.config;
-      if (this.config) {
-        console.log(`📦 Loaded Expozr config: ${this.config.name}`);
-      }
     } catch (error) {
       throw new Error(`Failed to load Expozr configuration: ${error}`);
     }
@@ -120,9 +116,6 @@ export class ExpozrPlugin {
 
     const path = require("path");
 
-    console.log(`🔧 Configuring webpack for Expozr "${this.config.name}"`);
-    console.log(`📦 Exposing ${Object.keys(this.config.expose).join(", ")}`);
-
     // Create webpack entries from expose configuration
     const exposedModules = this.createWebpackEntries();
     this.mergeEntries(compiler, exposedModules);
@@ -138,8 +131,6 @@ export class ExpozrPlugin {
 
     // Configure development server
     this.configureDevServer(compiler);
-
-    console.log("✅ Webpack configured for UMD output");
   }
 
   /**
@@ -360,11 +351,6 @@ export class ExpozrPlugin {
     const inventoryContent = JSON.stringify(inventory, null, 2);
 
     await fs.promises.writeFile(inventoryPath, inventoryContent, "utf8");
-
-    console.log(`📦 Expozr inventory generated: ${inventoryPath}`);
-    console.log(
-      `🚚 Expozr "${this.config.name}" ready with ${Object.keys(cargo).length} cargo`
-    );
   }
 
   /**

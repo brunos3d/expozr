@@ -123,31 +123,86 @@ export class ESMModuleLoader extends BaseModuleLoader {
       moduleToReturn = result as T;
     }
 
-    // Implement the standardized global binding system (same as UMD)
+    // ALWAYS implement the standardized global binding system with protection
     if (expozrName && cargoName && moduleToReturn) {
-      // Initialize the global __EXPOZR__ structure if it doesn't exist
-      if (!(globalThis as any).__EXPOZR__) {
-        (globalThis as any).__EXPOZR__ = {};
+      // Initialize the global __EXPOZR__ structure if it doesn't exist or is corrupted
+      if (
+        !(globalThis as any).__EXPOZR__ ||
+        typeof (globalThis as any).__EXPOZR__ !== "object"
+      ) {
+        // Create a protected __EXPOZR__ object
+        const expozrObject = {};
+
+        // Define it as non-configurable and non-writable to prevent extension interference
+        Object.defineProperty(globalThis, "__EXPOZR__", {
+          value: expozrObject,
+          writable: false,
+          enumerable: true,
+          configurable: false,
+        });
       }
 
-      if (!(globalThis as any).__EXPOZR__[expozrName]) {
-        (globalThis as any).__EXPOZR__[expozrName] = { CARGOS: {} };
+      if (
+        !(globalThis as any).__EXPOZR__[expozrName] ||
+        typeof (globalThis as any).__EXPOZR__[expozrName] !== "object"
+      ) {
+        const expozrEntry = { CARGOS: {} };
+
+        // Define the expozr entry as non-configurable
+        Object.defineProperty((globalThis as any).__EXPOZR__, expozrName, {
+          value: expozrEntry,
+          writable: false,
+          enumerable: true,
+          configurable: false,
+        });
       }
 
-      if (!(globalThis as any).__EXPOZR__[expozrName].CARGOS) {
-        (globalThis as any).__EXPOZR__[expozrName].CARGOS = {};
+      if (
+        !(globalThis as any).__EXPOZR__[expozrName].CARGOS ||
+        typeof (globalThis as any).__EXPOZR__[expozrName].CARGOS !== "object"
+      ) {
+        const cargosObject = {};
+
+        // Define CARGOS as non-configurable but allow adding properties
+        Object.defineProperty(
+          (globalThis as any).__EXPOZR__[expozrName],
+          "CARGOS",
+          {
+            value: cargosObject,
+            writable: false,
+            enumerable: true,
+            configurable: false,
+          }
+        );
       }
 
-      // Bind the module to the standardized location
-      (globalThis as any).__EXPOZR__[expozrName].CARGOS[cargoName] =
-        moduleToReturn;
-
-      console.log(
-        `📦 ESM Module bound to globalThis.__EXPOZR__.${expozrName}.CARGOS.${cargoName}`
+      // ALWAYS bind the module to the standardized location
+      // Use defineProperty to make it harder for extensions to override
+      Object.defineProperty(
+        (globalThis as any).__EXPOZR__[expozrName].CARGOS,
+        cargoName,
+        {
+          value: moduleToReturn,
+          writable: true, // Allow updates for HMR
+          enumerable: true,
+          configurable: true, // Allow reconfiguration for HMR
+        }
       );
     }
 
-    return moduleToReturn;
+    // ALWAYS prefer module from standardized location if available
+    let finalModule = moduleToReturn;
+    if (
+      expozrName &&
+      cargoName &&
+      (globalThis as any).__EXPOZR__?.[expozrName]?.CARGOS?.[cargoName]
+    ) {
+      finalModule = (globalThis as any).__EXPOZR__[expozrName].CARGOS[
+        cargoName
+      ];
+    }
+
+    return finalModule;
   }
 
   /**

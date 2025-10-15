@@ -28,8 +28,6 @@ export async function createAutoLoader(
   };
 
   try {
-    console.log("🚀 Initializing auto-loader...");
-
     // Create navigator instance
     const expozrConfig = Object.entries(config.expozrs).reduce(
       (acc, [name, { url, version }]) => {
@@ -56,16 +54,10 @@ export async function createAutoLoader(
 
     // Load all modules from all expozrs
     for (const [expozrName, expozrConfig] of Object.entries(config.expozrs)) {
-      console.log(`📦 Loading modules from expozr: ${expozrName}`);
-
       for (const [moduleName, cargoName] of Object.entries(
         expozrConfig.modules
       )) {
         try {
-          console.log(
-            `  - Loading module: ${moduleName} (cargo: ${cargoName})`
-          );
-
           // Load the cargo
           const cargoKey = Array.isArray(cargoName) ? cargoName[0] : cargoName;
           const loadedCargo = await navigator.loadCargo(expozrName, cargoKey);
@@ -77,14 +69,8 @@ export async function createAutoLoader(
           // Extract functions from the module
           const moduleFunctions = extractFunctions(normalizedModule);
           Object.assign(context.functions, moduleFunctions);
-
-          console.log(
-            `  ✅ Loaded module: ${moduleName} (${
-              Object.keys(moduleFunctions).length
-            } functions)`
-          );
         } catch (error) {
-          console.error(`  ❌ Failed to load module ${moduleName}:`, error);
+          console.error(`Failed to load module ${moduleName}:`, error);
           throw error;
         }
       }
@@ -96,11 +82,8 @@ export async function createAutoLoader(
     }
 
     context.status = "ready";
-    console.log("🎉 Auto-loader setup complete!");
-
     return context;
   } catch (error) {
-    console.error("❌ Auto-loader setup failed:", error);
     context.status = "error";
     context.error = error instanceof Error ? error : new Error(String(error));
     throw error;
@@ -119,10 +102,6 @@ function exposeGlobally(context: LoaderContext, namespace: string): void {
       modules: context.modules,
       ...context.functions, // Expose all functions directly
     };
-
-    console.log(
-      `🌐 Exposed ${Object.keys(context.functions).length} functions globally under '${namespace}'`
-    );
   }
 }
 

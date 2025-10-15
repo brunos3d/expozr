@@ -79,7 +79,7 @@ export class UMDModuleLoader extends BaseModuleLoader {
           const module = this.extractGlobalModule<T>(
             beforeGlobals,
             options?.exports,
-            options?.expectedGlobalName,
+            options?.globalNamespace,
             options?.expozrName,
             options?.cargoName
           );
@@ -137,7 +137,7 @@ export class UMDModuleLoader extends BaseModuleLoader {
   private extractGlobalModule<T = any>(
     beforeGlobals: Set<string>,
     requestedExports?: string[],
-    expectedGlobalName?: string,
+    globalNamespace?: string,
     expozrName?: string,
     cargoName?: string
   ): T {
@@ -147,59 +147,182 @@ export class UMDModuleLoader extends BaseModuleLoader {
 
     let moduleToReturn: any = null;
 
-    // Strategy 1: If expectedGlobalName is provided, check if it exists (even if not "new")
-    if (expectedGlobalName && (globalThis as any)[expectedGlobalName]) {
-      moduleToReturn = (globalThis as any)[expectedGlobalName];
+    // Strategy 1: If globalNamespace is provided, check if it exists (even if not "new")
+    if (globalNamespace && (globalThis as any)[globalNamespace]) {
+      moduleToReturn = (globalThis as any)[globalNamespace];
     }
     // Strategy 2: Fall back to checking new globals
     else if (newGlobals.length > 0) {
-      // Return the first new global (most likely the module)
-      const mainGlobal = newGlobals[0];
-      moduleToReturn = (globalThis as any)[mainGlobal];
-    } else {
+      // Filter out obvious non-module globals that might be from Chrome extensions or webpack
+      const filteredGlobals = newGlobals.filter(
+        (key) =>
+          !key.startsWith("__EXPOZR__") &&
+          !key.startsWith("webpackChunk") &&
+          !key.startsWith("__webpack") &&
+          !key.startsWith("webpackHotUpdate") && // Filter out webpack HMR functions
+          !key.startsWith("chrome") &&
+          !key.startsWith("__REACT_DEVTOOLS") &&
+          !key.startsWith("__VUE_DEVTOOLS") &&
+          !key.startsWith("__TAG_ASSISTANT") &&
+          !key.startsWith("__REDUX_DEVTOOLS") &&
+          key !== "__REACT_DEVTOOLS_GLOBAL_HOOK__"
+      );
+
+      if (filteredGlobals.length > 0) {
+        // Prefer the global that matches cargoName if available
+        let selectedGlobal = filteredGlobals[0];
+        if (cargoName) {
+          const cargoBaseName = cargoName.replace("./", ""); // Remove ./ prefix
+          const matchingGlobal = filteredGlobals.find(
+            (key) => key === cargoBaseName
+          );
+          if (matchingGlobal) {
+            selectedGlobal = matchingGlobal;
+          }
+        }
+
+        moduleToReturn = (globalThis as any)[selectedGlobal];
+      } else {
+        // No suitable globals found, will throw error below
+      }
+    }
+    // Strategy 3: If no globalNamespace provided, try using cargoName as fallback
+    else if (!globalNamespace && cargoName && (globalThis as any)[cargoName]) {
+      moduleToReturn = (globalThis as any)[cargoName];
+    }
+
+    if (!moduleToReturn) {
       throw new Error(
-        "No new globals found after loading UMD module and no expectedGlobalName provided"
+        `No module found after loading UMD script. Expected: ${globalNamespace || cargoName || "unknown"}, New globals: ${newGlobals.join(", ")}`
       );
     }
 
-    // Implement the standardized global binding system
-    if (expozrName && cargoName && moduleToReturn) {
-      // Initialize the global __EXPOZR__ structure if it doesn't exist
-      if (!(globalThis as any).__EXPOZR__) {
-        (globalThis as any).__EXPOZR__ = {};
+    // Validate that the module has the expected structure
+    if (
+      typeof moduleToReturn !== "object" &&
+      typeof moduleToReturn !== "function"
+    ) {
+      console.error(
+        `❌ Invalid module type:`,
+        typeof moduleToReturn,
+        moduleToReturn
+      );
+      throw new Error(
+        `Invalid module: expected object or function, got ${typeof moduleToReturn}`
+      );
+    }
+
+    // ALWAYS implement the standardized global binding system with protection
+    if (expozrName && cargoName) {
+      // Initialize the global __EXPOZR__ structure if it doesn't exist or is corrupted
+      if (
+        !(globalThis as any).__EXPOZR__ ||
+        typeof (globalThis as any).__EXPOZR__ !== "object"
+      ) {
+        // Create a protected __EXPOZR__ object
+        const expozrObject = {};
+
+        // Define it as non-configurable and non-writable to prevent extension interference
+        Object.defineProperty(globalThis, "__EXPOZR__", {
+          value: expozrObject,
+          writable: false,
+          enumerable: true,
+          configurable: false,
+        });
       }
 
-      if (!(globalThis as any).__EXPOZR__[expozrName]) {
-        (globalThis as any).__EXPOZR__[expozrName] = { CARGOS: {} };
+      if (
+        !(globalThis as any).__EXPOZR__[expozrName] ||
+        typeof (globalThis as any).__EXPOZR__[expozrName] !== "object"
+      ) {
+        const expozrEntry = { CARGOS: {} };
+
+        // Define the expozr entry as non-configurable
+        Object.defineProperty((globalThis as any).__EXPOZR__, expozrName, {
+          value: expozrEntry,
+          writable: false,
+          enumerable: true,
+          configurable: false,
+        });
       }
 
-      if (!(globalThis as any).__EXPOZR__[expozrName].CARGOS) {
-        (globalThis as any).__EXPOZR__[expozrName].CARGOS = {};
+      if (
+        !(globalThis as any).__EXPOZR__[expozrName].CARGOS ||
+        typeof (globalThis as any).__EXPOZR__[expozrName].CARGOS !== "object"
+      ) {
+        const cargosObject = {};
+
+        // Define CARGOS as non-configurable but writable (so we can add cargos)
+        Object.defineProperty(
+          (globalThis as any).__EXPOZR__[expozrName],
+          "CARGOS",
+          {
+            value: cargosObject,
+            writable: false,
+            enumerable: true,
+            configurable: false,
+          }
+        );
       }
 
-      // Bind the module to the standardized location
-      (globalThis as any).__EXPOZR__[expozrName].CARGOS[cargoName] =
-        moduleToReturn;
+      // ALWAYS bind the module to the standardized location
+      // Use defineProperty to make it harder for extensions to override
+      Object.defineProperty(
+        (globalThis as any).__EXPOZR__[expozrName].CARGOS,
+        cargoName,
+        {
+          value: moduleToReturn,
+          writable: true, // Allow updates for HMR
+          enumerable: true,
+          configurable: true, // Allow reconfiguration for HMR
+        }
+      );
 
-      // Also bind to expectedGlobalName if provided (for backward compatibility)
-      if (expectedGlobalName && !(globalThis as any)[expectedGlobalName]) {
-        (globalThis as any)[expectedGlobalName] = moduleToReturn;
+      // OPTIONAL: Also bind to globalNamespace if provided (for backward compatibility/convenience)
+      if (globalNamespace && !(globalThis as any)[globalNamespace]) {
+        (globalThis as any)[globalNamespace] = moduleToReturn;
       }
     }
 
     // Extract specific exports if requested
     if (requestedExports && requestedExports.length > 0) {
+      // ALWAYS prefer module from standardized location if available
+      let sourceModule = moduleToReturn;
+      if (
+        expozrName &&
+        cargoName &&
+        (globalThis as any).__EXPOZR__?.[expozrName]?.CARGOS?.[cargoName]
+      ) {
+        sourceModule = (globalThis as any).__EXPOZR__[expozrName].CARGOS[
+          cargoName
+        ];
+      }
+
       const result: any = {};
       for (const exportName of requestedExports) {
-        if (moduleToReturn[exportName]) {
-          result[exportName] = moduleToReturn[exportName];
+        if (sourceModule && sourceModule[exportName]) {
+          result[exportName] = sourceModule[exportName];
+        } else {
+          // Export not found, but continue processing
         }
       }
+
       return result as T;
     }
 
-    // Return the entire module
-    return moduleToReturn as T;
+    // Return the entire module - ALWAYS prefer standardized location if available
+    let finalModule = moduleToReturn;
+    if (
+      expozrName &&
+      cargoName &&
+      (globalThis as any).__EXPOZR__?.[expozrName]?.CARGOS?.[cargoName]
+    ) {
+      finalModule = (globalThis as any).__EXPOZR__[expozrName].CARGOS[
+        cargoName
+      ];
+    }
+
+    return finalModule as T;
   }
 
   /**

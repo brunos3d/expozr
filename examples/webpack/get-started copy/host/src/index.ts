@@ -62,9 +62,11 @@ async function initRemote() {
 
     console.log("🌐 Remote module loaded successfully!");
 
+    console.log("📦 Testing remote module functions:");
+
     // Test the remote functions directly
-    console.log("2 + 3 =", module.add(2, 3));
-    console.log("4 * 5 =", module.multiply(4, 5));
+    console.log("200 + 300 =", module.add(200, 300));
+    console.log("400 * 500 =", module.multiply(400, 500));
     console.log(module.greet("Host User"));
     console.log("Remote time:", module.getCurrentTime());
   } catch (error) {
