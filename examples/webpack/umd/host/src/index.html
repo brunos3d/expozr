@@ -3,205 +3,90 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>UMD Calculator - Expozr Example</title>
-    <meta
-      name="description"
-      content="Calculator application demonstrating UMD module loading with Expozr"
-    />
+    <title>Host Application</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+        background-color: #f5f5f5;
+      }
+      .container {
+        background: white;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        color: #333;
+        border-bottom: 2px solid #28a745;
+        padding-bottom: 0.5rem;
+      }
+      .status {
+        background: #d1ecf1;
+        color: #0c5460;
+        padding: 1rem;
+        border-radius: 5px;
+        margin: 1rem 0;
+      }
+      .console-output {
+        background: white;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        margin-top: 2rem;
+      }
+      .console {
+        overflow-y: auto;
+        background: #f8f9fa;
+        border: 1px solid #ccc;
+        padding: 1rem;
+        border-radius: 5px;
+        max-height: 300px;
+        overflow-x: auto;
+      }
+    </style>
   </head>
   <body>
     <div class="container">
-      <!-- Header -->
-      <header class="header">
-        <h1>🧮 UMD Calculator</h1>
-        <p>Powered by Remote UMD Modules via Expozr</p>
-      </header>
-
-      <!-- Status Section -->
-      <section class="status-section">
-        <div class="status-card">
-          <div class="status-header">
-            <span id="status-indicator" class="status-indicator">⏳</span>
-            <span id="status-text" class="status-text">Initializing...</span>
-          </div>
-          <div id="module-info" class="module-info">
-            <h4>📦 Loaded Modules:</h4>
-            <ul id="loaded-modules" class="module-list">
-              <!-- Will be populated by JavaScript -->
-            </ul>
-          </div>
-        </div>
-      </section>
-
-      <!-- Calculator -->
-      <main class="calculator">
-        <div class="calculator-screen">
-          <input type="text" id="display" class="display" value="0" readonly />
-        </div>
-
-        <div class="calculator-buttons">
-          <!-- Row 1: Advanced Functions -->
-          <button class="btn btn-advanced" onclick="calculatorApp.power()">
-            x^y
-          </button>
-          <button class="btn btn-advanced" onclick="calculatorApp.sqrt()">
-            √
-          </button>
-          <button class="btn btn-advanced" onclick="calculatorApp.factorial()">
-            x!
-          </button>
-          <button class="btn btn-advanced" onclick="calculatorApp.percentage()">
-            %
-          </button>
-
-          <!-- Row 2: Clear and Operations -->
-          <button class="btn btn-clear" onclick="calculatorApp.clearDisplay()">
-            C
-          </button>
-          <button class="btn btn-clear" onclick="calculatorApp.clearEntry()">
-            CE
-          </button>
-          <button
-            class="btn btn-operation"
-            onclick="calculatorApp.handleBackspace()"
-          >
-            ⌫
-          </button>
-          <button
-            class="btn btn-operation"
-            onclick="calculatorApp.handleOperation('/')"
-          >
-            /
-          </button>
-
-          <!-- Row 3: Numbers and Operations -->
-          <button
-            class="btn btn-number"
-            onclick="calculatorApp.inputNumber('7')"
-          >
-            7
-          </button>
-          <button
-            class="btn btn-number"
-            onclick="calculatorApp.inputNumber('8')"
-          >
-            8
-          </button>
-          <button
-            class="btn btn-number"
-            onclick="calculatorApp.inputNumber('9')"
-          >
-            9
-          </button>
-          <button
-            class="btn btn-operation"
-            onclick="calculatorApp.handleOperation('*')"
-          >
-            ×
-          </button>
-
-          <!-- Row 4: Numbers and Operations -->
-          <button
-            class="btn btn-number"
-            onclick="calculatorApp.inputNumber('4')"
-          >
-            4
-          </button>
-          <button
-            class="btn btn-number"
-            onclick="calculatorApp.inputNumber('5')"
-          >
-            5
-          </button>
-          <button
-            class="btn btn-number"
-            onclick="calculatorApp.inputNumber('6')"
-          >
-            6
-          </button>
-          <button
-            class="btn btn-operation"
-            onclick="calculatorApp.handleOperation('-')"
-          >
-            -
-          </button>
-
-          <!-- Row 5: Numbers and Operations -->
-          <button
-            class="btn btn-number"
-            onclick="calculatorApp.inputNumber('1')"
-          >
-            1
-          </button>
-          <button
-            class="btn btn-number"
-            onclick="calculatorApp.inputNumber('2')"
-          >
-            2
-          </button>
-          <button
-            class="btn btn-number"
-            onclick="calculatorApp.inputNumber('3')"
-          >
-            3
-          </button>
-          <button
-            class="btn btn-operation"
-            onclick="calculatorApp.handleOperation('+')"
-          >
-            +
-          </button>
-
-          <!-- Row 6: Zero, Decimal, and Equals -->
-          <button
-            class="btn btn-number btn-zero"
-            onclick="calculatorApp.inputNumber('0')"
-          >
-            0
-          </button>
-          <button class="btn btn-number" onclick="calculatorApp.inputDecimal()">
-            .
-          </button>
-          <button class="btn btn-equals" onclick="calculatorApp.calculate()">
-            =
-          </button>
-        </div>
-      </main>
-
-      <!-- Instructions -->
-      <section class="instructions">
-        <h3>🚀 How It Works</h3>
-        <ul>
-          <li>
-            <strong>Remote Loading:</strong> Math functions are loaded from a
-            UMD expozr
-          </li>
-          <li>
-            <strong>Basic Operations:</strong> +, -, ×, ÷ using remote functions
-          </li>
-          <li>
-            <strong>Advanced Functions:</strong> Power, square root, factorial,
-            percentage
-          </li>
-          <li>
-            <strong>Error Handling:</strong> Comprehensive error handling for
-            network and calculation errors
-          </li>
-        </ul>
-      </section>
-
-      <!-- Footer -->
-      <footer class="footer">
-        <p>
-          Built with
-          <a href="https://github.com/brunos3d/expozr" target="_blank"
-            >Expozr</a
-          >
-          - A framework for loading remote modules dynamically
-        </p>
-      </footer>
+      <h1>🏠 Host Application</h1>
+      <div class="status">
+        ✅ Host application is running! <strong>Port:</strong> 3000<br />
+        📦 TypeScript compiled and loaded as ES module<br />
+        🔄 Webpack is watching for changes with hot reload
+      </div>
     </div>
+    <script>
+      // Capture console output and display it in the HTML
+      (function () {
+        const originalLog = console.log;
+        const originalError = console.error;
+        const logContainer = document.createElement("div");
+        logContainer.className = "console-output";
+        logContainer.innerHTML = `<h2>Console Output:</h2><pre class="console"><code></code></pre>`;
+        document.body.appendChild(logContainer);
+        const codeElement = logContainer.querySelector("code");
 
-    <!-- The main application script will be injected by Webpack -->
+        function appendMessage(message, type) {
+          const msg = document.createElement("div");
+          msg.textContent = message;
+          msg.style.color = type === "error" ? "red" : "black";
+          codeElement.appendChild(msg);
+        }
+
+        console.log = function (...args) {
+          originalLog.apply(console, args);
+          appendMessage(args.join(" "), "log");
+        };
+
+        console.error = function (...args) {
+          originalError.apply(console, args);
+          appendMessage(args.join(" "), "error");
+        };
+      })();
+    </script>
+
+    <script src="main.js"></script>
   </body>
 </html>

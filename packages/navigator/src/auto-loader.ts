@@ -37,6 +37,7 @@ export async function createAutoLoader(
       {} as Record<string, { url: string; version: string }>
     );
 
+    // You can reuse the navigator instance across your application
     const navigator = createNavigator({
       expozrs: expozrConfig,
       cache: {

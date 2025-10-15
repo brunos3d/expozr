@@ -1,13 +1,15 @@
 const path = require("path");
 const { createExpozrPlugin } = require("@expozr/webpack-adapter");
 
+/**
+ * Webpack configuration
+ * @type {import("webpack").Configuration}
+ */
 module.exports = {
-  mode: "none", // Force mode to none for proper UMD
   entry: {
-    calculator: "./src/calculator.ts",
-    advanced: "./src/advanced.ts",
+    utils: "./src/index.ts",
   },
-  devtool: false, // Disable source maps for cleaner UMD
+  devtool: false,
   resolve: {
     extensions: [".ts", ".js"],
   },
@@ -20,17 +22,15 @@ module.exports = {
       },
     ],
   },
-  // Force UMD output configuration
   output: {
     path: path.resolve(__dirname, "dist"),
     filename: "[name].js",
     library: {
-      name: "[name]",
+      name: "utils",
       type: "umd",
-      export: "default",
     },
+    globalObject: "this",
     umdNamedDefine: true,
-    globalObject: "typeof self !== 'undefined' ? self : this",
   },
   plugins: [
     createExpozrPlugin(), // Will automatically discover expozr.config.ts
@@ -44,8 +44,8 @@ module.exports = {
       "Access-Control-Allow-Origin": "*",
     },
     open: false,
-    hot: false, // Disable hot reloading for UMD
-    liveReload: false, // Disable live reloading for UMD
+    hot: true,
+    liveReload: true,
     devMiddleware: {
       writeToDisk: true, // Ensure files are written to disk in development
     },
