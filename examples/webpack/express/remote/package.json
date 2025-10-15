@@ -1,0 +1,25 @@
+{
+  "name": "express-remote-server",
+  "version": "1.0.0",
+  "description": "Express remote server exposing UMD modules",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "webpack --mode production",
+    "start": "serve dist -p 5001"
+  },
+  "dependencies": {
+    "express": "^4.18.0",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "@expozr/webpack-adapter": "^2.1.0",
+    "@types/express": "^4.17.0",
+    "@types/cors": "^2.8.0",
+    "serve": "^14.0.0",
+    "ts-loader": "^9.0.0",
+    "typescript": "^5.0.0",
+    "webpack": "^5.0.0",
+    "webpack-cli": "^5.0.0",
+    "webpack-dev-server": "^4.0.0"
+  }
+}

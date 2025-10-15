@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Express + Webpack + UMD Example</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        color: #333;
+      }
+
+      .container {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      }
+
+      h1 {
+        text-align: center;
+        color: #4a5568;
+        margin-bottom: 10px;
+        font-size: 2.5em;
+      }
+
+      .subtitle {
+        text-align: center;
+        color: #718096;
+        margin-bottom: 40px;
+        font-size: 1.2em;
+      }
+
+      .server-info {
+        background: #f7fafc;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 30px;
+      }
+
+      .server-info h3 {
+        margin: 0 0 15px 0;
+        color: #2d3748;
+      }
+
+      .buttons-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+      }
+
+      .api-button {
+        background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+        color: white;
+        border: none;
+        padding: 15px 20px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(66, 153, 225, 0.3);
+      }
+
+      .api-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(66, 153, 225, 0.4);
+      }
+
+      .api-button:active {
+        transform: translateY(0);
+      }
+
+      .api-button.health {
+        background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+      }
+      .api-button.users {
+        background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+      }
+      .api-button.math {
+        background: linear-gradient(135deg, #9f7aea 0%, #805ad5 100%);
+      }
+      .api-button.data {
+        background: linear-gradient(135deg, #ed64a6 0%, #d53f8c 100%);
+      }
+      .api-button.create {
+        background: linear-gradient(135deg, #38b2ac 0%, #319795 100%);
+      }
+
+      .response-section {
+        margin-top: 30px;
+      }
+
+      .response-title {
+        font-size: 1.5em;
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 15px;
+        border-bottom: 2px solid #e2e8f0;
+        padding-bottom: 10px;
+      }
+
+      .response-content {
+        background: #1a202c;
+        color: #e2e8f0;
+        padding: 20px;
+        border-radius: 10px;
+        white-space: pre-wrap;
+        font-family: "Courier New", monospace;
+        font-size: 14px;
+        max-height: 500px;
+        overflow-y: auto;
+        border: 2px solid #4a5568;
+      }
+
+      .loading {
+        text-align: center;
+        color: #4299e1;
+        font-weight: 600;
+        font-size: 18px;
+      }
+
+      .error {
+        background: #fed7d7;
+        color: #c53030;
+        padding: 15px;
+        border-radius: 10px;
+        border: 2px solid #fc8181;
+      }
+
+      .cargo-info {
+        display: inline-block;
+        background: #bee3f8;
+        color: #2b6cb0;
+        padding: 4px 8px;
+        border-radius: 5px;
+        font-size: 12px;
+        font-weight: 600;
+        margin-left: 10px;
+      }
+
+      .route-description {
+        font-size: 14px;
+        color: #718096;
+        margin-top: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🚀 Express + UMD Federation</h1>
+      <div class="subtitle">Interactive API Testing Interface</div>
+
+      <div class="server-info">
+        <h3>🏠 Host Server (Port 5000)</h3>
+        <p>
+          <strong>Purpose:</strong> Express server with 5 API routes using
+          singleton navigator
+        </p>
+        <p>
+          <strong>UMD Source:</strong> http://localhost:5001 (Remote Express
+          Server)
+        </p>
+        <p><strong>Module Format:</strong> Universal Module Definition (UMD)</p>
+      </div>
+
+      <div class="buttons-grid">
+        <div>
+          <button class="api-button health" onclick="testHealth()">
+            🩺 Health Check
+            <span class="cargo-info">No UMD</span>
+          </button>
+          <div class="route-description">
+            GET /api/health - Server status and diagnostics
+          </div>
+        </div>
+
+        <div>
+          <button class="api-button users" onclick="testGetUser()">
+            👤 Get User Data
+            <span class="cargo-info">userUtils UMD</span>
+          </button>
+          <div class="route-description">
+            GET /api/users/:id - User retrieval and validation
+          </div>
+        </div>
+
+        <div>
+          <button class="api-button math" onclick="testCalculate()">
+            🔢 Math Operations
+            <span class="cargo-info">mathUtils UMD</span>
+          </button>
+          <div class="route-description">
+            POST /api/calculate - Mathematical calculations and statistics
+          </div>
+        </div>
+
+        <div>
+          <button class="api-button data" onclick="testProcessData()">
+            📊 Process Data
+            <span class="cargo-info">dataProcessor UMD</span>
+          </button>
+          <div class="route-description">
+            POST /api/process-data - Data transformation and aggregation
+          </div>
+        </div>
+
+        <div>
+          <button class="api-button create" onclick="testCreateUser()">
+            ➕ Create User
+            <span class="cargo-info">userUtils UMD</span>
+          </button>
+          <div class="route-description">
+            POST /api/users - User creation and validation
+          </div>
+        </div>
+      </div>
+
+      <div class="response-section">
+        <div class="response-title">🔍 API Response</div>
+        <div id="responseContent" class="response-content">
+          Click any button above to test the API routes and see the JSON
+          responses. Each route demonstrates different UMD module loading
+          patterns: - Health Check: No UMD loading (baseline) - User Operations:
+          Uses userUtils UMD module - Math Operations: Uses mathUtils UMD module
+          - Data Processing: Uses dataProcessor UMD module The singleton
+          navigator ensures efficient module reuse across routes.
+        </div>
+      </div>
+    </div>
+
+    <script>
+      async function makeRequest(url, options = {}) {
+        const responseDiv = document.getElementById("responseContent");
+        responseDiv.innerHTML = '<div class="loading">🔄 Loading...</div>';
+
+        try {
+          const response = await fetch(url, {
+            headers: {
+              "Content-Type": "application/json",
+            },
+            ...options,
+          });
+
+          const data = await response.json();
+          responseDiv.innerHTML = JSON.stringify(data, null, 2);
+        } catch (error) {
+          responseDiv.innerHTML = `<div class="error">❌ Request failed: ${error.message}</div>`;
+        }
+      }
+
+      function testHealth() {
+        makeRequest("/api/health");
+      }
+
+      function testGetUser() {
+        const userId = Math.floor(Math.random() * 100) + 1;
+        makeRequest(`/api/users/${userId}`);
+      }
+
+      function testCalculate() {
+        const operations = ["add", "multiply", "subtract", "power"];
+        const operation =
+          operations[Math.floor(Math.random() * operations.length)];
+        const operands = [
+          Math.floor(Math.random() * 100) + 1,
+          Math.floor(Math.random() * 20) + 1,
+          Math.floor(Math.random() * 10) + 1,
+        ];
+
+        makeRequest("/api/calculate", {
+          method: "POST",
+          body: JSON.stringify({ operation, operands }),
+        });
+      }
+
+      function testProcessData() {
+        const sampleData = [
+          { name: "Alice", score: 95 },
+          { name: "Bob", score: 87 },
+          { name: "Charlie", score: 92 },
+          "test string",
+          42,
+          { category: "A", value: 123 },
+          [1, 2, 3],
+          true,
+        ];
+
+        makeRequest("/api/process-data", {
+          method: "POST",
+          body: JSON.stringify({
+            data: sampleData,
+            type: "sample",
+          }),
+        });
+      }
+
+      function testCreateUser() {
+        const names = [
+          "Alice Johnson",
+          "Bob Smith",
+          "Charlie Brown",
+          "Diana Prince",
+          "Eve Adams",
+        ];
+        const name = names[Math.floor(Math.random() * names.length)];
+        const email = `${name.toLowerCase().replace(" ", ".")}@example.com`;
+
+        makeRequest("/api/users", {
+          method: "POST",
+          body: JSON.stringify({ name, email }),
+        });
+      }
+
+      // Auto-run health check on page load
+      document.addEventListener("DOMContentLoaded", () => {
+        setTimeout(testHealth, 1000);
+      });
+    </script>
+  </body>
+</html>
