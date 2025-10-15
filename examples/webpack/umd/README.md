@@ -1,11 +1,11 @@
 # Webpack + UMD Example
 
-This example demonstrates Universal Module Definition (UMD) module federation using Expozr and Webpack. The calculator application loads mathematical functions from a remote UMD expozr.
+This example demonstrates Universal Module Definition (UMD) federation between applications using Expozr and Webpack. UMD modules work in any environment - browsers, Node.js, AMD, and CommonJS.
 
 ## Overview
 
-- **Remote/Expozr** (port 3001): Exposes UMD mathematical functions
-- **Host** (port 3000): Calculator application consuming remote UMD modules
+- **Remote/Expozr** (port 3001): Exposes UMD modules with utility functions
+- **Host** (port 3000): Consumes UMD modules from the remote expozr
 
 ## Quick Start
 
@@ -31,339 +31,183 @@ This example demonstrates Universal Module Definition (UMD) module federation us
 
 ### Remote/Expozr (`./remote/`)
 
-Exposes mathematical functions as UMD modules:
+Exposes UMD modules with utility functions:
 
-- **`calculator`**: Basic math operations (add, subtract, multiply, divide)
-- **`advanced`**: Advanced math operations (power, sqrt, factorial, percentage)
+- **`greet`**: Greeting function with custom message
+- **`add`**: Addition function for two numbers
+- **`multiply`**: Multiplication function for two numbers
+- **`getCurrentTime`**: Returns current timestamp
 
 **Configuration** (`expozr.config.ts`):
 
 ```typescript
 export default defineExpozrConfig({
-  name: "math-functions",
+  name: "umd-remote-app",
   version: "1.0.0",
   expose: {
-    "./calculator": {
-      entry: "./src/calculator.ts",
-      exports: ["add", "subtract", "multiply", "divide"],
-    },
-    "./advanced": {
-      entry: "./src/advanced.ts",
-      exports: ["power", "sqrt", "factorial", "percentage"],
+    "./utils": {
+      entry: "./src/index.ts",
+      exports: ["greet", "add", "multiply", "getCurrentTime"],
     },
   },
   build: {
-    format: "umd",
     outDir: "dist",
     publicPath: "http://localhost:3001/",
   },
 });
 ```
 
+**Exposed Module** (`./src/index.ts`):
+
+```typescript
+export function greet(name: string): string {
+  return `Hello, ${name}! This is from the remote application.`;
+}
+
+export function add(a: number, b: number): number {
+  return a + b;
+}
+
+export function multiply(a: number, b: number): number {
+  return a * b;
+}
+
+export function getCurrentTime(): string {
+  return new Date().toLocaleTimeString();
+}
+
+// Default export for UMD compatibility
+const RemoteUtils = {
+  greet,
+  add,
+  multiply,
+  getCurrentTime,
+};
+
+export default RemoteUtils;
+```
+
 ### Host (`./host/`)
 
-Calculator application that:
+Consumes the UMD modules from the remote expozr:
 
-- Loads UMD modules from the remote expozr
-- Provides a modern calculator interface
-- Demonstrates both basic and advanced operations
-- Handles errors gracefully with user feedback
+```typescript
+import { createNavigator } from "@expozr/navigator";
+
+const navigator = createNavigator({
+  expozrs: {
+    "umd-remote-app": {
+      url: "http://localhost:3001",
+    },
+  },
+});
+
+// Load UMD module with auto-detection
+const { module } = await navigator.loadCargo("umd-remote-app", "./utils", {
+  moduleFormat: "umd", // Explicit UMD format
+  exports: ["add", "greet", "multiply", "getCurrentTime"],
+});
+
+// Use the loaded functions
+console.log(module.add(200, 300)); // 500
+console.log(module.multiply(400, 500)); // 200000
+console.log(module.greet("Host User")); // Hello, Host User! This is from the remote application.
+console.log(module.getCurrentTime()); // Current timestamp
+```
 
 ## Key Features
 
-### 🌍 UMD Module Format
+### UMD Module Format
 
-Universal Module Definition provides broad compatibility:
+- **Universal Compatibility**: Works in browsers, Node.js, AMD, and CommonJS environments
+- **Protected Global Storage**: Modules are stored in `globalThis.__EXPOZR__` for secure access
+- **Automatic Detection**: Expozr automatically detects UMD format when `moduleFormat` is not specified
+- **Default Export Support**: UMD modules can expose both named exports and default exports
+
+### Module Loading Options
 
 ```typescript
-// UMD modules work in multiple environments
-// - Browser globals
-// - AMD/RequireJS
-// - CommonJS/Node.js
-// - ES modules
+// Option 1: Auto-detection (recommended)
+const { module } = await navigator.loadCargo("umd-remote-app", "./utils");
 
-import { createNavigator } from "@expozr/navigator";
-
-// Load UMD modules using Navigator
-const navigator = createNavigator({
-  expozrs: {
-    "math-functions": {
-      url: "http://localhost:3001",
-      version: "^1.0.0",
-    },
-  },
+// Option 2: Explicit UMD format
+const { module } = await navigator.loadCargo("umd-remote-app", "./utils", {
+  moduleFormat: "umd",
 });
 
-const calculatorModule = await navigator.loadCargo(
-  "math-functions",
-  "calculator"
-);
-const { add, multiply } = calculatorModule.module;
-```
-
-### 🧮 Calculator Interface
-
-Complete calculator with:
-
-- Basic arithmetic operations
-- Advanced mathematical functions
-- Error handling and validation
-- Responsive design
-- Keyboard support
-
-### 🔧 TypeScript Support
-
-Full type safety with UMD modules:
-
-```typescript
-// Type definitions for remote modules
-interface CalculatorFunctions {
-  add(a: number, b: number): number;
-  subtract(a: number, b: number): number;
-  multiply(a: number, b: number): number;
-  divide(a: number, b: number): number;
-}
-
-interface AdvancedFunctions {
-  power(base: number, exponent: number): number;
-  sqrt(value: number): number;
-  factorial(n: number): number;
-  percentage(value: number, percent: number): number;
-}
-```
-
-## File Structure
-
-```
-webpack/umd/
-├── remote/                 # UMD modules expozr
-│   ├── src/
-│   │   ├── calculator.ts   # Basic math operations
-│   │   └── advanced.ts     # Advanced math operations
-│   ├── expozr.config.ts    # Expozr configuration
-│   ├── webpack.config.js   # Webpack config with UMD output
-│   ├── tsconfig.json       # TypeScript configuration
-│   └── package.json
-├── host/                   # Calculator application
-│   ├── src/
-│   │   ├── index.ts        # Main application logic
-│   │   ├── index.html      # HTML template
-│   │   ├── styles.css      # Calculator styling
-│   │   └── types.d.ts      # Type definitions
-│   ├── expozr.config.ts    # Host configuration
-│   ├── webpack.config.js   # Webpack config
-│   ├── tsconfig.json       # TypeScript configuration
-│   └── package.json
-└── README.md               # This file
-```
-
-## Calculator Features
-
-### Basic Operations
-
-- **Addition**: Add two numbers
-- **Subtraction**: Subtract second number from first
-- **Multiplication**: Multiply two numbers
-- **Division**: Divide first number by second (with zero check)
-
-### Advanced Operations
-
-- **Power**: Raise base to exponent
-- **Square Root**: Calculate square root (with negative check)
-- **Factorial**: Calculate factorial (with validation)
-- **Percentage**: Calculate percentage of a value
-
-### User Interface
-
-- Clean, modern calculator design
-- Responsive layout for different screen sizes
-- Error handling with user-friendly messages
-- Keyboard support for number input
-- Clear and reset functionality
-
-## Development
-
-### Running in Development Mode
-
-Both applications support hot reloading:
-
-```bash
-# Terminal 1 - Remote
-cd remote && npm run dev
-
-# Terminal 2 - Host
-cd host && npm run dev
-```
-
-- Use the calculator interface to perform calculations
-- Check the browser console for detailed loading and calculation logs
-
-## Architecture Details
-
-### Remote Modules
-
-The remote expozr exposes two UMD modules:
-
-- **Calculator Module** (`./calculator`): Basic math operations (add, subtract, multiply, divide)
-- **Advanced Module** (`./advanced`): Advanced operations (power, sqrt, factorial, percentage)
-
-### Host Configuration
-
-The host application configures the Navigator with:
-
-```typescript
-import { createNavigator } from "@expozr/navigator";
-
-const navigator = createNavigator({
-  expozrs: {
-    "math-utils": {
-      url: "http://localhost:3001/",
-      version: "^1.0.0",
-    },
-  },
-  cache: {
-    strategy: "memory",
-    ttl: 300000, // 5 minutes cache
-  },
-  loading: {
-    timeout: 10000, // 10 seconds timeout
-    retry: {
-      attempts: 3,
-      delay: 1000,
-    },
-  },
+// Option 3: With specific exports
+const { module } = await navigator.loadCargo("umd-remote-app", "./utils", {
+  moduleFormat: "umd",
+  exports: ["greet", "add", "multiply", "getCurrentTime"],
 });
 ```
 
-### Module Loading
+## Configuration Files
 
-Functions are loaded dynamically:
+### Remote Webpack Config
 
-```typescript
-// Load calculator module
-const calculatorCargo = await navigator.loadCargo("math-utils", "./calculator");
-const calculatorModule = calculatorCargo.module;
+The remote uses Webpack to build UMD modules:
 
-// Use remote functions
-const result = calculatorModule.add(5, 3); // Returns 8
+```javascript
+// webpack.config.js
+module.exports = {
+  mode: "development",
+  entry: "./src/index.ts",
+  output: {
+    library: "UmdRemoteApp",
+    libraryTarget: "umd",
+    globalObject: "this",
+  },
+  // ... other webpack configuration
+};
 ```
 
-## Key Concepts
+### Host Webpack Config
 
-### UMD Format
+The host consumes UMD modules:
 
-Universal Module Definition (UMD) allows modules to work in multiple environments:
-
-- Browser globals
-- AMD (RequireJS)
-- CommonJS (Node.js)
-- ES Modules
-
-### Dynamic Loading
-
-Expozr Navigator handles:
-
-- Module format detection
-- Network requests with retry logic
-- Caching strategies
-- Error handling and fallbacks
-
-### Type Safety
-
-TypeScript interfaces define remote module contracts:
-
-```typescript
-interface CalculatorModule {
-  add: (a: number, b: number) => number;
-  subtract: (a: number, b: number) => number;
-  multiply: (a: number, b: number) => number;
-  divide: (a: number, b: number) => number;
-}
+```javascript
+// webpack.config.js
+module.exports = {
+  mode: "development",
+  entry: "./src/index.ts",
+  // ... standard webpack configuration for consuming apps
+};
 ```
 
-### Building for Production
+## Development Workflow
 
-```bash
-# Build remote first
-cd remote && npm run build
+1. **Start Remote**: The remote expozr builds and serves UMD modules
+2. **Start Host**: The host application loads and uses the remote modules
+3. **Hot Reload**: Both applications support hot reload for development
+4. **Testing**: Console logs show successful module loading and function calls
 
-# Then build host
-cd host && npm run build
-```
+## UMD Module System Benefits
 
-### Testing the Calculator
-
-1. Check that the expozr is accessible:
-   http://localhost:3001/expozr.inventory.json
-
-2. Verify UMD modules are available:
-   - http://localhost:3001/calculator.js
-   - http://localhost:3001/advanced.js
+- **Browser Native**: Works directly in browsers without module bundlers
+- **Legacy Support**: Compatible with older JavaScript environments
+- **Global Access**: Modules are available globally for debugging
+- **Flexible Loading**: Supports both synchronous and asynchronous loading
+- **Production Ready**: UMD is a stable, well-tested module format
 
 ## Troubleshooting
 
-### Connection Issues
+### Common Issues
 
-- Ensure the remote expozr is running on port 3001
-- Check browser console for network errors
-- Verify CORS settings if accessing from different domains
+1. **Empty Module Object**: Ensure your UMD module has proper exports and default export
+2. **Loading Failures**: Check that the remote expozr is running on the correct port
+3. **CORS Issues**: Ensure both applications are running on allowed origins
+4. **Missing Functions**: Verify the exports array matches your module's actual exports
 
-### Module Loading Errors
+### Debug Tips
 
-- Check the browser network tab for failed requests
-- Verify module paths in the expozr configuration
-- Ensure UMD modules are properly built and accessible
-
-### Calculator Issues
-
-- Check that mathematical operations return expected results
-- Verify error handling for invalid inputs (divide by zero, negative sqrt)
-- Test keyboard input and UI responsiveness
-
-### TypeScript Errors
-
-- Verify type definitions match the actual remote module exports
-- Check that all required dependencies are installed
-- Ensure tsconfig.json includes all necessary files
-
-## Advanced Usage
-
-### Custom Calculator Functions
-
-Add new mathematical operations:
-
-```typescript
-// In remote/src/advanced.ts
-export function logarithm(value: number, base: number = Math.E): number {
-  return Math.log(value) / Math.log(base);
-}
-
-export function sin(angle: number): number {
-  return Math.sin(angle);
-}
-```
-
-### Error Boundaries
-
-Implement graceful error handling:
-
-```typescript
-try {
-  const result = await navigator.loadCargo("math-functions", "calculator");
-  return result.module;
-} catch (error) {
-  console.error("Failed to load calculator functions:", error);
-  // Fallback to local implementations
-  return getLocalCalculatorFunctions();
-}
-```
+- Check browser console for module loading messages
+- Inspect `globalThis.__EXPOZR__` to see stored modules
+- Use `moduleFormat: "umd"` explicitly if auto-detection fails
+- Verify remote expozr is accessible at the configured URL
 
 ## Next Steps
 
-- Try the [React example](../react/) for component sharing
-- Try the [ESM example](../esm/) for modern ES modules
-- Try the [Vanilla example](../vanilla/) for simpler use cases
-- Try the [Vite React example](../../vite/react/) for modern bundler comparison
-- Experiment with different caching strategies
-- Add new mathematical functions to the remote expozr
-- Learn about [deployment strategies](../../../docs/deployment.md)
+- Explore the [ESM Example](../esm/) for modern ES module federation
+- Check the [React Example](../react/) for React component federation
+- Read the [Get Started Example](../get-started/) for simpler use cases

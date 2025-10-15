@@ -14,10 +14,7 @@ interface ButtonProps {
 
 type ButtonComponent = React.ComponentType<ButtonProps>;
 
-type CargoModule = {
-  Button: ButtonComponent;
-};
-
+// You can reuse the navigator instance across your application
 const navigator = createNavigator({
   expozrs: {
     "webpack-react-components": {
@@ -27,11 +24,15 @@ const navigator = createNavigator({
 });
 
 // Component loaded with UMD preference
-const RemoteButton = React.lazy(() =>
-  navigator
-    .loadCargo<CargoModule>("webpack-react-components", "./Button")
-    .then((cargo) => ({ default: cargo.module.Button }))
-);
+const RemoteButton = React.lazy(async () => {
+  const { module } = await navigator.loadCargo<{ Button: ButtonComponent }>(
+    "webpack-react-components",
+    "./Button"
+  );
+
+  // The module contains the Button component as a named export
+  return { default: module.Button };
+});
 
 function App() {
   return (

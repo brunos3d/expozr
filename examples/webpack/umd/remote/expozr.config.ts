@@ -1,23 +1,16 @@
 /**
- * UMD Math Utils Expozr Configuration
- *
- * This configuration exposes math utility functions as UMD modules
- * that can be consumed by any host application.
+ * Simple expozr configuration
  */
 
 import { defineExpozrConfig } from "@expozr/core";
 
 export default defineExpozrConfig({
-  name: "math-utils",
+  name: "umd-remote-app",
   version: "1.0.0",
   expose: {
-    "./calculator": {
-      entry: "./src/calculator.ts",
-      exports: ["add", "subtract", "multiply", "divide", "Calculator"],
-    },
-    "./advanced": {
-      entry: "./src/advanced.ts",
-      exports: ["power", "sqrt", "factorial"],
+    "./utils": {
+      entry: "./src/index.ts",
+      exports: ["greet", "add", "multiply", "getCurrentTime"],
     },
   },
   build: {
@@ -25,9 +18,9 @@ export default defineExpozrConfig({
     publicPath: "http://localhost:3001/",
   },
   metadata: {
-    description: "Math utility functions for UMD consumption",
+    description: "Simple expozr example with basic utilities",
     author: "Expozr Team",
     license: "MIT",
-    tags: ["math", "calculator", "umd", "utilities"],
+    tags: ["utilities", "example", "simple"],
   },
 });

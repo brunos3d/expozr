@@ -2,15 +2,30 @@ const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { suppressExpozrWarnings } = require("@expozr/webpack-adapter");
 
+/**
+ * Webpack configuration
+ * @param {*} env - The environment variables
+ * @param {*} argv - The command line arguments
+ * @returns {import("webpack").Configuration} - The webpack configuration object
+ */
 module.exports = (env, argv) => {
   const isProduction = argv.mode === "production";
 
   return {
     entry: "./src/index.ts",
-    mode: argv.mode || "development",
-    devtool: isProduction ? "source-map" : "inline-source-map",
+    mode: "none", // Use 'none' for minimal output
+    devtool: false, // No source maps for cleaner output
+
+    ignoreWarnings: suppressExpozrWarnings(),
+
     resolve: {
       extensions: [".ts", ".js"],
+      fallback: {
+        crypto: require.resolve("crypto-browserify"),
+        stream: require.resolve("stream-browserify"),
+        buffer: require.resolve("buffer"),
+        vm: false,
+      },
     },
     module: {
       rules: [
@@ -19,22 +34,16 @@ module.exports = (env, argv) => {
           use: "ts-loader",
           exclude: /node_modules/,
         },
-        {
-          test: /\.css$/,
-          use: ["style-loader", "css-loader"],
-        },
       ],
     },
     output: {
+      filename: "[name].js",
       path: path.resolve(__dirname, "dist"),
-      filename: "app.js",
-      clean: true,
     },
-    ignoreWarnings: suppressExpozrWarnings(),
     plugins: [
       new HtmlWebpackPlugin({
-        template: "src/index.html",
-        title: "Expozr UMD Calculator Example",
+        template: "./src/index.html",
+        filename: "index.html",
       }),
     ],
     devServer: {
@@ -42,11 +51,10 @@ module.exports = (env, argv) => {
         directory: path.join(__dirname, "dist"),
       },
       port: 3000,
-      open: true,
+      open: false,
       hot: true,
-      liveReload: true,
       devMiddleware: {
-        writeToDisk: true, // Ensure files are written to disk in development
+        writeToDisk: true,
       },
     },
   };

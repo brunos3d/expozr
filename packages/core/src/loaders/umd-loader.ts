@@ -202,11 +202,6 @@ export class UMDModuleLoader extends BaseModuleLoader {
       typeof moduleToReturn !== "object" &&
       typeof moduleToReturn !== "function"
     ) {
-      console.error(
-        `❌ Invalid module type:`,
-        typeof moduleToReturn,
-        moduleToReturn
-      );
       throw new Error(
         `Invalid module: expected object or function, got ${typeof moduleToReturn}`
       );
@@ -267,9 +262,12 @@ export class UMDModuleLoader extends BaseModuleLoader {
 
       // ALWAYS bind the module to the standardized location
       // Use defineProperty to make it harder for extensions to override
+      // Use the same base name logic as in global detection
+      const cargoBaseName = cargoName.replace("./", "");
+
       Object.defineProperty(
         (globalThis as any).__EXPOZR__[expozrName].CARGOS,
-        cargoName,
+        cargoBaseName,
         {
           value: moduleToReturn,
           writable: true, // Allow updates for HMR
@@ -288,41 +286,58 @@ export class UMDModuleLoader extends BaseModuleLoader {
     if (requestedExports && requestedExports.length > 0) {
       // ALWAYS prefer module from standardized location if available
       let sourceModule = moduleToReturn;
-      if (
-        expozrName &&
-        cargoName &&
-        (globalThis as any).__EXPOZR__?.[expozrName]?.CARGOS?.[cargoName]
-      ) {
-        sourceModule = (globalThis as any).__EXPOZR__[expozrName].CARGOS[
-          cargoName
-        ];
+      if (expozrName && cargoName) {
+        const cargoBaseName = cargoName.replace("./", "");
+        if (
+          (globalThis as any).__EXPOZR__?.[expozrName]?.CARGOS?.[cargoBaseName]
+        ) {
+          sourceModule = (globalThis as any).__EXPOZR__[expozrName].CARGOS[
+            cargoBaseName
+          ];
+        }
       }
 
       const result: any = {};
+      let foundAnyExport = false;
+
       for (const exportName of requestedExports) {
         if (sourceModule && sourceModule[exportName]) {
           result[exportName] = sourceModule[exportName];
-        } else {
-          // Export not found, but continue processing
+          foundAnyExport = true;
         }
+        // Also check if the sourceModule itself is the requested export (for UMD modules)
+        else if (
+          typeof sourceModule === "function" &&
+          exportName === sourceModule.name
+        ) {
+          result[exportName] = sourceModule;
+          foundAnyExport = true;
+        }
+      }
+
+      // If no specific exports were found, return the entire module instead
+      // This handles UMD modules that expose themselves as the main export
+      if (!foundAnyExport && sourceModule) {
+        return sourceModule as T;
       }
 
       return result as T;
     }
 
     // Return the entire module - ALWAYS prefer standardized location if available
-    let finalModule = moduleToReturn;
-    if (
-      expozrName &&
-      cargoName &&
-      (globalThis as any).__EXPOZR__?.[expozrName]?.CARGOS?.[cargoName]
-    ) {
-      finalModule = (globalThis as any).__EXPOZR__[expozrName].CARGOS[
-        cargoName
-      ];
+    if (expozrName && cargoName) {
+      // Use the same base name logic as in the global detection
+      const cargoBaseName = cargoName.replace("./", "");
+
+      const protectedModule = (globalThis as any).__EXPOZR__?.[expozrName]
+        ?.CARGOS?.[cargoBaseName];
+      if (protectedModule) {
+        return protectedModule as T;
+      }
     }
 
-    return finalModule as T;
+    // Fallback to original module (should rarely happen)
+    return moduleToReturn as T;
   }
 
   /**

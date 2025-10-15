@@ -35,6 +35,8 @@ async function init(): Promise<void> {
 
 async function initRemote() {
   // Initialize Expozr Navigator
+
+  // You can reuse the navigator instance across your application
   const navigator = createNavigator({
     expozrs: {
       "remote-esm-functions": {
