@@ -8,7 +8,7 @@
     "start": "node dist/server.js",
     "dev": "concurrently \"npm run webpack:watch\" \"npm run server:watch\"",
     "webpack:watch": "webpack --mode development --watch",
-    "server:watch": "nodemon dist/server.js"
+    "server:watch": "wait-on dist/server.js && nodemon dist/server.js"
   },
   "dependencies": {
     "@expozr/navigator": "^2.1.0",
@@ -28,6 +28,7 @@
     "stream-browserify": "^3.0.0",
     "ts-loader": "^9.0.0",
     "typescript": "^5.0.0",
+    "wait-on": "^9.0.1",
     "webpack": "^5.0.0",
     "webpack-cli": "^5.0.0"
   }
