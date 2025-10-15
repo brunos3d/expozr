@@ -369,7 +369,7 @@ export interface LoadOptions {
   /** Whether to add cache busting parameters */
   cacheBusting?: boolean;
   /** Expected global name for UMD modules */
-  expectedGlobalName?: string;
+  globalNamespace?: string;
   /** Expozr name for global binding structure */
   expozrName?: string;
   /** Cargo name for global binding structure */

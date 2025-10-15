@@ -335,7 +335,7 @@ export interface LoaderContext {
  * const options: UMDLoadOptions = {
  *   timeout: 10000,
  *   retries: 2,
- *   expectedGlobalName: 'MyLibrary'
+ *   globalNamespace: 'MyLibrary'
  * };
  * ```
  */
@@ -372,7 +372,7 @@ export interface UMDLoadOptions {
    * @example 'React' - Module exposes itself as window.React
    * @example 'MyLibrary' - Module exposes itself as window.MyLibrary
    */
-  expectedGlobalName?: string;
+  globalNamespace?: string;
 }
 
 /**
@@ -407,7 +407,7 @@ export interface UMDModuleInfo {
    *
    * The name of the global variable (property of window) where the module
    * was found after script execution. This may be different from the
-   * expectedGlobalName if the module uses a different naming convention.
+   * globalNamespace if the module uses a different naming convention.
    *
    * @example 'React' - Found as window.React
    * @example 'MyLibrary' - Found as window.MyLibrary

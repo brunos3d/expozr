@@ -41,8 +41,6 @@ export function expozr(options: ExpozrPluginOptions = {}): Plugin {
         console.warn("Invalid expozr configuration");
         return;
       }
-
-      console.log(`📦 Expozr config loaded: ${config.name}`);
     },
 
     async buildStart() {
@@ -64,8 +62,6 @@ export function expozr(options: ExpozrPluginOptions = {}): Plugin {
               }
             }
           }
-
-          console.log(`📦 Expozr inventory prepared for development`);
         } catch (error) {
           console.error("Failed to generate expozr inventory:", error);
         }
@@ -133,8 +129,6 @@ export function expozr(options: ExpozrPluginOptions = {}): Plugin {
           JSON.stringify(buildInventory, null, 2),
           "utf-8"
         );
-
-        console.log(`📦 Expozr inventory generated: ${inventoryPath}`);
       } catch (error) {
         console.error("Failed to generate expozr inventory:", error);
       }

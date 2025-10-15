@@ -18,7 +18,7 @@ import { loadUMDModule, loadExpozrInventory } from "@expozr/navigator";
  * setupReactGlobals();
  *
  * // Now you can load React UMD modules
- * const buttonModule = await loadUMDModule(url, { expectedGlobalName: 'Button' });
+ * const buttonModule = await loadUMDModule(url, { globalNamespace: 'Button' });
  * ```
  */
 export function setupReactGlobals() {
@@ -42,8 +42,6 @@ export function setupReactGlobals() {
   // Webpack external module references
   globals.__WEBPACK_EXTERNAL_MODULE_react__ = React;
   globals.__WEBPACK_EXTERNAL_MODULE_react_dom__ = { createRoot };
-
-  console.log("✅ React globals configured for UMD module loading");
 }
 
 /**
@@ -57,7 +55,7 @@ export function setupReactGlobals() {
 export async function loadReactUMDModule(
   url: string,
   options: {
-    expectedGlobalName?: string;
+    globalNamespace?: string;
     timeout?: number;
     validateComponent?: boolean;
   } = {}
@@ -76,7 +74,7 @@ export async function loadReactUMDModule(
   // Try different access patterns for React components
   if (component && typeof component === "object") {
     component =
-      component[options.expectedGlobalName || ""] ||
+      component[options.globalNamespace || ""] ||
       component.default ||
       component;
   }
@@ -138,7 +136,7 @@ export async function loadReactExpozr(
       : `${inventory.expozr.url}/${cargo.entry}`;
 
     const result = await loadReactUMDModule(moduleUrl, {
-      expectedGlobalName: cargoName,
+      globalNamespace: cargoName,
     });
 
     return { name: cargoName, component: result.component };

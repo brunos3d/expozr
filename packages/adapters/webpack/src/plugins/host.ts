@@ -127,8 +127,6 @@ export class ExpozrHostPlugin {
 
     // Configure warning suppressions
     this.configureWarningSuppressions(compiler);
-
-    console.log("✅ Expozr host configuration applied");
   }
 
   /**
