@@ -161,6 +161,7 @@ function App() {
 
 - **[@expozr/core](./packages/core)** - Core abstractions, types, and configuration system with multi-format module support (ESM, UMD, CJS)
 - **[@expozr/navigator](./packages/navigator)** - Universal runtime loader with smart format detection, caching strategies, and cross-platform support
+- **[@expozr/adapter-sdk](./packages/adapters/sdk)** - Shared SDK and utilities for building bundler adapters with configuration management and format utilities
 
 ### Bundler Adapters
 
