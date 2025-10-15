@@ -147,9 +147,11 @@ Universal runtime system that handles dynamic loading, dependency resolution, an
 
 | Tool       | Status     | Package            | Features                                     |
 | ---------- | ---------- | ------------------ | -------------------------------------------- |
+| Node.js    | ✅ Ready   | @expozr/core       | Native runtime support                       |
+| npm        | ✅ Ready   | @expozr/core       | Standard package manager support             |
+| TypeScript | ✅ Ready   | @expozr/core       | Full TypeScript support                      |
 | Bun        | 📋 Planned | @expozr/bun        | All-in-one runtime, package manager, bundler |
 | Deno       | 📋 Planned | @expozr/deno       | Secure runtime, built-in tooling             |
-| Node.js    | ✅ Ready   | @expozr/core       | Native runtime support                       |
 | Nx         | 📋 Planned | @expozr/nx         | Monorepo integration, workspace management   |
 | Turbopack  | 📋 Planned | @expozr/turbopack  | Fast builds, incremental compilation         |
 | Turborepo  | 📋 Planned | @expozr/turborepo  | Monorepo builds, remote caching              |
@@ -158,11 +160,9 @@ Universal runtime system that handles dynamic loading, dependency resolution, an
 | Changesets | 📋 Planned | @expozr/changesets | Version management, changelog generation     |
 | pnpm       | 📋 Planned | @expozr/pnpm       | Workspace support, efficient installs        |
 | Yarn PnP   | 📋 Planned | @expozr/yarn-pnp   | Zero-installs, workspace optimization        |
-| npm        | ✅ Ready   | @expozr/core       | Standard package manager support             |
 | esbuild    | 📋 Planned | @expozr/esbuild    | Ultra-fast builds, module transformation     |
 | SWC        | 📋 Planned | @expozr/swc        | Fast compilation, TypeScript support         |
 | Babel      | 📋 Planned | @expozr/babel      | Code transformation, plugin ecosystem        |
-| TypeScript | ✅ Ready   | @expozr/core       | Full TypeScript support                      |
 | Biome      | 📋 Planned | @expozr/biome      | Linting integration, code formatting         |
 | ESLint     | 📋 Planned | @expozr/eslint     | Code quality, custom rules                   |
 | Prettier   | 📋 Planned | @expozr/prettier   | Code formatting integration                  |
