@@ -40,12 +40,7 @@ import { defineConfig } from "vite";
 import { expozr } from "@expozr/vite-adapter";
 
 export default defineConfig({
-  plugins: [
-    expozr({
-      configPath: "./expozr.config.ts",
-      development: true,
-    }),
-  ],
+  plugins: [expozr()],
 });
 ```
 
