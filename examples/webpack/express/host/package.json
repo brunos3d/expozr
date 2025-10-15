@@ -6,20 +6,24 @@
   "scripts": {
     "build": "webpack --mode production",
     "start": "node dist/server.js",
-    "dev": "webpack --mode development --watch"
+    "dev": "concurrently \"npm run webpack:watch\" \"npm run server:watch\"",
+    "webpack:watch": "webpack --mode development --watch",
+    "server:watch": "nodemon dist/server.js"
   },
   "dependencies": {
     "@expozr/navigator": "^2.1.0",
-    "express": "^4.18.0",
-    "cors": "^2.8.5"
+    "cors": "^2.8.5",
+    "express": "^4.18.0"
   },
   "devDependencies": {
     "@expozr/webpack-adapter": "^2.1.0",
-    "@types/express": "^4.17.0",
     "@types/cors": "^2.8.0",
+    "@types/express": "^4.17.0",
     "@types/node": "^18.0.0",
     "buffer": "^6.0.3",
+    "concurrently": "^9.2.1",
     "crypto-browserify": "^3.12.0",
+    "nodemon": "^3.1.10",
     "process": "^0.11.10",
     "stream-browserify": "^3.0.0",
     "ts-loader": "^9.0.0",
