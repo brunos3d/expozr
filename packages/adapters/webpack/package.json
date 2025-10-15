@@ -1,6 +1,6 @@
 {
   "name": "@expozr/webpack-adapter",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Webpack adapter for the Expozr ecosystem",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
@@ -26,8 +26,8 @@
     "access": "public"
   },
   "dependencies": {
-    "@expozr/core": "2.0.0",
-    "@expozr/adapter-sdk": "2.0.0"
+    "@expozr/adapter-sdk": "2.1.0",
+    "@expozr/core": "2.1.0"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.0",

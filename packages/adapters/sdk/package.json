@@ -1,6 +1,6 @@
 {
   "name": "@expozr/adapter-sdk",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Shared SDK and utilities for Expozr bundler adapters",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
@@ -27,7 +27,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@expozr/core": "2.0.0"
+    "@expozr/core": "2.1.0"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.0",

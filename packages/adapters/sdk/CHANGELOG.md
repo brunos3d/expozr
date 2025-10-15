@@ -1,3 +1,19 @@
+# Change Log
+
+All notable changes to this project will be documented in this file.
+See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
+# 2.1.0 (2025-10-15)
+
+
+### Features
+
+* Create adapter SDK and refactor bundler adapters ([9387988](https://github.com/brunos3d/expozr/commit/938798833369f6a5268008bc5965cef8dd9d5dd0))
+
+
+
+
+
 # Changelog - @expozr/adapter-sdk
 
 All notable changes to the Expozr Adapter SDK will be documented in this file.
