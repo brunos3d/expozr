@@ -69,11 +69,11 @@ npm install && npm run build
 
 # 2. Start the expozr (port 3001)
 cd examples/webpack/get-started/remote
-npm install && npm run dev
+npm run dev
 
 # 3. In a new terminal, start the host (port 3000)
 cd examples/webpack/get-started/host
-npm install && npm run dev
+npm run dev
 
 # 4. Open http://localhost:3000 in your browser
 ```
