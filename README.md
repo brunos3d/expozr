@@ -74,7 +74,7 @@ Universal runtime system that handles dynamic loading, dependency resolution, an
 
 - 💾 **Multiple Strategies**: Memory, localStorage, IndexedDB, or no caching
 - ⏱️ **TTL Support**: Time-based cache invalidation
-- � **Cache Analytics**: Monitor cache performance and hit rates
+- 🔧 **Cache Analytics**: Monitor cache performance and hit rates
 - 🔄 **Smart Invalidation**: Automatic cache updates when modules change
 
 ### 🔒 **Production Ready**
@@ -83,77 +83,6 @@ Universal runtime system that handles dynamic loading, dependency resolution, an
 - 📊 **Performance Monitoring**: Track loading times and cache efficiency
 - � **Debug Mode**: Detailed logging for development and troubleshooting
 - 🚀 **Optimized Loading**: Preloading and lazy loading strategies
-
-## 🚀 Quick Start
-
-Here's a minimal example of setting up an Expozr remote application and a host application using Webpack and React. (see [examples](./examples) for full working examples)
-
-**webpack.config.js:**
-
-First, add the Expozr Webpack plugin to your Webpack configuration:
-
-```javascript
-const { createExpozrPlugin } = require("@expozr/webpack-adapter");
-
-module.exports = {
-  plugins: [createExpozrPlugin()],
-};
-```
-
-**expozr.config.ts:**
-
-Everything goes around a simple configuration file the `expozr.config.ts`:
-
-```typescript
-import { defineExpozrConfig } from "@expozr/core";
-
-export default defineExpozrConfig({
-  name: "my-components",
-  version: "1.0.0",
-  expose: {
-    "./Button": {
-      entry: "./src/components/Button.tsx",
-      exports: ["Button", "ButtonProps"],
-    },
-  },
-  dependencies: {
-    react: "^18.0.0",
-    "react-dom": "^18.0.0",
-    // ...other shared dependencies
-  },
-  build: {
-    outDir: "dist",
-    publicPath: "http://localhost:3001/",
-  },
-});
-```
-
-**React Host app:**
-
-Now you can load and use the exposed components in your React host application:
-
-```typescript
-import React from "react";
-import { loadReactExpozr } from "@expozr/react";
-
-const expozr = loadReactExpozr("http://localhost:3001");
-
-// Load React components dynamically
-const Button = React.lazy(() =>
-  expozr.then((mod) => ({ default: mod.Button }))
-);
-
-// Use them in your React app
-function App() {
-  return (
-    <div>
-      <Button onClick={() => console.log("Clicked!")}>
-        Click me!
-      </Button>
-    </div>
-  );
-}
-```
 
 ## 📦 Packages
 
