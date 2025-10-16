@@ -510,6 +510,17 @@ export interface NavigatorConfig extends Partial<HostConfig> {
     hybrid?: boolean;
 
     /**
+     * Preferred runtime environment for module loading.
+     *
+     * When set to "auto" the navigator will detect the current runtime
+     * (browser vs node) and adjust default format preferences accordingly.
+     * You can override this to force node/browser behavior during loading.
+     *
+     * @default "auto"
+     */
+    environment?: "auto" | "browser" | "node";
+
+    /**
      * Enable smart fallback system (probe multiple URLs).
      *
      * When enabled, the navigator will probe multiple format URLs to find

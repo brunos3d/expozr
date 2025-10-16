@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { loadNodeUMDCargo } from "../libs/expozr/navigator";
+import { loadCargo } from "../libs/expozr/navigator";
 
 const router: Router = Router();
 
@@ -7,7 +7,7 @@ const router: Router = Router();
 router.get("/users/:id", async (req, res) => {
   try {
     console.log("👤 Loading UserUtils cargo...");
-    const userUtils = await loadNodeUMDCargo("./userUtils");
+    const userUtils = await loadCargo("./userUtils");
 
     const userId = parseInt(req.params.id);
     if (isNaN(userId)) {
@@ -43,7 +43,7 @@ router.get("/users/:id", async (req, res) => {
 router.post("/users", async (req, res) => {
   try {
     console.log("👤 Loading UserUtils cargo for user creation...");
-    const userUtils = await loadNodeUMDCargo("./userUtils");
+    const userUtils = await loadCargo("./userUtils");
 
     const { name, email } = req.body;
 

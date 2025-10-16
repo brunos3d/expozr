@@ -2,23 +2,33 @@
  * ExpozrNavigator with advanced module system support
  */
 
-import type { LoadedCargo, LoadOptions, NavigatorConfig } from "../types";
-
-import type { ModuleFormat, ModuleLoadingStrategy } from "@expozr/core";
-
 import {
   getGlobalModuleSystem,
+  DefaultFormatDetector,
   ESMModuleLoader,
   UMDModuleLoader,
-  HybridModuleLoader,
-  DefaultFormatDetector,
   CargoNotFoundError,
   ExpozrNotFoundError,
   generateCargoKey,
+  isBrowser,
+} from "@expozr/core";
+import type {
+  ModuleLoader,
+  ModuleFormat,
+  ModuleLoadingStrategy,
 } from "@expozr/core";
 
 import { BaseExpozrNavigator } from "./base-navigator";
 import { generateFormatUrls } from "../utils";
+
+import type { LoadedCargo, LoadOptions, NavigatorConfig } from "../types";
+
+// Environment-aware loaders from navigator package
+import {
+  createModuleLoader,
+  createBrowserLoader,
+  createNodeLoader,
+} from "../loaders";
 
 /**
  * ExpozrNavigator with universal module system support
@@ -26,6 +36,8 @@ import { generateFormatUrls } from "../utils";
  */
 export class ExpozrNavigator extends BaseExpozrNavigator {
   private moduleSystemConfig: NavigatorConfig["moduleSystem"];
+  private environment: "browser" | "node";
+  private moduleLoader: ModuleLoader;
 
   /**
    * Create an ExpozrNavigator instance
@@ -37,8 +49,25 @@ export class ExpozrNavigator extends BaseExpozrNavigator {
     // Store module system config for later use
     this.moduleSystemConfig = config.moduleSystem;
 
+    // Detect runtime environment (browser vs node) unless explicitly set
+    const envPreference = this.moduleSystemConfig?.environment || "auto";
+    if (envPreference === "auto") {
+      this.environment = isBrowser() ? "browser" : "node";
+    } else {
+      this.environment = envPreference === "browser" ? "browser" : "node";
+    }
+
     // Initialize the module system with user configuration
     this.initializeModuleSystem(config.moduleSystem);
+
+    // Create an environment-aware module loader for this navigator
+    if (this.moduleSystemConfig?.environment === "browser") {
+      this.moduleLoader = createBrowserLoader();
+    } else if (this.moduleSystemConfig?.environment === "node") {
+      this.moduleLoader = createNodeLoader();
+    } else {
+      this.moduleLoader = createModuleLoader();
+    }
   }
 
   /**
@@ -227,27 +256,15 @@ export class ExpozrNavigator extends BaseExpozrNavigator {
 
       let module: T;
 
-      // Use the appropriate loader based on the format
-      if (format === "umd") {
-        const umdLoader = new UMDModuleLoader();
-        module = await umdLoader.loadModule<T>(url, {
-          ...options,
-          exports: cargoInfo.exports,
-          expozrName: options?.expozrName,
-          cargoName: options?.cargoName,
-        });
-      } else if (format === "esm") {
-        const esmLoader = new ESMModuleLoader();
-        module = await esmLoader.loadModule<T>(url, {
-          ...options,
-          exports: cargoInfo.exports,
-          expozrName: options?.expozrName,
-          cargoName: options?.cargoName,
-        });
-      } else {
-        // Fallback to generic module system
-        module = await moduleSystem.loadModule<T>(url, options);
-      }
+      // Use the environment-aware module loader to load the URL
+      module = await this.moduleLoader.loadModule<T>(url, {
+        ...options,
+        exports: cargoInfo.exports,
+        expozrName: options?.expozrName,
+        cargoName: options?.cargoName,
+        // Hint the desired format so loader implementations can prefer it
+        // cast to any because core LoadOptions doesn't include navigator-specific hints
+      } as any);
 
       return {
         module,
@@ -315,25 +332,12 @@ export class ExpozrNavigator extends BaseExpozrNavigator {
       try {
         let module: T;
 
-        // Use the appropriate loader based on the format
-        if (format === "umd") {
-          const umdLoader = new UMDModuleLoader();
-          module = await umdLoader.loadModule<T>(url, {
-            ...options,
-            expozrName: options?.expozrName,
-            cargoName: options?.cargoName,
-          });
-        } else if (format === "esm") {
-          const esmLoader = new ESMModuleLoader();
-          module = await esmLoader.loadModule<T>(url, {
-            ...options,
-            expozrName: options?.expozrName,
-            cargoName: options?.cargoName,
-          });
-        } else {
-          // Fallback to generic module system
-          module = await moduleSystem.loadModule<T>(url, options);
-        }
+        // Delegate to environment-aware module loader and hint the format
+        module = await this.moduleLoader.loadModule<T>(url, {
+          ...options,
+          expozrName: options?.expozrName,
+          cargoName: options?.cargoName,
+        } as any);
 
         return {
           module,
@@ -378,35 +382,56 @@ export class ExpozrNavigator extends BaseExpozrNavigator {
     urls: { format: ModuleFormat; url: string }[],
     options?: LoadOptions
   ): { format: ModuleFormat; url: string }[] {
-    if (!options?.moduleFormat && !options?.fallbackFormats) {
-      return urls; // Return original order if no preferences
-    }
+    // If user provided explicit preferences, respect them
+    if (options?.moduleFormat || options?.fallbackFormats) {
+      const preferred: { format: ModuleFormat; url: string }[] = [];
+      const fallbacks: { format: ModuleFormat; url: string }[] = [];
+      const others: { format: ModuleFormat; url: string }[] = [];
 
-    const preferred: { format: ModuleFormat; url: string }[] = [];
-    const fallbacks: { format: ModuleFormat; url: string }[] = [];
-    const others: { format: ModuleFormat; url: string }[] = [];
-
-    // Group URLs by preference
-    for (const urlInfo of urls) {
-      if (options.moduleFormat === urlInfo.format) {
-        preferred.push(urlInfo);
-      } else if (options.fallbackFormats?.includes(urlInfo.format as any)) {
-        fallbacks.push(urlInfo);
-      } else {
-        others.push(urlInfo);
+      // Group URLs by preference
+      for (const urlInfo of urls) {
+        if (options.moduleFormat === urlInfo.format) {
+          preferred.push(urlInfo);
+        } else if (options.fallbackFormats?.includes(urlInfo.format as any)) {
+          fallbacks.push(urlInfo);
+        } else {
+          others.push(urlInfo);
+        }
       }
+
+      // Order fallbacks by user preference
+      if (options.fallbackFormats) {
+        fallbacks.sort((a, b) => {
+          const aIndex = options.fallbackFormats!.indexOf(a.format as any);
+          const bIndex = options.fallbackFormats!.indexOf(b.format as any);
+          return aIndex - bIndex;
+        });
+      }
+
+      return [...preferred, ...fallbacks, ...others];
     }
 
-    // Order fallbacks by user preference
-    if (options.fallbackFormats) {
-      fallbacks.sort((a, b) => {
-        const aIndex = options.fallbackFormats!.indexOf(a.format as any);
-        const bIndex = options.fallbackFormats!.indexOf(b.format as any);
-        return aIndex - bIndex;
-      });
-    }
+    // No explicit user preferences: choose sensible defaults based on environment
+    const env = this.environment;
+    const defaultOrder =
+      env === "browser" ? ["esm", "umd", "cjs"] : ["cjs", "esm", "umd"];
 
-    return [...preferred, ...fallbacks, ...others];
+    const ordered = [...urls].sort((a, b) => {
+      const aIndex = defaultOrder.indexOf(a.format as string);
+      const bIndex = defaultOrder.indexOf(b.format as string);
+      const ai = aIndex === -1 ? 99 : aIndex;
+      const bi = bIndex === -1 ? 99 : bIndex;
+      return ai - bi;
+    });
+
+    return ordered;
+  }
+
+  /**
+   * Get the detected runtime environment for this navigator instance
+   */
+  getEnvironment(): "browser" | "node" {
+    return this.environment;
   }
 
   /**

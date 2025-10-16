@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { loadNodeUMDCargo } from "../libs/expozr/navigator";
+import { loadCargo } from "../libs/expozr/navigator";
 
 const router: Router = Router();
 
@@ -7,7 +7,7 @@ const router: Router = Router();
 router.post("/process-data", async (req, res) => {
   try {
     console.log("📊 Loading DataProcessor cargo...");
-    const dataProcessor = await loadNodeUMDCargo("./dataProcessor");
+    const dataProcessor = await loadCargo("./dataProcessor");
 
     const { data, type = "generic" } = req.body;
 

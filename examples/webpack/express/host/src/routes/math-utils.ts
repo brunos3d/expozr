@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { loadNodeUMDCargo } from "../libs/expozr/navigator";
+import { loadCargo } from "../libs/expozr/navigator";
 
 const router: Router = Router();
 
@@ -7,7 +7,7 @@ const router: Router = Router();
 router.post("/calculate", async (req, res) => {
   try {
     console.log("🔢 Loading MathUtils cargo...");
-    const mathUtils = await loadNodeUMDCargo("./mathUtils");
+    const mathUtils = await loadCargo("./mathUtils");
 
     const { operation, operands } = req.body;
 

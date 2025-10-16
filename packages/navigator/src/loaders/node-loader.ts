@@ -1,6 +1,9 @@
 /**
  * Node.js-based module loader
  */
+import * as vm from "vm";
+import * as https from "https";
+import * as http from "http";
 
 import type { ModuleLoader, LoadOptions, ModuleFormat } from "@expozr/core";
 import {
@@ -71,27 +74,8 @@ export class NodeModuleLoader implements ModuleLoader {
    * @param url - URL or path to load
    * @returns Promise resolving to the loaded module
    */
-  private async loadNodeModule(url: string): Promise<any> {
-    if (url.startsWith("http://") || url.startsWith("https://")) {
-      // For HTTP URLs, fetch and evaluate
-      const module = await this.fetchModule(url);
-      return module;
-    } else {
-      // For local files, use require or import
-      try {
-        return await import(
-          /* webpackIgnore: true */
-          /* @vite-ignore */
-          url
-        );
-      } catch {
-        // Fallback to require for CommonJS modules (Node.js only)
-        if (typeof globalThis !== "undefined" && "require" in globalThis) {
-          return (globalThis as any).require(url);
-        }
-        throw new Error("Module loading failed");
-      }
-    }
+  private async loadNodeModule<T = any>(url: string): Promise<T> {
+    return this.fetchModule<T>(url);
   }
 
   /**
@@ -99,10 +83,146 @@ export class NodeModuleLoader implements ModuleLoader {
    * @param url - Remote URL to fetch
    * @returns Promise resolving to the module
    */
-  private async fetchModule(url: string): Promise<any> {
-    // This would need a proper implementation with dynamic evaluation
-    // For now, throwing as HTTP module loading in Node.js requires special handling
-    throw new Error("HTTP module loading in Node.js not implemented yet");
+  private async fetchModule<T = any>(url: string): Promise<T> {
+    return new Promise((resolve, reject) => {
+      console.log(`🌐 Fetching UMD module from: ${url}`);
+
+      const client = url.startsWith("https:") ? https : http;
+
+      client
+        .get(url, (res) => {
+          if (res.statusCode !== 200) {
+            reject(new Error(`HTTP ${res.statusCode}: ${res.statusMessage}`));
+            return;
+          }
+
+          let data = "";
+          res.on("data", (chunk) => {
+            data += chunk;
+          });
+
+          res.on("end", () => {
+            try {
+              // Create mock browser APIs
+              const mockEventTarget = {
+                addEventListener: () => {},
+                removeEventListener: () => {},
+                dispatchEvent: () => true,
+              };
+
+              const mockLocation = {
+                href: url,
+                protocol: new URL(url).protocol,
+                host: new URL(url).host,
+                hostname: new URL(url).hostname,
+                port: new URL(url).port,
+                pathname: new URL(url).pathname,
+                search: "",
+                hash: "",
+              };
+
+              const mockDocument = {
+                ...mockEventTarget,
+                createElement: () => mockEventTarget,
+                createTextNode: () => ({}),
+                querySelector: () => null,
+                querySelectorAll: () => [],
+                getElementById: () => null,
+                getElementsByTagName: () => [],
+                body: mockEventTarget,
+                head: mockEventTarget,
+                documentElement: mockEventTarget,
+              };
+
+              const mockWindow = {
+                ...mockEventTarget,
+                document: mockDocument,
+                location: mockLocation,
+                navigator: { userAgent: "Node.js" },
+                setTimeout,
+                clearTimeout,
+                setInterval,
+                clearInterval,
+                fetch: undefined,
+                XMLHttpRequest: undefined,
+              };
+
+              // Create a safe execution context with proper browser mocks
+              const sandbox = {
+                module: { exports: {} },
+                exports: {},
+                require: require,
+                console: console,
+                setTimeout,
+                clearTimeout,
+                setInterval,
+                clearInterval,
+                // Browser globals - all pointing to our mock
+                global: mockWindow,
+                window: mockWindow,
+                self: mockWindow,
+                document: mockDocument,
+                location: mockLocation,
+                navigator: mockWindow.navigator,
+                // Make 'this' point to the window mock in global scope
+                this: undefined, // Will be set to global context
+              };
+
+              // Execute the UMD module in the sandbox
+              const context = vm.createContext(sandbox);
+
+              // Wrap in try-catch to handle webpack-dev-server or other client-only code
+              const wrappedCode = `
+              (function() {
+                try {
+                  ${data}
+                } catch (err) {
+                  // Suppress errors from browser-only code (like webpack-dev-server)
+                  if (err.message && (
+                    err.message.includes('addEventListener') ||
+                    err.message.includes('document') ||
+                    err.message.includes('window')
+                  )) {
+                    console.warn('⚠️ Browser-only code detected, skipping:', err.message);
+                  } else {
+                    throw err;
+                  }
+                }
+              })();
+            `;
+
+              vm.runInContext(wrappedCode, context);
+
+              // Extract the module exports
+              const moduleExports: any =
+                sandbox.module.exports || sandbox.exports || {};
+
+              // Check if we got valid exports
+              if (
+                Object.keys(moduleExports).length === 0 &&
+                moduleExports.constructor === Object
+              ) {
+                console.warn(
+                  `⚠️ Warning: No exports found in UMD module from: ${url}`
+                );
+                console.warn(
+                  `   This might be a client-only bundle (webpack-dev-server).`
+                );
+              }
+
+              console.log(`✅ Successfully loaded UMD module from: ${url}`);
+              resolve(moduleExports as T);
+            } catch (error) {
+              console.error(`❌ Failed to execute UMD module: ${error}`);
+              reject(error);
+            }
+          });
+        })
+        .on("error", (error) => {
+          console.error(`❌ Failed to fetch UMD module: ${error}`);
+          reject(error);
+        });
+    });
   }
 
   /**
