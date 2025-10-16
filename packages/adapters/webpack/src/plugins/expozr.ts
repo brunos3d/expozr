@@ -9,21 +9,19 @@
  * - Development and production build support
  */
 
+import { isPromise } from "util/types";
+
+import { ValidationUtils, InventoryGenerator } from "@expozr/core";
+import { loadExpozrConfigSync, INVENTORY_FILE_NAME } from "@expozr/adapter-sdk";
+import type { ExpozrConfig, Inventory, Cargo, CargoConfig } from "@expozr/core";
 import type {
   Compiler,
   Compilation,
   RuleSetRule,
   EntryObject,
   EntryNormalized,
+  Configuration as WebpackConfiguration,
 } from "webpack";
-import type { ExpozrConfig, Inventory, Cargo, CargoConfig } from "@expozr/core";
-import {
-  ValidationUtils,
-  InventoryGenerator,
-  ChecksumUtils,
-  timestamp,
-} from "@expozr/core";
-import { loadExpozrConfigSync, INVENTORY_FILE_NAME } from "@expozr/adapter-sdk";
 
 export interface ExpozrPluginOptions {
   /** Path to expozr config file */
@@ -34,7 +32,24 @@ export interface ExpozrPluginOptions {
   outputPath?: string;
   /** Custom public path (overrides config) */
   publicPath?: string;
+  /** Whether to automatically configure webpack config.entry (default: true) */
+  configureEntries?: boolean;
+  /** Whether to apply UMD output configuration (default: true) */
+  configureUMDOutput?: boolean;
+  /** Whether to configure TypeScript compilation (default: true) */
+  configureTypescript?: boolean;
+  /** Whether to configure optimizations (default: true) */
+  configureOptimizations?: boolean;
+  /** Whether to configure development server for CORS (default: true) */
+  configureDevServer?: boolean;
 }
+export const DEFAULT_EXPOZR_PLUGIN_OPTIONS: ExpozrPluginOptions = {
+  configureEntries: true,
+  configureUMDOutput: true,
+  configureTypescript: true,
+  configureOptimizations: true,
+  configureDevServer: true,
+};
 
 /**
  * Webpack plugin for creating Expozr remotes
@@ -43,7 +58,7 @@ export class ExpozrPlugin {
   private options: ExpozrPluginOptions;
   private config?: ExpozrConfig;
 
-  constructor(options: ExpozrPluginOptions = {}) {
+  constructor(options: ExpozrPluginOptions = DEFAULT_EXPOZR_PLUGIN_OPTIONS) {
     this.options = options;
   }
 
@@ -114,38 +129,56 @@ export class ExpozrPlugin {
   private configureWebpack(compiler: Compiler): void {
     if (!this.config) return;
 
-    const path = require("path");
-
-    // Create webpack entries from expose configuration
-    const exposedModules = this.createWebpackEntries();
-    this.mergeEntries(compiler, exposedModules);
-
-    // Configure for UMD output (compatible with Navigator)
-    this.configureUMDOutput(compiler);
-
-    // Configure TypeScript compilation
-    this.configureTypeScript(compiler);
-
-    // Configure optimizations
-    this.configureOptimizations(compiler);
-
-    // Configure development server
-    this.configureDevServer(compiler);
+    if (this.options.configureEntries) {
+      // Create webpack entries from expose configuration
+      const exposedModules = this.createWebpackEntries();
+      this.mergeEntries(compiler, exposedModules);
+    }
+    if (this.options.configureUMDOutput) {
+      // Configure UMD output for Navigator compatibility
+      this.configureUMDOutput(compiler);
+    }
+    if (this.options.configureTypescript) {
+      // Configure TypeScript compilation
+      this.configureTypeScript(compiler);
+    }
+    if (this.options.configureOptimizations) {
+      // Configure optimizations
+      this.configureOptimizations(compiler);
+    }
+    if (this.options.configureDevServer) {
+      // Configure development server
+      this.configureDevServer(compiler);
+    }
   }
 
   /**
    * Create webpack entry points from expose configuration
    */
-  private createWebpackEntries(): EntryNormalized {
+  private createWebpackEntries(): EntryNormalized | null {
     const exposedModules: EntryNormalized = {};
 
     for (const [name, cargoConfig] of Object.entries(this.config!.expose)) {
       const entry =
         typeof cargoConfig === "string" ? cargoConfig : cargoConfig.entry;
 
+      const dependOn =
+        typeof cargoConfig === "string" ||
+        typeof cargoConfig.dependOn === "string"
+          ? undefined
+          : cargoConfig.dependOn;
+
       // Clean name (remove ./ prefix)
       const cleanName = name.startsWith("./") ? name.slice(2) : name;
-      exposedModules[cleanName] = { import: [entry] };
+      exposedModules[cleanName] = {
+        import: [entry],
+        dependOn,
+      };
+    }
+
+    if (!Object.keys(exposedModules).length) {
+      console.warn("⚠️  No exposed modules found in Expozr configuration.");
+      return null;
     }
 
     return exposedModules;
@@ -156,21 +189,45 @@ export class ExpozrPlugin {
    */
   private mergeEntries(
     compiler: Compiler,
-    exposedModules: EntryNormalized
+    exposedModules: EntryNormalized | null
   ): void {
-    const existingEntries = compiler.options.entry || {};
-    const hasExistingEntries = Object.keys(existingEntries).length > 0;
-
-    if (Object.keys(exposedModules).length > 0) {
+    if (!exposedModules) return;
+    if (!compiler.options.entry) {
       compiler.options.entry = exposedModules;
+      return;
     }
 
-    // Preserve existing entries if they exist
-    if (hasExistingEntries) {
+    const originalEntry = compiler.options.entry;
+
+    if (typeof originalEntry === "function") {
+      compiler.options.entry = () => {
+        const entries = originalEntry();
+        return {
+          ...entries,
+          ...exposedModules,
+        };
+      };
+    }
+
+    if (typeof originalEntry === "object" && !Array.isArray(originalEntry)) {
+      const hasExistingEntries = Object.keys(originalEntry).length > 0;
+      if (hasExistingEntries) {
+        compiler.options.entry = {
+          ...originalEntry,
+          ...exposedModules,
+        };
+      } else {
+        compiler.options.entry = exposedModules;
+      }
+      return;
+    }
+
+    if (typeof originalEntry === "string") {
       compiler.options.entry = {
         ...exposedModules,
-        ...existingEntries,
+        main: originalEntry,
       };
+      return;
     }
   }
 
@@ -297,11 +354,10 @@ export class ExpozrPlugin {
     const path = require("path");
     const fs = require("fs");
 
-    const outputPath = compilation.outputOptions.path || compiler.outputPath;
-    const publicPath =
-      typeof compilation.outputOptions.publicPath === "string"
-        ? compilation.outputOptions.publicPath
-        : "/";
+    const outputPath =
+      this.options.outputPath ||
+      compiler.outputPath ||
+      compilation.outputOptions.path;
 
     // Ensure output directory exists
     await fs.promises.mkdir(outputPath, { recursive: true });
@@ -320,7 +376,11 @@ export class ExpozrPlugin {
 
       // Clean name (remove ./ prefix) for webpack asset lookup
       const cleanName = name.startsWith("./") ? name.slice(2) : name;
-      const assetName = this.findCompiledAsset(compilation, cleanName);
+      const assetName =
+        typeof this.config.expose[name] === "string"
+          ? this.findCompiledAsset(compilation, cleanName)
+          : this.config.expose[name]?.overrideAssetName ||
+            this.findCompiledAsset(compilation, cleanName);
 
       if (!assetName) {
         console.warn(`⚠️  Asset not found for cargo: ${name}`);
@@ -361,6 +421,13 @@ export class ExpozrPlugin {
     entryName: string
   ): string {
     const entrypoints = compilation.entrypoints;
+
+    console.log("Available entrypoints keys:", Array.from(entrypoints.keys()));
+    console.log(
+      "Available entrypoints values:",
+      Array.from(entrypoints.values())
+    );
+
     const entrypoint = entrypoints.get(entryName);
 
     if (entrypoint) {

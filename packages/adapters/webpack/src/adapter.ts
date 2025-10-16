@@ -11,12 +11,12 @@ import type {
   ModuleFormat,
   ModuleSystemConfig,
 } from "@expozr/core";
+import { AbstractBundlerAdapter, InventoryGenerator } from "@expozr/core";
 import {
-  AbstractBundlerAdapter,
-  ValidationUtils,
-  InventoryGenerator,
-} from "@expozr/core";
-import { ExpozrPlugin } from "./plugins/expozr";
+  DEFAULT_EXPOZR_PLUGIN_OPTIONS,
+  ExpozrPlugin,
+  type ExpozrPluginOptions,
+} from "./plugins/expozr";
 import { ExpozrHostPlugin } from "./plugins/host";
 
 /**
@@ -258,7 +258,9 @@ export class WebpackAdapter extends AbstractBundlerAdapter {
 export const webpackAdapter = new WebpackAdapter();
 
 // Export convenience functions
-export function createExpozrPlugin(options?: any) {
+export function createExpozrPlugin(
+  options: ExpozrPluginOptions = DEFAULT_EXPOZR_PLUGIN_OPTIONS
+) {
   return new ExpozrPlugin(options);
 }
 

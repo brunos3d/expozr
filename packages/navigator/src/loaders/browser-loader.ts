@@ -74,7 +74,14 @@ export class BrowserModuleLoader implements ModuleLoader {
   private async dynamicImport(url: string): Promise<any> {
     // Handle different module formats
     if (url.endsWith(".json")) {
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        // fetch from any origin
+        mode: "cors",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+      });
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
