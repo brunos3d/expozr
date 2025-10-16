@@ -9,7 +9,7 @@
     "dev": "webpack serve --mode development"
   },
   "devDependencies": {
-    "@expozr/webpack-adapter": "^2.1.0",
+    "@expozr/webpack-adapter": "^2.2.0",
     "serve": "^14.0.0",
     "ts-loader": "^9.0.0",
     "typescript": "^5.0.0",

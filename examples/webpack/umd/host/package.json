@@ -9,7 +9,7 @@
     "dev": "webpack serve --mode development"
   },
   "dependencies": {
-    "@expozr/navigator": "^2.1.0"
+    "@expozr/navigator": "^2.2.0"
   },
   "devDependencies": {
     "buffer": "^6.0.3",

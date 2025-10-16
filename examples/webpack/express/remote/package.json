@@ -12,7 +12,7 @@
     "cors": "^2.8.5"
   },
   "devDependencies": {
-    "@expozr/webpack-adapter": "^2.1.0",
+    "@expozr/webpack-adapter": "^2.2.0",
     "@types/express": "^4.17.0",
     "@types/cors": "^2.8.0",
     "serve": "^14.0.0",
