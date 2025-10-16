@@ -1,6 +1,6 @@
 {
   "name": "@expozr/navigator",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Universal runtime loader for the Expozr ecosystem",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
@@ -26,7 +26,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@expozr/core": "2.1.0"
+    "@expozr/core": "2.2.0"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.0",
