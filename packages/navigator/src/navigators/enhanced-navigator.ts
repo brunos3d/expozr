@@ -230,8 +230,6 @@ export class ExpozrNavigator extends BaseExpozrNavigator {
     format: ModuleFormat;
     strategy: ModuleLoadingStrategy;
   }> {
-    const moduleSystem = getGlobalModuleSystem();
-
     // Build the direct URL from inventory entry
     const baseUrl = expozrRef.url.endsWith("/")
       ? expozrRef.url
@@ -248,12 +246,6 @@ export class ExpozrNavigator extends BaseExpozrNavigator {
       "dynamic") as ModuleLoadingStrategy;
 
     try {
-      // Check if error suppression is enabled
-      const shouldSuppressErrors =
-        options?.suppressErrors === true ||
-        (options?.suppressErrors !== false &&
-          this.moduleSystemConfig?.suppressErrors === true);
-
       let module: T;
 
       // Use the environment-aware module loader to load the URL

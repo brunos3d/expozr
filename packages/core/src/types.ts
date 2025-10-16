@@ -222,8 +222,12 @@ export interface ExpozrConfig {
 export interface CargoConfig {
   /** Entry point file path */
   entry: string;
+  /** Override output asset name */
+  overrideAssetName?: string;
   /** Specific exports to expose */
   exports?: string[];
+  /** Modules that this cargo depends on */
+  dependOn?: string | string[];
   /** Cargo-specific dependencies */
   dependencies?: Record<string, string>;
   /** Cargo metadata */

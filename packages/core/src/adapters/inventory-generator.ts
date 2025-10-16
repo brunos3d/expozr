@@ -15,7 +15,7 @@ export class InventoryGenerator {
   static async generate(config: ExpozrConfig): Promise<Inventory> {
     const { name, version, expose, dependencies = {}, metadata = {} } = config;
     const { build = {} } = config;
-    const { publicPath = "/", outDir = "dist" } = build;
+    const { publicPath = "/" } = build;
 
     const cargo = this.generateCargoManifest(expose, version, build);
     const baseUrl = this.resolveBaseUrl(publicPath);
