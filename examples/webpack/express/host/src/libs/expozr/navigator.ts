@@ -1,7 +1,4 @@
 // Singleton Navigator for Express Host Server
-import * as vm from "vm";
-import * as https from "https";
-import * as http from "http";
 import { createNavigator, ExpozrNavigator } from "@expozr/navigator";
 
 // Export types for route handlers
